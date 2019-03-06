@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+
+  database:
+    restart: unless-stopped
+    image: mariadb:latest
+    environment:
+      - "MYSQL_DATABASE=bitcart"
+      - "MYSQL_USER=user"
+      - "MYSQL_PASSWORD=123@"
+      - "MYSQL_ROOT_PASSWORD=123@"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "33061:3306"
+
+  memcached:
+    restart: unless-stopped
+    image: memcached:alpine
+    ports:
+      - "11211:11211"
+
+  rabbitmq:
+    restart: unless-stopped
+    image: rabbitmq:alpine
+    environment:
+      - "RABBITMQ_DEFAULT_VHOST=asgi"
+    ports:
+      - "5672:5672"
+
+  celery:
+    restart: unless-stopped
+    build: .
+    command: celery worker -A mainsite
+
+  daemon:
+    restart: unless-stopped
+    build: .
+    command: python3 daemon.py
+    ports:
+      - "5000:5000"
+
+  web:
+    restart: unless-stopped
+    build: .
+    command: /usr/local/bin/docker-entrypoint.sh
+    environment:
+      - "DB_PORT=3306"
+      - "DB_HOST=database"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+      - memcached
+      - rabbitmq
+      - celery
+      - daemon
+    links:
+      - database
+      - memcached
+      - rabbitmq
+      - celery
+      - daemon
+
+volumes:
+  dbdata:
