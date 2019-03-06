@@ -30,19 +30,19 @@ services:
 
   celery:
     restart: unless-stopped
-    image: bitcart:latest
+    build: .
     command: celery worker -A mainsite
 
   daemon:
     restart: unless-stopped
-    image: bitcart:latest
+    build: .
     command: python3 daemon.py
     ports:
       - "5000:5000"
 
   web:
     restart: unless-stopped
-    image: bitcart:latest
+    build: .
     command: /usr/local/bin/docker-entrypoint.sh
     environment:
       - "DB_PORT=3306"
