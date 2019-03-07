@@ -13,20 +13,20 @@ services:
       - "MYSQL_ROOT_HOST=%"
     volumes:
       - dbdata:/var/lib/mysql
-    ports:
-      - "33061:3306"
+    expose:
+      - "3306"
 
   memcached:
     restart: unless-stopped
     image: memcached:alpine
-    ports:
-      - "11211:11211"
+    expose:
+      - "11211"
 
   rabbitmq:
     restart: unless-stopped
     image: rabbitmq:alpine
-    ports:
-      - "5672:5672"
+    expose:
+      - "5672"
 
   celery:
     restart: unless-stopped
@@ -37,8 +37,8 @@ services:
     restart: unless-stopped
     image: mrnaif/bitcart:latest
     command: python3 daemon.py
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
 
   web:
     restart: unless-stopped
