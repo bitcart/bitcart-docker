@@ -50,7 +50,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - "conf/.env:/home/electrum/site/.env"
+      - "conf:/home/electrum/site/"
     depends_on:
       - database
       - memcached
@@ -66,3 +66,4 @@ services:
 
 volumes:
   dbdata:
+  conf: conf
