@@ -49,6 +49,8 @@ services:
       - "DB_HOST=database"
     ports:
       - "8000:8000"
+    volumes:
+      - "conf/.env:/home/electrum/site/.env"
     depends_on:
       - database
       - memcached
