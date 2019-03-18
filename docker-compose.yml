@@ -4,17 +4,15 @@ services:
 
   database:
     restart: unless-stopped
-    image: mariadb:latest
+    image: postgres:alpine
     environment:
-      - "MYSQL_DATABASE=bitcart"
-      - "MYSQL_USER=user"
-      - "MYSQL_PASSWORD=123@"
-      - "MYSQL_ROOT_PASSWORD=123@"
-      - "MYSQL_ROOT_HOST=%"
+      - "POSTGRES_DB=bitcart"
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=123@"
     volumes:
-      - dbdata:/var/lib/mysql
+      - dbdata:/var/lib/postgresql/data
     expose:
-      - "3306"
+      - "5432"
 
   memcached:
     restart: unless-stopped
@@ -45,7 +43,7 @@ services:
     image: mrnaif/bitcart:latest
     command: /usr/local/bin/docker-entrypoint.sh
     environment:
-      - "DB_PORT=3306"
+      - "DB_PORT=5432"
       - "DB_HOST=database"
     ports:
       - "8000:8000"

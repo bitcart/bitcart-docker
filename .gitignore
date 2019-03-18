@@ -1,2 +1,5 @@
 #ignore tests and downloaded dirs
 /bitcart/
+#conf
+.env
+conf/

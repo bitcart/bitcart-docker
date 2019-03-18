@@ -1,7 +1,7 @@
 FROM python:3.6-alpine
 
 
-RUN apk add --no-cache gnupg mariadb-connector-c-dev gcc musl-dev jpeg-dev \
+RUN apk add --no-cache gnupg postgresql-libs postgresql-dev gcc python3-dev musl-dev jpeg-dev \
                        zlib-dev \
                        freetype-dev \
                        lcms2-dev \
