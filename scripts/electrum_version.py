@@ -19,11 +19,12 @@ with open("Electrum-{version}.tar.gz.asc".format(version=version),"wb") as f:
 
 with open("ThomasV.asc","wb") as f:
     f.write(requests.get("https://raw.githubusercontent.com/spesmilo/electrum/master/pubkeys/ThomasV.asc").content)
-
+print("Verifying signature...")
 g("gpg --import ThomasV.asc")
 verify=g("gpg --verify Electrum-{version}.tar.gz.asc Electrum-{version}.tar.gz".format(version=version))[0]
 if verify != 0:
     print('\033[31m'+ "Warning: Signature verify failed!" +'\033[0m')
 else:
+    print("Installing electrum, it might take a while...")
     g("pip3 install Electrum-{version}.tar.gz".format(version=version))
     print('\033[32m'+ "Success!" +'\033[0m')

@@ -3,3 +3,4 @@
 #conf
 .env
 conf/
+.vscode/
