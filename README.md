@@ -2,6 +2,17 @@
 
 Docker images now available!
 
+Using provided scripts(easy)
+----------------------------
+Now, to install bitcart, if you're on linux system(these scripts for windows will be added soon), 
+you won't even need to install docker in most cases, script will do it for you!
+So, now, to download, set up, and run your bitcart instance, simply run these 4 commands:
+
+    git clone https://github.com/MrNaif2018/bitcart-docker
+    cd bitcart-docker
+    ./setup.sh
+    ./start.sh
+
 Install from docker hub(stable)
 ------------------------------
 
@@ -23,7 +34,7 @@ You will also need to create .env file with approciate settings.
 You can find .env file specification at main repository.
 So, first run  
 
-    ./setup.sh
+    ./dev-setup.sh
   
 which will download git, clone repository and make needed adjustments. 
 If you can't use this shell script, do it manually, 
