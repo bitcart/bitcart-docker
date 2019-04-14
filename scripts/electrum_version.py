@@ -42,3 +42,4 @@ for name in name_file:
         os.remove(name)
     except Exception:
         pass
+print("test")
