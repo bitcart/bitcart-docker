@@ -90,8 +90,12 @@ services:
     image: mrnaif/bitcart:latest
     command: /usr/local/bin/docker-entrypoint.sh
     environment:
-      - "DB_PORT=5432"
-      - "DB_HOST=database"
+      DB_PORT: 5432
+      DB_HOST: database
+      VIRTUAL_NETWORK: nginx-proxy
+      VIRTUAL_PORT: 8000
+      VIRTUAL_HOST: testststs.tk
+      VIRTUAL_HOST_NAME: "bitcart"
     ports:
       - "8000:8000"
     volumes:
