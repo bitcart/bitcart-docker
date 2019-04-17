@@ -96,7 +96,9 @@ services:
       VIRTUAL_PORT: 8000
       VIRTUAL_HOST: testststs.tk
       VIRTUAL_HOST_NAME: "bitcart"
+      SSL_POLICY: Mozilla-Modern
       LETSENCRYPT_HOST: testststs.tk
+      LETSENCRYPT_EMAIL: chuff184@gmail.com
     ports:
       - "8000:8000"
     volumes:
