@@ -20,7 +20,6 @@ services:
     container_name: nginx-gen
     volumes:
     - "/var/run/docker.sock:/tmp/docker.sock:ro"
-    - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
     - "nginx_conf:/etc/nginx/conf.d"
     - "nginx_vhost:/etc/nginx/vhost.d"
     - "nginx_html:/usr/share/nginx/html"
