@@ -99,8 +99,8 @@ services:
       SSL_POLICY: Mozilla-Modern
       LETSENCRYPT_HOST: testststs.tk
       LETSENCRYPT_EMAIL: chuff184@gmail.com
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     volumes:
       - ./conf:/home/electrum/site/conf
     depends_on:
