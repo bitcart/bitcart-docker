@@ -31,19 +31,18 @@ services:
 
   nginx-gen:
     restart: unless-stopped
-    image: jwilder/nginx-proxy:latest
+    image: btcpayserver/docker-gen:0.7.5
     container_name: nginx-gen
     volumes:
-    - "/var/run/docker.sock:/tmp/docker.sock:ro"
-    - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
-    - "nginx_conf:/etc/nginx/conf.d"
-    - "nginx_vhost:/etc/nginx/vhost.d"
-    - "nginx_html:/usr/share/nginx/html"
-    - "nginx_certs:/etc/nginx/certs:ro"
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
+      - "nginx_conf:/etc/nginx/conf.d"
+      - "nginx_vhost:/etc/nginx/vhost.d"
+      - "nginx_html:/usr/share/nginx/html"
+      - "nginx_certs:/etc/nginx/certs:ro"
     entrypoint: /usr/local/bin/docker-gen -notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
     links:
-      - web
-
+      - nginx
   letsencrypt-nginx-proxy-companion:
     restart: unless-stopped
     image: jrcs/letsencrypt-nginx-proxy-companion
