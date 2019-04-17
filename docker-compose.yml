@@ -14,21 +14,6 @@ services:
     expose:
       - "5432"
 
-  nginx:
-    restart: unless-stopped
-    image: nginx:stable
-    container_name: nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "nginx_conf:/etc/nginx/conf.d"
-      - "nginx_vhost:/etc/nginx/vhost.d"
-      - "nginx_html:/usr/share/nginx/html"
-      - "nginx_certs:/etc/nginx/certs:ro"
-    links:
-      - web
-  
   nginx-gen:
     restart: unless-stopped
     image: jwilder/nginx-proxy:latest
