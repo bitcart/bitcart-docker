@@ -8,3 +8,6 @@ conf/
 .idea/
 #virtualenv
 venv/
+#backups
+backup/
+backups/
