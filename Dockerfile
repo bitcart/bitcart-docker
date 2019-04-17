@@ -29,6 +29,7 @@ RUN pip3 install -U pip setuptools wheel requests && \
     python3 /usr/local/bin/electrum_version.py && \
     cd $ELECTRUM_HOME/site && \
     pip3 install -r requirements.txt && \
+    pip3 install -r requirements.dev.txt && \
     apk del build-deps
 
 USER $ELECTRUM_USER
