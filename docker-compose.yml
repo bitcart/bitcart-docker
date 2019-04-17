@@ -93,7 +93,7 @@ services:
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 8000
-      VIRTUAL_HOST: testststs.tk
+      VIRTUAL_HOST: web
       VIRTUAL_HOST_NAME: "bitcart"
       SSL_POLICY: Mozilla-Modern
       LETSENCRYPT_HOST: testststs.tk

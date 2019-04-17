@@ -8,5 +8,4 @@ CELERY_BROKER_URL=amqp://rabbitmq
 CHANNEL_LAYERS_HOST=amqp://rabbitmq
 RPC_URL=http://daemon:5000
 EOF
-rm -rf gui/migrations
 cd ..
