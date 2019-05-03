@@ -21,11 +21,21 @@ echo "Creating config file..."
 mkdir -p conf
 cat > conf/.env << EOF
 DB_HOST=database
-MEMCACHED_URL=http://memcached:11211
-CELERY_BROKER_URL=amqp://rabbitmq
-CHANNEL_LAYERS_HOST=amqp://rabbitmq
+CHANNEL_LAYERS_HOST=redis://redis
+CACHE_REDIS_URL=redis://redis
+DRAMATIQ_REDIS_URL=redis://redis
 RPC_URL=http://daemon:5000
 EOF
+echo "
+Creating docker config file with parameters:
+BITCART_HOST=$BITCART_HOST
+BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
+"
+cat > env.sh << EOF
+export BITCART_HOST=$BITCART_HOST
+export BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
+EOF
+chmod +x env.sh
 echo "Pulling images..."
 docker pull mrnaif/bitcart
 echo "Setup done."

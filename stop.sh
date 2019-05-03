@@ -1,3 +1,4 @@
+source env.sh
 accepted_modes=(production dev)
 echo Availables modes: ${accepted_modes[*]}
 value=${1:-production}

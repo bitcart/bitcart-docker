@@ -2,9 +2,13 @@
 /bitcart/
 #conf
 .env
+env.sh
 conf/
 .vscode/
 #pycharm
 .idea/
 #virtualenv
 venv/
+#backups
+backup/
+backups/
