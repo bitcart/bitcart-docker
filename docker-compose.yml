@@ -31,7 +31,7 @@ services:
 
   nginx-gen:
     restart: unless-stopped
-    image: btcpayserver/docker-gen:0.7.5
+    image: jwilder/docker-gen:0.7.0
     container_name: nginx-gen
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
@@ -60,22 +60,16 @@ services:
     links:
       - nginx-gen
 
-  memcached:
+  redis:
     restart: unless-stopped
-    image: memcached:alpine
+    image: redis:alpine
     expose:
-      - "11211"
+      - "6379"
 
-  rabbitmq:
-    restart: unless-stopped
-    image: rabbitmq:alpine
-    expose:
-      - "5672"
-
-  celery:
+  dramatiq:
     restart: unless-stopped
     image: mrnaif/bitcart:latest
-    command: celery worker -A mainsite
+    command: python3 manage.py rundramatiq
 
   daemon:
     restart: unless-stopped
@@ -93,25 +87,23 @@ services:
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 8000
-      VIRTUAL_HOST: testststs.tk
+      VIRTUAL_HOST: ${BITCART_HOST}
       VIRTUAL_HOST_NAME: "bitcart"
-      LETSENCRYPT_HOST: testststs.tk
-      LETSENCRYPT_EMAIL: chuff184@gmail.com
+      LETSENCRYPT_HOST: ${BITCART_HOST}
+      LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-none}
     expose:
       - "8000"
     volumes:
       - ./conf:/home/electrum/site/conf
     depends_on:
       - database
-      - memcached
-      - rabbitmq
-      - celery
+      - redis
+      - dramatiq
       - daemon
     links:
       - database
-      - memcached
-      - rabbitmq
-      - celery
+      - redis
+      - dramatiq
       - daemon
 
 volumes:

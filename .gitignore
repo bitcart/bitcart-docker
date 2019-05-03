@@ -2,6 +2,7 @@
 /bitcart/
 #conf
 .env
+env.sh
 conf/
 .vscode/
 #pycharm
