@@ -90,7 +90,7 @@ services:
       VIRTUAL_HOST: ${BITCART_HOST}
       VIRTUAL_HOST_NAME: "bitcart"
       LETSENCRYPT_HOST: ${BITCART_HOST}
-      LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-none}
+      LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
     expose:
       - "8000"
     volumes:
