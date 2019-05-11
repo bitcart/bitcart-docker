@@ -10,6 +10,7 @@ So, now, to download, set up, and run your bitcart instance, simply run these 4 
 
     git clone https://github.com/MrNaif2018/bitcart-docker
     cd bitcart-docker
+    export BITCART_HOST=yourdomain
     ./setup.sh
     ./start.sh
 
@@ -58,6 +59,24 @@ Note that our project is still in early alpha stage, so a lot will be changed.
 
 Guide: how demo was set up
 --------------------------
+**UPDATE**
+Now demo can be setup just like so:
+
+    sudo apt install git
+    git clone https://github.com/MrNaif2018/bitcart-docker
+    cd bitcart-docker
+    export BITCART_HOST=yourhost
+    ./setup.sh
+    ./start.sh
+    
+Or, use our brand new wizard:
+
+    wget https://github.com/MrNaif2018/bitcart-docker/releases/download/0.0.1/bitcart-cli && ./bitcart-cli
+    
+It will launch interactive wizard, which you can use to install bitcart on your server.
+    
+**OLD GUIDE:**
+   
 This guide will show how the live demo was set up.
 You can use this guide to set up your own bitcart instance.
 Our server already has everything we needed as it isn't a new server.
