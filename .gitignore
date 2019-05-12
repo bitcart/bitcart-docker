@@ -12,3 +12,5 @@ venv/
 #backups
 backup/
 backups/
+#cache
+__pycache__/

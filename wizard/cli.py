@@ -1,5 +1,5 @@
 import getpass
-from core import connect
+import core
 
 
 ip = input("Enter ip address: ")
@@ -8,4 +8,6 @@ if not user:
     user = getpass.getuser()
 password = getpass.getpass("Enter password: ")
 domain = input("Enter domain(optional, enter for none): ")
-connect(ip, user, password, print, input, domain)
+start = input("Do you want to start bitcart?(Y/N) ")
+core.connect(ip, user, password, print,
+             core.verify_install_bitcart(start), domain)

@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 import sys
-from core import connect
+import core
 import traceback
 
 
@@ -29,18 +29,15 @@ class MainWindow(QtWidgets.QWidget):
         self.layout.addWidget(self.text)
         self.setLayout(self.layout)
 
-    def log_info(self, text):
+    def log(self, text):
         self.text.insertPlainText(text)
-
-    def log_error(self, err):
-        self.text.insertPlainText(err)
 
     def submit(self):
         try:
-            connect(self.e1.text(), self.e2.text(),
-                    self.e3.text(), self.log_info, self.log_error)
+            core.connect(self.e1.text(), self.e2.text(),
+                         self.e3.text(), self.log, True)
         except Exception:
-            self.log_error(traceback.format_exc())
+            self.log(traceback.format_exc())
 
 
 if __name__ == "__main__":
