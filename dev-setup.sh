@@ -1,5 +1,6 @@
 sudo apt install -y git
-rm -rf bitcart && git clone https://github.com/MrNaif2018/bitcart
+branch=${1:-master}
+rm -rf bitcart && git clone https://github.com/MrNaif2018/bitcart -b $branch
 cd bitcart
 cat > conf/.env << EOF
 DB_HOST=database
