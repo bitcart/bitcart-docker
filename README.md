@@ -71,7 +71,7 @@ Now demo can be setup just like so:
     
 Or, use our brand new wizard:
 
-    wget https://github.com/MrNaif2018/bitcart-docker/releases/download/0.0.1/bitcart-cli && ./bitcart-cli
+    wget https://github.com/MrNaif2018/bitcart-docker/releases/download/0.0.1/bitcart-cli && chmod +x bitcart-cli && ./bitcart-cli
     
 It will launch interactive wizard, which you can use to install bitcart on your server.
     
