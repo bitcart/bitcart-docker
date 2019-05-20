@@ -19,7 +19,7 @@ Install from docker hub(stable)
 
 Simply run
 
-    docker pull mrnaif/bitcart
+    docker pull mrnaif/bitcart:stable
     
 for downloading image.
 To run it, use the following command(pulling is done automaticly):

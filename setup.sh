@@ -38,5 +38,5 @@ export BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 EOF
 chmod +x env.sh
 echo "Pulling images..."
-docker pull mrnaif/bitcart
+docker pull mrnaif/bitcart:stable
 echo "Setup done."
