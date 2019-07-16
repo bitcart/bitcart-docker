@@ -1,13 +1,15 @@
+import shutil
 from os import getenv
 from os.path import join as path_join
 
 import oyaml as yaml
 
-COMPOSE_DIR = '../compose'
+COMPOSE_DIR = 'compose'
 BACKEND = path_join(COMPOSE_DIR, 'backend-compose.yml')
 FRONTEND = path_join(COMPOSE_DIR, 'frontend-compose.yml')
 BACKEND_DEV = path_join(COMPOSE_DIR, 'backend-compose.dev.yml')
 FRONTEND_DEV = path_join(COMPOSE_DIR, 'frontend-compose.dev.yml')
+GENERATED_NAME = 'generated.yml'
 
 if getenv('BITCART_ONE_HOST'):
     with open(BACKEND) as f:
@@ -21,5 +23,13 @@ if getenv('BITCART_ONE_HOST'):
         s["nginx"]["links"] = ["backend", "frontend"]
     if s.get("frontend"):
         s["frontend"]["links"] = ["backend"]
-    with open(path_join(COMPOSE_DIR, "my_file.yaml"), "w") as f:
+    with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
         yaml.dump(data1, f, default_flow_style=False)
+else:
+    to_install = getenv("BITCART_INSTALL", "backend")
+    if to_install == "backend":
+        f_name = BACKEND
+    else:
+        f_name = FRONTEND
+
+    shutil.copy2(f_name, path_join(COMPOSE_DIR, GENERATED_NAME))
