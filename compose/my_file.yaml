@@ -82,7 +82,7 @@ services:
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 8000
       VIRTUAL_HOST: ${BITCART_HOST}
-      VIRTUAL_HOST_NAME: bitcart
+      VIRTUAL_HOST_NAME: bitcart-backend
       LETSENCRYPT_HOST: ${BITCART_HOST}
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
     expose:
@@ -111,7 +111,7 @@ services:
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 3000
       VIRTUAL_HOST: ${BITCART_FRONTEND_HOST}
-      VIRTUAL_HOST_NAME: bitcart
+      VIRTUAL_HOST_NAME: bitcart-frontend
       LETSENCRYPT_HOST: ${BITCART_FRONTEND_HOST}
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
     links:
