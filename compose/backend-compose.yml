@@ -27,7 +27,7 @@ services:
       - "nginx_html:/usr/share/nginx/html"
       - "nginx_certs:/etc/nginx/certs:ro"
     links:
-      - web
+      - backend
 
   nginx-gen:
     restart: unless-stopped
@@ -78,7 +78,7 @@ services:
     expose:
       - "5000"
 
-  web:
+  backend:
     restart: unless-stopped
     image: mrnaif/bitcart:stable
     command: /usr/local/bin/docker-entrypoint.sh
