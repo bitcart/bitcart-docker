@@ -34,7 +34,7 @@ BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 "
 echo "
 Generating docker image based on parameters:
-BITCART_ONE_HOST=$BITCART_ONE_HOST
+BITCART_INSTALL={$BITCART_INSTALL:-all}
 "
 ./build.sh
 cat > env.sh << EOF

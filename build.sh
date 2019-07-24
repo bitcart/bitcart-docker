@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 BITCARTGEN_DOCKER_IMAGE='mrnaif/docker-compose-generator'
 
 docker run -v "$PWD/compose:/app/compose" \
