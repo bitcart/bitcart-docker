@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 sudo apt install -y git
 branch=${1:-master}
 rm -rf bitcart && git clone https://github.com/MrNaif2018/bitcart -b $branch

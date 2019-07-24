@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 if ! [ -x "$(command -v curl)" ]; then
         apt-get update 2>error
         apt-get install -y \
