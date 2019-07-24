@@ -28,6 +28,7 @@ RUN apk add --virtual build-deps --no-cache postgresql-dev gcc python3-dev musl-
     cd $ELECTRUM_HOME/site && \
     pip3 install -r requirements.txt && \
     pip3 install -r requirements/daemons/btc.txt && \
+    pip3 install -r requirements/production.txt && \
     apk del build-deps
 
 USER $ELECTRUM_USER
