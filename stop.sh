@@ -9,7 +9,7 @@ if ! [[ " ${accepted_modes[*]} " == *"$value"* ]]; then
 fi
 echo Selected mode: $value
 if [ "$value" == "production" ];then
-    docker-compose down
+    docker-compose -f compose/generated.yml down
 elif [ "$value" == "dev" ];then
     docker-compose -f docker-compose.dev.yml down 
 fi

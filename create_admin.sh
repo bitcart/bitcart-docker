@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-docker exec -it bitcart-docker_daemon_1 sh -c "python manage.py createsuperuser"
+docker exec -it compose_backend_1 sh -c "python manage.py createsuperuser"

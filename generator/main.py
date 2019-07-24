@@ -11,7 +11,11 @@ BACKEND_DEV = path_join(COMPOSE_DIR, 'backend-compose.dev.yml')
 FRONTEND_DEV = path_join(COMPOSE_DIR, 'frontend-compose.dev.yml')
 GENERATED_NAME = 'generated.yml'
 
-if getenv('BITCART_ONE_HOST'):
+to_install = getenv("BITCART_INSTALL", "all")
+# double check
+if not to_install:
+    to_install = "all"
+if to_install == "all":
     with open(BACKEND) as f:
         data1 = yaml.load(f, Loader=yaml.SafeLoader)
     with open(FRONTEND) as f:
@@ -26,7 +30,6 @@ if getenv('BITCART_ONE_HOST'):
     with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
         yaml.dump(data1, f, default_flow_style=False)
 else:
-    to_install = getenv("BITCART_INSTALL", "backend")
     if to_install == "backend":
         f_name = BACKEND
     else:
