@@ -19,8 +19,8 @@ if ! [ -x "$(command -v docker-compose)" ]; then
     chmod +x /usr/local/bin/docker-compose
 fi
 echo "Creating config file..."
-mkdir -p conf
-cat > conf/.env << EOF
+mkdir -p compose/conf
+cat > compose/conf/.env << EOF
 DB_HOST=database
 CHANNEL_LAYERS_HOST=redis://redis
 CACHE_REDIS_URL=redis://redis
