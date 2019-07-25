@@ -27,7 +27,7 @@ services:
       - "nginx_html:/usr/share/nginx/html"
       - "nginx_certs:/etc/nginx/certs:ro"
     links:
-      - web
+      - backend
 
   nginx-gen:
     restart: unless-stopped
@@ -69,7 +69,7 @@ services:
   dramatiq:
     restart: unless-stopped
     image: mrnaif/bitcart:stable
-    command: python3 manage.py rundramatiq
+    command: python3 manage.py rundramatiq --no-reload
 
   daemon:
     restart: unless-stopped
@@ -78,7 +78,7 @@ services:
     expose:
       - "5000"
 
-  web:
+  backend:
     restart: unless-stopped
     image: mrnaif/bitcart:stable
     command: /usr/local/bin/docker-entrypoint.sh
@@ -88,7 +88,7 @@ services:
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 8000
       VIRTUAL_HOST: ${BITCART_HOST}
-      VIRTUAL_HOST_NAME: "bitcart"
+      VIRTUAL_HOST_NAME: "bitcart-backend"
       LETSENCRYPT_HOST: ${BITCART_HOST}
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
     expose:

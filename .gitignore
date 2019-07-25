@@ -14,3 +14,5 @@ backup/
 backups/
 #cache
 __pycache__/
+#generated configs
+compose/generated.yml

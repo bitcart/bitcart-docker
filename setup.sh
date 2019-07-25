@@ -33,6 +33,11 @@ Creating docker config file with parameters:
 BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 "
+echo "
+Generating docker image based on parameters:
+BITCART_INSTALL=${BITCART_INSTALL:-all}
+"
+./build.sh
 cat > env.sh << EOF
 export BITCART_HOST=$BITCART_HOST
 export BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
