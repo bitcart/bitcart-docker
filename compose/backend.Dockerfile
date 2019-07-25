@@ -10,7 +10,6 @@ RUN adduser -D $ELECTRUM_USER && \
     mkdir -p $ELECTRUM_HOME/site && \
     chown ${ELECTRUM_USER} $ELECTRUM_HOME/site
 
-COPY scripts/electrum_version.py /usr/local/bin/
 COPY bitcart $ELECTRUM_HOME/site
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 
