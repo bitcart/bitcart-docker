@@ -1,0 +1,6 @@
+services:
+  redis:
+    restart: unless-stopped
+    image: redis:alpine
+    expose:
+      - "6379"

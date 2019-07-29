@@ -41,50 +41,42 @@ def add_components() -> Set[str]:
         components.update(BACKEND_COMPONENTS)
     elif to_install == "frontend":
         components.update(FRONTEND_COMPONENTS)
+    if not components:
+        components.add(CRYPTOS['btc']['component'])
     return components
 
 
 def load_component(component: str):
     path = path_join(COMPONENTS_DIR, component + ".yml")
     if not exists(path):
-        return
+        return {}
     with open(path) as f:
         data = yaml.load(f, Loader=yaml.SafeLoader)
-        print(data)
+        return data or {}
 
 
 def generate(components: Set[str]):
     # generated yaml
     data = {}
+    services = {}
+    networks = {}
+    volumes = {}
     for i in components:
-        load_component(i)
+        doc = load_component(i)
+        if doc.get("services"):
+            services.update(doc["services"])
+        if doc.get("networks"):
+            networks.update(doc["networks"])
+        if doc.get("volumes"):
+            volumes.update(doc["volumes"])
+    data = {
+        "version": "3",
+        "services": services,
+        "networks": networks,
+        "volumes": volumes}
     with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
         yaml.dump(data, f, default_flow_style=False)
 
 
 components = add_components()
-print(components)
 generate(components)
-'''if not to_install:
-    to_install = "all"
-if to_install == "all":
-    with open(BACKEND) as f:
-        data1 = yaml.load(f, Loader=yaml.SafeLoader)
-    with open(FRONTEND) as f:
-        data2 = yaml.load(f, Loader=yaml.SafeLoader)
-    data1["services"].update(data2["services"])
-    data1["volumes"].update(data2["volumes"])
-    s = data1["services"]
-    if s.get("nginx"):
-        s["nginx"]["links"] = ["backend", "frontend"]
-    if s.get("frontend"):
-        s["frontend"]["links"] = ["backend"]
-    with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
-        yaml.dump(data1, f, default_flow_style=False)
-else:
-    if to_install == "backend":
-        f_name = BACKEND
-    else:
-        f_name = FRONTEND
-
-    shutil.copy2(f_name, path_join(COMPOSE_DIR, GENERATED_NAME))'''

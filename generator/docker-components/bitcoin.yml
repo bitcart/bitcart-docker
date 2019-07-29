@@ -1,0 +1,13 @@
+services:
+  daemon:
+    restart: unless-stopped
+    image: mrnaif/bitcart:stable
+    command: python3 daemons/btc.py
+    expose:
+      - "5000"
+
+  backend:
+    depends_on:
+      - daemon
+    links:
+      - daemon

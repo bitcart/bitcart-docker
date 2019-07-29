@@ -1,0 +1,26 @@
+services:
+  backend:
+    restart: unless-stopped
+    image: mrnaif/bitcart:stable
+    command: /usr/local/bin/docker-entrypoint.sh
+    environment:
+      DB_PORT: 5432
+      DB_HOST: database
+      VIRTUAL_NETWORK: nginx-proxy
+      VIRTUAL_PORT: 8000
+      VIRTUAL_HOST: ${BITCART_HOST}
+      VIRTUAL_HOST_NAME: "bitcart-backend"
+      LETSENCRYPT_HOST: ${BITCART_HOST}
+      LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
+    expose:
+      - "8000"
+    volumes:
+      - ./conf:/home/electrum/site/conf
+    depends_on:
+      - database
+      - redis
+      - dramatiq
+    links:
+      - database
+      - redis
+      - dramatiq

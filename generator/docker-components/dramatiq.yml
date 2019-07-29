@@ -1,0 +1,5 @@
+services:
+  dramatiq:
+    restart: unless-stopped
+    image: mrnaif/bitcart:stable
+    command: python3 manage.py rundramatiq --no-reload
