@@ -58,17 +58,20 @@ def load_component(component: str):
 def generate(components: Set[str]):
     # generated yaml
     data = {}
-    services = {}
-    networks = {}
-    volumes = {}
+    services = []
+    networks = []
+    volumes = []
     for i in components:
         doc = load_component(i)
         if doc.get("services"):
-            services.update(doc["services"])
+            services.append(doc["services"])
         if doc.get("networks"):
-            networks.update(doc["networks"])
+            networks.append(doc["networks"])
         if doc.get("volumes"):
-            volumes.update(doc["volumes"])
+            volumes.append(doc["volumes"])
+    services = {j: i[j] for i in services for j in i}
+    networks = {j: i[j] for i in networks for j in i}
+    volumes = {j: i[j] for i in volumes for j in i}
     data = {
         "version": "3",
         "services": services,
