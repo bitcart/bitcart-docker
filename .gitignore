@@ -16,3 +16,4 @@ backups/
 __pycache__/
 #generated configs
 compose/generated.yml
+.mypy_cache
