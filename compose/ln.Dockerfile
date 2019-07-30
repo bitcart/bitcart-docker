@@ -20,6 +20,8 @@ RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake au
     ./configure && \
     make && \
     make install && \
+    cd .. && \
+    rm -rf secp256k1 && \
     cd $ELECTRUM_HOME/site && \
     pip3 install -r requirements/base.txt && \
     pip3 install -r requirements/daemons/ln.txt && \
