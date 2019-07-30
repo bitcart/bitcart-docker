@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  deploy:
     docker: 
       - image: circleci/python:3.6.8
     working_directory: ~/repo
@@ -14,3 +14,13 @@ jobs:
             docker build -t mrnaif/docker-compose-generator:latest .
             docker login --username=$DOCKER_USER --password=$DOCKER_PASS
             docker push mrnaif/docker-compose-generator:latest
+
+workflows: 
+  version: 2 
+  build:
+    jobs: 
+      - deploy:
+          context: global
+          filters:
+            branches:
+              only: master
