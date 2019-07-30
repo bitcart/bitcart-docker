@@ -1,5 +1,5 @@
 services:
-  daemon:
+  bitcoin:
     restart: unless-stopped
     image: mrnaif/bitcart:stable
     command: python3 daemons/btc.py

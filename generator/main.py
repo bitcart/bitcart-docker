@@ -7,26 +7,11 @@ from os.path import join as path_join, exists
 from typing import Set, Union
 
 import oyaml as yaml
-
-COMPOSE_DIR = 'compose' if getenv("IN_DOCKER") else '../compose'
-BACKEND = path_join(COMPOSE_DIR, 'backend-compose.yml')
-FRONTEND = path_join(COMPOSE_DIR, 'frontend-compose.yml')
-BACKEND_DEV = path_join(COMPOSE_DIR, 'backend-compose.dev.yml')
-FRONTEND_DEV = path_join(COMPOSE_DIR, 'frontend-compose.dev.yml')
-COMPONENTS_DIR = 'docker-components'
-GENERATED_NAME = 'generated.yml'
-
-CRYPTOS = {
-    'btc': {'component': 'bitcoin'},
-    'ln': {'component': 'lightning'}
-}
-BACKEND_COMPONENTS = ['backend', 'dramatiq', 'postgres', 'redis']
-FRONTEND_COMPONENTS = ['frontend']
+from constants import COMPOSE_DIR, COMPONENTS_DIR, GENERATED_NAME, CRYPTOS, CRYPTO_COMPONENTS, BACKEND_COMPONENTS, FRONTEND_COMPONENTS, RULES_DIR, RULES_PYTHON_DIR, RULES_PYTHON_PKG
 
 
 def add_components() -> Set[str]:
     components: Set[str] = set()
-    # components.update()
     # add daemons
     for i in range(1, 10):
         crypto = getenv(f'BITCART_CRYPTO{i}')
@@ -44,10 +29,20 @@ def add_components() -> Set[str]:
         components.update(BACKEND_COMPONENTS)
     elif to_install == "frontend":
         components.update(FRONTEND_COMPONENTS)
-    crypto_comps = [CRYPTOS[i]["component"] for i in CRYPTOS]
+    # reverse proxy
+    reverseproxy = getenv("BITCART_REVERSE_PROXY", "nginx-https")
+    if not reverseproxy:
+        reverseproxy == "nginx-https"
+    if reverseproxy == "nginx-https":
+        components.update(
+            ["nginx", "nginx-https", "bitcart-nginx", "bitcart-nginx-https"])
+    elif reverseproxy == "nginx":
+        components.update(["nginx", "bitcart-nginx"])
+    else:
+        components.add("bitcart-noreverseproxy")
     HAS_CRYPTO = False
     for i in components:
-        if i in crypto_comps:
+        if i in CRYPTO_COMPONENTS:
             HAS_CRYPTO = True
             break
     if not HAS_CRYPTO:
@@ -97,13 +92,13 @@ def merge(services):
 
 
 def load_rules():
-    modules = glob.glob(path_join("rules", "*.py"))
+    modules = glob.glob(path_join(RULES_DIR, "*.py"))
     loaded = [
         importlib.import_module(
-            "rules." +
+            f"{RULES_PYTHON_DIR}." +
             basename(f)[
                 :-
-                3],
+                3], RULES_PYTHON_PKG
         ) for f in modules if isfile(f) and not f.endswith('__init__.py')]
     for i in loaded.copy():
         if not getattr(i, "rule", None) or not callable(i.rule):
@@ -124,11 +119,11 @@ def generate(components: Set[str]):
     for i in components:
         doc = load_component(i)
         if doc.get("services"):
-            services.append(doc["services"])
+            services.append(doc["services"])  # type: ignore
         if doc.get("networks"):
-            networks.append(doc["networks"])
+            networks.append(doc["networks"])  # type: ignore
         if doc.get("volumes"):
-            volumes.append(doc["volumes"])
+            volumes.append(doc["volumes"])  # type: ignore
     services = merge(services)
     rules = load_rules()
     execute_rules(rules, services)
