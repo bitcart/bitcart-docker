@@ -30,7 +30,7 @@ def add_components() -> Set[str]:
     elif to_install == "frontend":
         components.update(FRONTEND_COMPONENTS)
     # reverse proxy
-    reverseproxy = getenv("BITCART_REVERSE_PROXY", "nginx-https")
+    reverseproxy = getenv("BITCART_REVERSEPROXY", "nginx-https")
     if not reverseproxy:
         reverseproxy == "nginx-https"
     if reverseproxy == "nginx-https":
@@ -40,6 +40,8 @@ def add_components() -> Set[str]:
         components.update(["nginx", "bitcart-nginx"])
     else:
         components.add("bitcart-noreverseproxy")
+    # additional components
+    components.update(getenv("BITCART_ADDITIONAL_COMPONENTS", "").split())
     HAS_CRYPTO = False
     for i in components:
         if i in CRYPTO_COMPONENTS:
