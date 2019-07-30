@@ -7,4 +7,7 @@ def rule(services):
         items.extend(CRYPTO_COMPONENTS)
         for i in items:
             if services.get(i):
-                services[i]["ports"] = services[i].get("expose", [])
+                expose = services[i].get("expose", []).copy()
+                for key, port in enumerate(expose):
+                    expose[key] = f"{port}:{port}"
+                services[i]["ports"] = expose
