@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    docker: 
+      - image: circleci/python:3.6.8
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: build docker image
+          command: |
+            cd generator
+            docker build -t mrnaif/docker-compose-generator:latest .
+            docker login --username=$DOCKER_USER --password=$DOCKER_PASS
+            docker push mrnaif/docker-compose-generator:latest

@@ -1,10 +1,7 @@
 services:
   bitcoin:
     restart: unless-stopped
-    image: mrnaif/bitcart:stable
-    command: python3 daemons/btc.py
-    expose:
-      - "5000"
+    image: mrnaif/bitcart-btc:stable
 
   backend:
     depends_on:
