@@ -1,0 +1,20 @@
+services:
+  database:
+    restart: unless-stopped
+    image: postgres:alpine
+    environment:
+      - "POSTGRES_DB=bitcart"
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=123@"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+  backend:
+    depends_on:
+      - database
+    links:
+      - database
+    
+volumes:
+  dbdata:

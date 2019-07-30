@@ -1,0 +1,11 @@
+services:
+  redis:
+    restart: unless-stopped
+    image: redis:alpine
+    expose:
+      - "6379"
+  backend:
+    depends_on:
+      - redis
+    links:
+      - redis

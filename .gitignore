@@ -1,5 +1,5 @@
 #ignore tests and downloaded dirs
-/bitcart/
+/compose/bitcart/
 #conf
 .env
 env.sh
@@ -16,3 +16,4 @@ backups/
 __pycache__/
 #generated configs
 compose/generated.yml
+.mypy_cache

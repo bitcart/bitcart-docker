@@ -1,0 +1,10 @@
+services:
+  lightning:
+    restart: unless-stopped
+    image: mrnaif/bitcart-ln:stable
+
+  backend:
+    depends_on:
+      - lightning
+    links:
+      - lightning

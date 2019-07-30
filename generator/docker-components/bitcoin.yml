@@ -1,0 +1,10 @@
+services:
+  bitcoin:
+    restart: unless-stopped
+    image: mrnaif/bitcart-btc:stable
+
+  backend:
+    depends_on:
+      - bitcoin
+    links:
+      - bitcoin
