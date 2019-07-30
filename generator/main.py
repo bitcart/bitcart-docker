@@ -1,3 +1,6 @@
+import importlib
+import glob
+from os.path import basename, isfile
 import shutil
 from os import getenv
 from os.path import join as path_join, exists
@@ -93,6 +96,26 @@ def merge(services):
     return d
 
 
+def load_rules():
+    modules = glob.glob(path_join("rules", "*.py"))
+    loaded = [
+        importlib.import_module(
+            "rules." +
+            basename(f)[
+                :-
+                3],
+        ) for f in modules if isfile(f) and not f.endswith('__init__.py')]
+    for i in loaded.copy():
+        if not getattr(i, "rule", None) or not callable(i.rule):
+            loaded.remove(i)
+    return loaded
+
+
+def execute_rules(rules, services):
+    for i in rules:
+        i.rule(services)
+
+
 def generate(components: Set[str]):
     # generated yaml
     services: Union[dict, list] = []
@@ -107,6 +130,8 @@ def generate(components: Set[str]):
         if doc.get("volumes"):
             volumes.append(doc["volumes"])
     services = merge(services)
+    rules = load_rules()
+    execute_rules(rules, services)
     networks = {j: i[j] for i in networks for j in i}
     volumes = {j: i[j] for i in volumes for j in i}
     data = {
@@ -119,5 +144,4 @@ def generate(components: Set[str]):
 
 
 components = add_components()
-print(components)
 generate(components)

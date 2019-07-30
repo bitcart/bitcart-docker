@@ -16,11 +16,3 @@ services:
       - "8000"
     volumes:
       - ./conf:/home/electrum/site/conf
-    depends_on:
-      - database
-      - redis
-      - dramatiq
-    links:
-      - database
-      - redis
-      - dramatiq

@@ -10,6 +10,11 @@ services:
       - dbdata:/var/lib/postgresql/data
     expose:
       - "5432"
+  backend:
+    depends_on:
+      - database
+    links:
+      - database
     
 volumes:
   dbdata:
