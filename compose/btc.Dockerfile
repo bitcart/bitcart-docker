@@ -19,7 +19,6 @@ RUN cd $ELECTRUM_HOME/site && \
 
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
-EXPOSE 5000
 VOLUME /data
 
 CMD ["python","daemons/btc.py"]

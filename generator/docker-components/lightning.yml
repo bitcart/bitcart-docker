@@ -2,6 +2,8 @@ services:
   lightning:
     restart: unless-stopped
     image: mrnaif/bitcart-ln:stable
+    expose:
+      - "5001"
 
   backend:
     depends_on:

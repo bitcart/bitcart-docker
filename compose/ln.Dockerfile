@@ -29,7 +29,6 @@ RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake au
 
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
-EXPOSE 5001
 VOLUME /data
 
 CMD ["python","daemons/ln.py"]

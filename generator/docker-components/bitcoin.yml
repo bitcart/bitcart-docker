@@ -2,6 +2,8 @@ services:
   bitcoin:
     restart: unless-stopped
     image: mrnaif/bitcart-btc:stable
+    expose:
+      - "5000"
 
   backend:
     depends_on:
