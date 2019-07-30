@@ -1,7 +1,7 @@
 import shutil
 from os import getenv
 from os.path import join as path_join, exists
-from typing import List, Set, Set
+from typing import Set, Union
 
 import oyaml as yaml
 
@@ -41,7 +41,13 @@ def add_components() -> Set[str]:
         components.update(BACKEND_COMPONENTS)
     elif to_install == "frontend":
         components.update(FRONTEND_COMPONENTS)
-    if not components:
+    crypto_comps = [CRYPTOS[i]["component"] for i in CRYPTOS]
+    HAS_CRYPTO = False
+    for i in components:
+        if i in crypto_comps:
+            HAS_CRYPTO = True
+            break
+    if not HAS_CRYPTO:
         components.add(CRYPTOS['btc']['component'])
     return components
 
@@ -55,12 +61,43 @@ def load_component(component: str):
         return data or {}
 
 
+def _merge(a, b, path=None):
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                _merge(a[key], b[key], path + [str(key)])
+            elif isinstance(a[key], list) and isinstance(b[key], list):
+                a[key] += b[key]
+            elif a[key] == b[key]:
+                pass
+        else:
+            a[key] = b[key]
+    return a
+
+
+def merge(services):
+    new = []
+    for i in services:
+        for j in i:
+            new.append({j: i[j]})
+    d = {}
+    new = sorted(new, key=lambda x: list(x)[0])
+    for i in new:
+        key = list(i)[0]
+        try:
+            _merge(d[key], i[key])
+        except KeyError:
+            d[key] = i[key]
+    return d
+
+
 def generate(components: Set[str]):
     # generated yaml
-    data = {}
-    services = []
-    networks = []
-    volumes = []
+    services: Union[dict, list] = []
+    networks: Union[dict, list] = []
+    volumes: Union[dict, list] = []
     for i in components:
         doc = load_component(i)
         if doc.get("services"):
@@ -69,7 +106,7 @@ def generate(components: Set[str]):
             networks.append(doc["networks"])
         if doc.get("volumes"):
             volumes.append(doc["volumes"])
-    services = {j: i[j] for i in services for j in i}
+    services = merge(services)
     networks = {j: i[j] for i in networks for j in i}
     volumes = {j: i[j] for i in volumes for j in i}
     data = {
@@ -82,4 +119,5 @@ def generate(components: Set[str]):
 
 
 components = add_components()
+print(components)
 generate(components)
