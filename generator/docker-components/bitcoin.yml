@@ -8,6 +8,6 @@ services:
 
   backend:
     depends_on:
-      - daemon
+      - bitcoin
     links:
-      - daemon
+      - bitcoin
