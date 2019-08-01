@@ -25,7 +25,7 @@ DB_HOST=database
 CHANNEL_LAYERS_HOST=redis://redis
 CACHE_REDIS_URL=redis://redis
 DRAMATIQ_REDIS_URL=redis://redis
-RPC_URL=http://daemon:5000
+RPC_URL=http://bitcoin:5000
 ALLOWED_HOSTS=$BITCART_HOST
 EOF
 echo "
