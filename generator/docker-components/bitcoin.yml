@@ -2,6 +2,8 @@ services:
   bitcoin:
     restart: unless-stopped
     image: mrnaif/bitcart-btc:stable
+    environment:
+      BTC_TESTNET: ${BTC_TESTNET:-false}
     expose:
       - "5000"
 

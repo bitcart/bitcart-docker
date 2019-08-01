@@ -2,6 +2,8 @@ services:
   lightning:
     restart: unless-stopped
     image: mrnaif/bitcart-ln:stable
+    environment:
+      LN_TESTNET: ${LN_TESTNET:-false}
     expose:
       - "5001"
 
