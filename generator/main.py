@@ -7,14 +7,25 @@ from os.path import join as path_join, exists
 from typing import Set, Union
 
 import oyaml as yaml
-from constants import COMPOSE_DIR, COMPONENTS_DIR, GENERATED_NAME, CRYPTOS, CRYPTO_COMPONENTS, BACKEND_COMPONENTS, FRONTEND_COMPONENTS, RULES_DIR, RULES_PYTHON_DIR, RULES_PYTHON_PKG
+from constants import (
+    COMPOSE_DIR,
+    COMPONENTS_DIR,
+    GENERATED_NAME,
+    CRYPTOS,
+    CRYPTO_COMPONENTS,
+    BACKEND_COMPONENTS,
+    FRONTEND_COMPONENTS,
+    RULES_DIR,
+    RULES_PYTHON_DIR,
+    RULES_PYTHON_PKG,
+)
 
 
 def add_components() -> Set[str]:
     components: Set[str] = set()
     # add daemons
     for i in range(1, 10):
-        crypto = getenv(f'BITCART_CRYPTO{i}')
+        crypto = getenv(f"BITCART_CRYPTO{i}")
         if crypto:
             value = CRYPTOS.get(crypto)
             if value:
@@ -35,7 +46,8 @@ def add_components() -> Set[str]:
         reverseproxy == "nginx-https"
     if reverseproxy == "nginx-https":
         components.update(
-            ["nginx", "nginx-https", "bitcart-nginx", "bitcart-nginx-https"])
+            ["nginx", "nginx-https", "bitcart-nginx", "bitcart-nginx-https"]
+        )
     elif reverseproxy == "nginx":
         components.update(["nginx", "bitcart-nginx"])
     else:
@@ -48,7 +60,7 @@ def add_components() -> Set[str]:
             HAS_CRYPTO = True
             break
     if not HAS_CRYPTO:
-        components.add(CRYPTOS['btc']['component'])
+        components.add(CRYPTOS["btc"]["component"])
     return components
 
 
@@ -97,11 +109,11 @@ def load_rules():
     modules = glob.glob(path_join(RULES_DIR, "*.py"))
     loaded = [
         importlib.import_module(
-            f"{RULES_PYTHON_DIR}." +
-            basename(f)[
-                :-
-                3], RULES_PYTHON_PKG
-        ) for f in modules if isfile(f) and not f.endswith('__init__.py')]
+            f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG
+        )
+        for f in modules
+        if isfile(f) and not f.endswith("__init__.py")
+    ]
     for i in loaded.copy():
         if not getattr(i, "rule", None) or not callable(i.rule):
             loaded.remove(i)
@@ -135,7 +147,8 @@ def generate(components: Set[str]):
         "version": "3",
         "services": services,
         "networks": networks,
-        "volumes": volumes}
+        "volumes": volumes,
+    }
     with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
         yaml.dump(data, f, default_flow_style=False)
 
