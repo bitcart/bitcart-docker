@@ -1,0 +1,14 @@
+services:
+  litecoin:
+    restart: unless-stopped
+    image: mrnaif/bitcart-ltc:stable
+    environment:
+      LTC_NETWORK: ${LTC_NETWORK:-mainnet}
+    expose:
+      - "5001"
+
+  backend:
+    depends_on:
+      - litecoin
+    links:
+      - litecoin

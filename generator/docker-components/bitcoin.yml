@@ -3,7 +3,8 @@ services:
     restart: unless-stopped
     image: mrnaif/bitcart-btc:stable
     environment:
-      BTC_TESTNET: ${BTC_TESTNET:-false}
+      BTC_NETWORK: ${BTC_NETWORK:-mainnet}
+      BTC_LIGHTNING: ${BTC_LIGHTNING:-true}
     expose:
       - "5000"
 
