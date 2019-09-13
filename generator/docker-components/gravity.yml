@@ -1,0 +1,14 @@
+services:
+  gravity:
+    restart: unless-stopped
+    image: mrnaif/bitcart-gzro:stable
+    environment:
+      GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
+    expose:
+      - "5002"
+
+  backend:
+    depends_on:
+      - gravity
+    links:
+      - gravity

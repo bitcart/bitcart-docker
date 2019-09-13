@@ -24,11 +24,11 @@ RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake au
     rm -rf secp256k1 && \
     cd $ELECTRUM_HOME/site && \
     pip3 install -r requirements/base.txt && \
-    pip3 install -r requirements/daemons/ltc.txt && \
+    pip3 install -r requirements/daemons/gzro.txt && \
     apk del build-deps
 
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
 VOLUME /data
 
-CMD ["python","daemons/ltc.py"]
+CMD ["python","daemons/gzro.py"]
