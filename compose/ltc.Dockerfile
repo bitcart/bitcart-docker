@@ -13,7 +13,7 @@ RUN adduser -D $ELECTRUM_USER && \
 
 COPY bitcart $ELECTRUM_HOME/site
 
-RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake autoconf libtool file git make && \
+RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake autoconf libtool file git make openssl-dev && \
     git clone https://github.com/bitcoin/secp256k1 && \
     cd secp256k1 && \
     ./autogen.sh && \
