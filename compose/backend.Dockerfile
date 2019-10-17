@@ -4,7 +4,7 @@ COPY bitcart /app
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 WORKDIR /app
 RUN adduser -D electrum && \
-    apk add --virtual build-deps --no-cache build-base libffi-dev && \
+    apk add --virtual build-deps --no-cache build-base libffi-dev postgresql-dev && \
     pip install -r requirements.txt && \
     pip install -r requirements/production.txt && \
     rm -rf /root/.cache/pip && \
