@@ -1,0 +1,16 @@
+services:
+  admin:
+    restart: unless-stopped
+    image: mrnaif/bitcart-admin
+    expose:
+      - "4000"
+    command: npm start
+    environment:
+      BITCART_FRONTEND_URL: ${BITCART_ADMIN_URL}
+      BITCART_FRONTEND_TOKEN: ${BITCART_ADMIN_TOKEN}
+      VIRTUAL_NETWORK: nginx-proxy
+      VIRTUAL_PORT: 4000
+      VIRTUAL_HOST: ${BITCART_ADMIN_HOST}
+      VIRTUAL_HOST_NAME: "bitcart-admin"
+      LETSENCRYPT_HOST: ${BITCART_ADMIN_HOST}
+      LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}

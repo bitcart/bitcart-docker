@@ -1,5 +1,5 @@
 services:
-  frontend:
+  store:
     restart: unless-stopped
     image: mrnaif/bitcart-frontend
     expose:
@@ -11,6 +11,6 @@ services:
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 3000
       VIRTUAL_HOST: ${BITCART_FRONTEND_HOST}
-      VIRTUAL_HOST_NAME: "bitcart-frontend"
+      VIRTUAL_HOST_NAME: "bitcart-store"
       LETSENCRYPT_HOST: ${BITCART_FRONTEND_HOST}
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
