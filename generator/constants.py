@@ -12,6 +12,7 @@ CRYPTOS = {
     "btc": {"component": "bitcoin"},
     "ltc": {"component": "litecoin"},
     "gzro": {"component": "gravity"},
+    "bsty": {"component": "globalboost"},
 }
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
 BACKEND_COMPONENTS = ["backend", "dramatiq", "postgres", "redis"]

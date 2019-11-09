@@ -1,0 +1,15 @@
+services:
+  globalboost:
+    restart: unless-stopped
+    image: mrnaif/bitcart-bsty:stable
+    environment:
+      BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
+      BSTY_LIGHTNING: ${BSTY_LIGHTNING:-true}
+    expose:
+      - "5003"
+
+  backend:
+    depends_on:
+      - globalboost
+    links:
+      - globalboost
