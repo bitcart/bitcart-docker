@@ -22,11 +22,8 @@ echo "Creating config file..."
 mkdir -p compose/conf
 cat > compose/conf/.env << EOF
 DB_HOST=database
-CHANNEL_LAYERS_HOST=redis://redis
-CACHE_REDIS_URL=redis://redis
-DRAMATIQ_REDIS_URL=redis://redis
+REDIS_HOST=redis://redis
 RPC_URL=http://bitcoin:5000
-ALLOWED_HOSTS=$BITCART_HOST
 EOF
 echo "
 Creating docker config file with parameters:
