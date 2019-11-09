@@ -14,5 +14,5 @@ CRYPTOS = {
     "gzro": {"component": "gravity"},
 }
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
-BACKEND_COMPONENTS = ["backend", "postgres", "redis"]
+BACKEND_COMPONENTS = ["backend", "dramatiq", "postgres", "redis"]
 FRONTEND_COMPONENTS = ["store", "admin"]

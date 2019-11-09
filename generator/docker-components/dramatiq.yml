@@ -1,0 +1,10 @@
+services:
+  dramatiq:
+    restart: unless-stopped
+    image: mrnaif/bitcart:stable
+    command: dramatiq api.tasks
+  backend:
+    depends_on:
+      - dramatiq
+    links:
+      - dramatiq
