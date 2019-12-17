@@ -15,4 +15,5 @@ services:
     expose:
       - "8000"
     volumes:
-      - ./conf:/home/electrum/site/conf
+      - ./conf:/app/conf
+      - ./images:/app/images
