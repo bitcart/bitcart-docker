@@ -8,4 +8,6 @@ DB_HOST=database
 REDIS_HOST=redis://redis
 RPC_URL=http://bitcoin:5000
 EOF
+mkdir -p images
+mkdir -p images/products
 cd ../..

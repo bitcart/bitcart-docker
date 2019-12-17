@@ -20,6 +20,8 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 echo "Creating config file..."
 mkdir -p compose/conf
+mkdir -p compose/images
+mkdir -p compose/images/products
 cat > compose/conf/.env << EOF
 DB_HOST=database
 REDIS_HOST=redis://redis
