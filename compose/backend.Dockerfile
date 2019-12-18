@@ -16,4 +16,5 @@ RUN adduser -D electrum && \
     rm -rf /root/.cache/pip && \
     apk del build-deps
 USER electrum
+VOLUME /app/images
 CMD ["sh"]
