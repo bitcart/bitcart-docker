@@ -5,10 +5,6 @@ COPY scripts/docker-entrypoint.sh /usr/local/bin/
 WORKDIR /app
 RUN adduser -D electrum && \
     adduser electrum electrum && \
-    mkdir -p /app/images && \
-    mkdir -p /app/images/products && \
-    chown -R electrum:electrum /app/images && \
-    chown -R electrum:electrum /app/images/products && \
     apk add --virtual build-deps --no-cache build-base libffi-dev && \
     apk add postgresql-dev && \
     pip install -r requirements.txt && \
@@ -16,5 +12,7 @@ RUN adduser -D electrum && \
     rm -rf /root/.cache/pip && \
     apk del build-deps
 USER electrum
+RUN mkdir -p /app/images && \
+    mkdir -p /app/images/products
 VOLUME /app/images
 CMD ["sh"]
