@@ -16,4 +16,7 @@ services:
       - "8000"
     volumes:
       - ./conf:/app/conf
-      - ./images:/app/images
+      - images:/app/images
+
+volumes:
+  images:
