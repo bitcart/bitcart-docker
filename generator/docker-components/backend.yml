@@ -14,6 +14,7 @@ services:
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
     expose:
       - "8000"
+    user: "${USER_UID}:${USER_GID}"
     volumes:
       - ./conf:/app/conf
       - images:/app/images

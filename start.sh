@@ -10,7 +10,7 @@ if ! [[ " ${accepted_modes[*]} " == *"$value"* ]]; then
 fi
 echo Selected mode: $value
 if [ "$value" == "production" ];then
-    uid=${UID} gid=${GID} docker-compose -f compose/generated.yml up --remove-orphans -d
+    USER_UID=${UID} USER_GID=${GID} docker-compose -f compose/generated.yml up --remove-orphans -d
 elif [ "$value" == "dev" ];then
-    uid=${UID} gid=${GID} docker-compose -f docker-compose.dev.yml up --remove-orphans -d
+    USER_UID=${UID} USER_GID=${GID} docker-compose -f docker-compose.dev.yml up --remove-orphans -d
 fi
