@@ -3,6 +3,7 @@
 #conf
 .env
 env.sh
+generator-env.sh
 conf/
 .vscode/
 #pycharm

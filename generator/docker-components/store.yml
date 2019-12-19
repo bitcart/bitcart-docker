@@ -4,7 +4,7 @@ services:
     image: mrnaif/bitcart-frontend
     expose:
       - "3000"
-    command: npm start
+    command: yarn start
     environment:
       BITCART_FRONTEND_URL: ${BITCART_FRONTEND_URL}
       BITCART_FRONTEND_EMAIL: ${BITCART_FRONTEND_EMAIL}

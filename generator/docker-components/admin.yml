@@ -4,7 +4,7 @@ services:
     image: mrnaif/bitcart-admin
     expose:
       - "4000"
-    command: npm start
+    command: yarn start
     environment:
       BITCART_ADMIN_URL: ${BITCART_ADMIN_URL}
       BITCART_ADMIN_TOKEN: ${BITCART_ADMIN_TOKEN}
