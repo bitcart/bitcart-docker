@@ -18,6 +18,20 @@ if ! [ -x "$(command -v docker-compose)" ]; then
     curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
 fi
+if [[ "$BITCART_HOST" == *.local ]] ; then
+    echo "Local setup detected."
+    if [[ "$BITCART_NOHOSTSEDIT" = true ]] ; then
+        echo "Not modifying hosts."
+    else
+        echo "WARNING! Modifying /etc/hosts to make local setup work. It may require superuser privileges."
+        cat >> /etc/hosts << EOF
+127.0.0.1   $BITCART_FRONTEND_HOST
+127.0.0.1   $BITCART_HOST
+127.0.0.1   $BITCART_ADMIN_HOST
+EOF
+    fi
+fi
+        
 echo "Creating config file..."
 mkdir -p compose/conf
 mkdir -p compose/images
