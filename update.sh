@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source env.sh
-USER_UID=${UID} 
-USER_GID=${GID}
+export USER_UID=${UID} 
+export USER_GID=${GID}
 echo "Updating git repo..."
 git pull --force
 echo "Updating images..."
