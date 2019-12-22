@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source env.sh
 echo "Updating git repo..."
 git pull --force
 echo "Updating images..."
