@@ -13,6 +13,8 @@ services:
       GZRO_LIGHTNING: ${GZRO_LIGHTNING:-true}
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-true}
+    volumes:
+      - ./conf:/app/conf
   backend:
     depends_on:
       - dramatiq
