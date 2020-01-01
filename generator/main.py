@@ -1,20 +1,22 @@
-import importlib
 import glob
-from os.path import basename, isfile
+import importlib
 import shutil
 from os import getenv
-from os.path import join as path_join, exists
+from os.path import basename, exists, isfile
+from os.path import join as path_join
+from shlex import shlex
 from typing import Set, Union
 
 import oyaml as yaml
+
 from constants import (
-    COMPOSE_DIR,
-    COMPONENTS_DIR,
-    GENERATED_NAME,
-    CRYPTOS,
-    CRYPTO_COMPONENTS,
     BACKEND_COMPONENTS,
+    COMPONENTS_DIR,
+    COMPOSE_DIR,
+    CRYPTO_COMPONENTS,
+    CRYPTOS,
     FRONTEND_COMPONENTS,
+    GENERATED_NAME,
     RULES_DIR,
     RULES_PYTHON_DIR,
     RULES_PYTHON_PKG,
@@ -24,8 +26,12 @@ from constants import (
 def add_components() -> Set[str]:
     components: Set[str] = set()
     # add daemons
-    for i in range(1, 10):
-        crypto = getenv(f"BITCART_CRYPTO{i}")
+    cryptos = getenv("BITCART_CRYPTOS", "btc")
+    splitter = shlex(cryptos, posix=True)
+    splitter.whitespace = ","
+    splitter.whitespace_split = True
+    cryptos = [item.strip() for item in splitter]
+    for crypto in cryptos:
         if crypto:
             value = CRYPTOS.get(crypto)
             if value:

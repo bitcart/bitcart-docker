@@ -12,6 +12,15 @@ services:
       VIRTUAL_HOST_NAME: "bitcart-backend"
       LETSENCRYPT_HOST: ${BITCART_HOST}
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
+      BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
+      BTC_NETWORK: ${BTC_NETWORK:-mainnet}
+      BTC_LIGHTNING: ${BTC_LIGHTNING:-true}
+      LTC_NETWORK: ${LTC_NETWORK:-mainnet}
+      LTC_LIGHTNING: ${LTC_LIGHTNING:-true}
+      GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
+      GZRO_LIGHTNING: ${GZRO_LIGHTNING:-true}
+      BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
+      BSTY_LIGHTNING: ${BSTY_LIGHTNING:-true}
     expose:
       - "8000"
     user: "${USER_UID}:${USER_GID}"
