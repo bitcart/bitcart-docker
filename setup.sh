@@ -39,7 +39,10 @@ mkdir -p compose/images/products
 cat > compose/conf/.env << EOF
 DB_HOST=database
 REDIS_HOST=redis://redis
-RPC_URL=http://bitcoin:5000
+BTC_HOST=bitcoin
+LTC_HOST=litecoin
+GZRO_HOST=gravity
+BSTY_HOST=globalboost
 EOF
 echo "
 Creating docker config file with parameters:
