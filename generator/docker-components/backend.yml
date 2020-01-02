@@ -15,6 +15,7 @@ services:
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
       BTC_LIGHTNING: ${BTC_LIGHTNING:-true}
+      BCH_NETWORK: ${BCH_NETWORK:-mainnet}
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
       LTC_LIGHTNING: ${LTC_LIGHTNING:-true}
       GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}

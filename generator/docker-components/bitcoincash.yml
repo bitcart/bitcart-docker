@@ -1,0 +1,14 @@
+services:
+  bitcoincash:
+    restart: unless-stopped
+    image: mrnaif/bitcart-bch:stable
+    environment:
+      BCH_NETWORK: ${BCH_NETWORK:-mainnet}
+    expose:
+      - "5004"
+
+  backend:
+    depends_on:
+      - bitcoincash
+    links:
+      - bitcoincash
