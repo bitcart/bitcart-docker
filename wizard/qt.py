@@ -34,8 +34,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def submit(self):
         try:
-            core.connect(self.e1.text(), self.e2.text(),
-                         self.e3.text(), self.log, True)
+            core.connect(self.e1.text(), self.e2.text(), self.e3.text(), self.log, True)
         except Exception:
             self.log(traceback.format_exc())
 

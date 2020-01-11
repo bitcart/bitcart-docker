@@ -53,9 +53,12 @@ class Install(StatesGroup):
 
 @dp.message_handler(commands=["start", "help"])
 async def echo(message: types.Message):
-    await bot.send_message(message.chat.id, '''Hello!
+    await bot.send_message(
+        message.chat.id,
+        """Hello!
 I am Bitcart installation bot. I will help you to install bitcart on your server!
-Type /install for me to ask you installation details!''')
+Type /install for me to ask you installation details!""",
+    )
 
 
 @dp.message_handler(commands=["install"])
@@ -67,7 +70,7 @@ async def install(message: types.Message):
 @dp.message_handler(state=Install.ip)
 async def process_ip(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['ip'] = message.text
+        data["ip"] = message.text
 
     await Install.next()
     await bot.send_message(message.chat.id, "User:")
@@ -76,7 +79,7 @@ async def process_ip(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Install.user)
 async def process_user(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['user'] = message.text
+        data["user"] = message.text
 
     await Install.next()
     await bot.send_message(message.chat.id, "Password:")
@@ -85,7 +88,7 @@ async def process_user(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Install.password)
 async def process_password(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['password'] = message.text
+        data["password"] = message.text
 
     await Install.next()
     await bot.send_message(message.chat.id, "Domain:")
@@ -94,27 +97,43 @@ async def process_password(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Install.domain)
 async def process_domain(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['domain'] = message.text
+        data["domain"] = message.text
     await Install.next()
-    await bot.send_message(message.chat.id, "Do you want to start bitcart after installation?(Y/N)")
+    await bot.send_message(
+        message.chat.id, "Do you want to start bitcart after installation?(Y/N)"
+    )
 
 
 @dp.message_handler(state=Install.start)
 async def process_start(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['start'] = message.text
+        data["start"] = message.text
         try:
-            await bot.send_message(message.chat.id, "Starting installation, please wait...")
-            core.connect(data['ip'], data['user'], data['password'], functools.partial(
-                print, file=open(os.devnull, 'w')), core.verify_install_bitcart(data['start']), data['domain'])
-            if core.verify_install_bitcart(data['start']):
+            await bot.send_message(
+                message.chat.id, "Starting installation, please wait..."
+            )
+            core.connect(
+                data["ip"],
+                data["user"],
+                data["password"],
+                functools.partial(print, file=open(os.devnull, "w")),
+                core.verify_install_bitcart(data["start"]),
+                data["domain"],
+            )
+            if core.verify_install_bitcart(data["start"]):
                 await bot.send_message(message.chat.id, "Successfully started bitcart!")
             else:
-                await bot.send_message(message.chat.id, "Successfully installed bitcart!")
+                await bot.send_message(
+                    message.chat.id, "Successfully installed bitcart!"
+                )
         except Exception:
-            await bot.send_message(message.chat.id, "Error connecting to server/installing.\n"+code(traceback.format_exc().splitlines()[-1]))
+            await bot.send_message(
+                message.chat.id,
+                "Error connecting to server/installing.\n"
+                + code(traceback.format_exc().splitlines()[-1]),
+            )
         data.state = None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     executor.start_polling(dp)
