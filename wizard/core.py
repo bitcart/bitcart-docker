@@ -1,8 +1,64 @@
 import paramiko
 import warnings
 import time
+import getpass
 
 warnings.filterwarnings(action="ignore", module=".*paramiko.*")
+
+texts = {
+    "ip": "Enter ip address: ",
+    "user": "Enter username[{username}]: ",
+    "password": "Enter password: ",
+    "install": "Select installation preset(all/frontend/backend/none): ",
+    "store_email": "Enter email to use for your Bitcart Store Auth: ",
+    "store_pass": "Enter password to use for your Bitcart Store Auth: ",
+    "store_id": "Enter id of the store used in your Bitcart Store[1]: ",
+    "onedomain_mode": "Do you want to enter one domain mode(default domain preset)?(Y/N) ",
+    "alldomain": "Enter root domain for all services: ",
+    "api_domain": "Enter domain for Bitcart Merchants API: ",
+    "admin_domain": "Enter domain for Bitcart Admin Panel: ",
+    "frontend_domain": "Enter domain for Bitcart Store: ",
+    "cryptos": "Which cryptos to add[btc]: ",
+    "reverseproxy": "Which reverseproxy to use[nginx-https]: ",
+    "additional_components": "Which additional components to add[none]:",
+    "start_bitcart": "Do you want to start bitcart?(Y/N) ",
+}
+
+defaults = {
+    "user": getpass.getuser(),
+    "install": "all",
+    "store_id": "1",
+    "onedomain_mode": "Y",
+    "cryptos": "btc",
+    "reverseproxy": "nginx-https",
+    "additional_components": "",
+    "start_bitcart": "Y",
+}
+
+checks = [
+    {
+        "vars": ["store_email", "store_pass", "store_id"],
+        "args": ["install"],
+        "check": lambda x: x in ["frontend", "all"],
+    },
+    {
+        "vars": ["domain"],
+        "args": ["onedomain_mode"],
+        "check": lambda x: verify_install_bitcart(x),
+    },
+    {
+        "vars": ["api_domain"],
+        "args": ["onedomain_mode", "install"],
+        "check": lambda x, y: not verify_install_bitcart(x)
+        and y in ["frontend", "backend", "all"],
+    },
+    {
+        "vars": ["admin_domain", "frontend_domain"],
+        "args": ["onedomain_mode", "install"],
+        "check": lambda x, y: not verify_install_bitcart(x)
+        and y in ["frontend", "all"],
+    },
+]
 
 
 def connect(
