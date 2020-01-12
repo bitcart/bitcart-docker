@@ -42,21 +42,24 @@ checks = [
         "check": lambda x: x in ["frontend", "all"],
     },
     {
-        "vars": ["domain"],
+        "vars": ["alldomain"],
         "args": ["onedomain_mode"],
         "check": lambda x: verify_install_bitcart(x),
     },
     {
+        "vars": ["api_domain", "admin_domain", "frontend_domain"],
+        "args": ["onedomain_mode"],
+        "check": lambda x: not verify_install_bitcart(x),
+    },
+    {
         "vars": ["api_domain"],
-        "args": ["onedomain_mode", "install"],
-        "check": lambda x, y: not verify_install_bitcart(x)
-        and y in ["frontend", "backend", "all"],
+        "args": ["install"],
+        "check": lambda x: x in ["frontend", "backend", "all"],
     },
     {
         "vars": ["admin_domain", "frontend_domain"],
-        "args": ["onedomain_mode", "install"],
-        "check": lambda x, y: not verify_install_bitcart(x)
-        and y in ["frontend", "all"],
+        "args": ["install"],
+        "check": lambda x: x in ["frontend", "all"],
     },
 ]
 

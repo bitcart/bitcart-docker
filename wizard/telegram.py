@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 import logging
 
 from aiogram import Bot, Dispatcher, executor, types
@@ -5,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.utils.markdown import code
+from aiogram.utils.markdown import hcode
 import asyncio
 import core
 import traceback
@@ -38,17 +39,17 @@ API_TOKEN = get_or_ask("TELEGRAM_TOKEN", ask=True)
 logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN, parse_mode="markdown")
+bot = Bot(token=API_TOKEN, parse_mode="html")
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 
-class Install(StatesGroup):
-    ip = State()
-    user = State()
-    password = State()
-    domain = State()
-    start = State()
+Install = type("Install", (StatesGroup,), {key: State() for key in core.texts.keys()})
+states = list(core.texts.keys())
+texts = list(core.texts.values())
+for ind, item in enumerate(texts):
+    if item == core.texts["user"]:
+        texts[ind] = "Enter username: "
 
 
 @dp.message_handler(commands=["start", "help"])
@@ -63,64 +64,71 @@ Type /install for me to ask you installation details!""",
 
 @dp.message_handler(commands=["install"])
 async def install(message: types.Message):
-    await Install.ip.set()
-    await bot.send_message(message.chat.id, "Send me your server ip address:")
+    await getattr(Install, states[0]).set()
+    await bot.send_message(message.chat.id, texts[0])
 
 
-@dp.message_handler(state=Install.ip)
-async def process_ip(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data["ip"] = message.text
+def make_func(name, pos):
+    async def process(message: types.Message, state: FSMContext):
+        cont = True
+        skip = 0
+        install = None
+        async with state.proxy() as data:
+            value = message.text
+            if not value:
+                value = core.defaults.get(states[pos], "")
+            if states[pos] in core.defaults and value.lower() == "default":
+                value = core.defaults.get(states[pos], "")
+            data[states[pos]] = value
+            if "install" in data:
+                install = data["install"]
+            for check in core.checks:
+                if states[pos + 1] in check["vars"]:
+                    args = [data[key] for key in check["args"]]
+                    if not check["check"](*args):
+                        cont = False
+                        skip += len(check["vars"])
+                        break
 
-    await Install.next()
-    await bot.send_message(message.chat.id, "User:")
+        if cont:
+            await Install.next()
+        else:
+            if (
+                install not in ["backend", "frontend", "all"]
+                and states[pos + skip + 1] == "api_domain"
+            ):
+                skip += 3
+            for _ in range(skip + 1):
+                await Install.next()
+        await bot.send_message(message.chat.id, texts[pos + skip + 1])
+
+    process.__name__ = name
+    return process
 
 
-@dp.message_handler(state=Install.user)
-async def process_user(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data["user"] = message.text
-
-    await Install.next()
-    await bot.send_message(message.chat.id, "Password:")
+pos = 0
+for var, text in list(core.texts.items())[:-1]:
+    dp.message_handler(state=getattr(Install, var))(make_func(f"process_{var}", pos))
+    pos += 1
 
 
-@dp.message_handler(state=Install.password)
-async def process_password(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data["password"] = message.text
-
-    await Install.next()
-    await bot.send_message(message.chat.id, "Domain:")
-
-
-@dp.message_handler(state=Install.domain)
-async def process_domain(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data["domain"] = message.text
-    await Install.next()
-    await bot.send_message(
-        message.chat.id, "Do you want to start bitcart after installation?(Y/N)"
-    )
-
-
-@dp.message_handler(state=Install.start)
+@dp.message_handler(state=Install.start_bitcart)
 async def process_start(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data["start"] = message.text
+        data["start_bitcart"] = (
+            core.defaults["start_bitcart"]
+            if message.text == "default"
+            else message.text
+        )
         try:
             await bot.send_message(
                 message.chat.id, "Starting installation, please wait..."
             )
-            core.connect(
-                data["ip"],
-                data["user"],
-                data["password"],
-                functools.partial(print, file=open(os.devnull, "w")),
-                core.verify_install_bitcart(data["start"]),
-                data["domain"],
-            )
-            if core.verify_install_bitcart(data["start"]):
+            kwargs = {key: data[key] for key in core.texts if key in data}
+            kwargs["print_func"] = functools.partial(print, file=open(os.devnull, "w"))
+            kwargs.pop("onedomain_mode", None)
+            core.connect(**kwargs)
+            if core.verify_install_bitcart(data["start_bitcart"]):
                 await bot.send_message(message.chat.id, "Successfully started bitcart!")
             else:
                 await bot.send_message(
@@ -130,7 +138,7 @@ async def process_start(message: types.Message, state: FSMContext):
             await bot.send_message(
                 message.chat.id,
                 "Error connecting to server/installing.\n"
-                + code(traceback.format_exc().splitlines()[-1]),
+                + hcode(traceback.format_exc().splitlines()[-1]),
             )
         data.state = None
 
