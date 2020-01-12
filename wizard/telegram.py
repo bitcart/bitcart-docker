@@ -4,7 +4,6 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.contrib.fsm_storage.redis import RedisStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.markdown import hcode
 import asyncio
