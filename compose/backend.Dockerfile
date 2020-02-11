@@ -1,5 +1,7 @@
 FROM python:3.6-alpine
 
+ENV IN_DOCKER=1
+
 COPY bitcart /app
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
 WORKDIR /app
