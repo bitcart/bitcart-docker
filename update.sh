@@ -39,6 +39,8 @@ fi
 
 . helpers.sh
 bitcart_update_docker_env
+# stop listener
+kill $(cat listener.pid)
 ./start.sh
 
 set +e
