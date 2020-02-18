@@ -28,3 +28,4 @@ services:
     volumes:
       - ./conf:/app/conf
       - ./images:/app/images
+      - ./queue:/app/queue
