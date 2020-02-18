@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-source generator-env.sh
-
+set -e
 BITCARTGEN_DOCKER_IMAGE='mrnaif/docker-compose-generator'
+set +e
+docker pull $BITCARTGEN_DOCKER_IMAGE
+docker rmi $(docker images mrnaif/docker-compose-generator --format "{{.Tag}};{{.ID}}" | grep "^<none>" | cut -f2 -d ';') > /dev/null 2>&1
+set -e
 
 docker run -v "$PWD/compose:/app/compose" \
     -e "BITCART_INSTALL=${BITCART_INSTALL:-all}" \
