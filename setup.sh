@@ -1,23 +1,134 @@
 #!/usr/bin/env bash
-if ! [ -x "$(command -v curl)" ]; then
-        apt-get update 2>error
-        apt-get install -y \
-            curl \
-            apt-transport-https \
-            ca-certificates \
-            software-properties-common \
-            2>/dev/null
+
+set +x
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OS
+
+    if [[ $EUID -eq 0 ]]; then
+        # Running as root is discouraged on Mac OS. Run under the current user instead.
+        echo "This script should not be run as root."
+        exit 1
+    fi
+
+    BASH_PROFILE_SCRIPT="$HOME/bitcartcc-env.sh"
+
+    # Mac OS doesn't use /etc/profile.d/xxx.sh. Instead we create a new file and load that from ~/.bash_profile
+    if [[ ! -f "$HOME/.bash_profile" ]]; then
+        touch "$HOME/.bash_profile"
+    fi
+    if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile") ]]; then
+        # Line does not exist, add it
+        echo ". \"$BASH_PROFILE_SCRIPT\"" >> "$HOME/.bash_profile"
+    fi
+
+else
+    BASH_PROFILE_SCRIPT="/etc/profile.d/bitcartcc-env.sh"
+
+    if [[ $EUID -ne 0 ]]; then
+        echo "This script must be run as root after running \"sudo su -\""
+        exit 1
+    fi
 fi
-if ! [ -x "$(command -v docker)" ]; then
-    echo "Trying to install docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
-    rm get-docker.sh
-fi
-if ! [ -x "$(command -v docker-compose)" ]; then
-    curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-fi
+
+function display_help () {
+cat <<-END
+Usage:
+------
+Install BitcartCC on this server
+This script must be run as root, except on Mac OS
+    -h, --help: Show help
+    --install-only: Run install only
+    --docker-unavailable: Same as --install-only, but will also skip install steps requiring docker
+    --no-startup-register: Do not register BitcartCC to start via systemctl or upstart
+    --no-systemd-reload: Do not reload systemd configuration
+This script will:
+* Install Docker
+* Install Docker-Compose
+* Setup BitcartCC settings
+* Make sure it starts at reboot via upstart or systemd
+* Add BitcartCC utilities in /usr/bin
+* Start BitcartCC
+You can run again this script if you desire to change your configuration.
+Make sure you own a domain with DNS record pointing to your website.
+Passing domain ending with .local will automatically edit /etc/hosts and make it work.
+Environment variables:
+    BITCART_INSTALL: installation template to use (eg. all, backend, frontend)
+    BITCART_CRYPTOS: comma-separated list of cryptocurrencies to enable (eg. btc)
+    BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, none)
+    BITCART_HOST: The hostname of your website API (eg. api.example.com)
+    BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
+    BITCART_FRONTEND_HOST: The hostname of your website store (eg. example.com)
+    BITCART_FRONTEND_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
+    BITCART_FRONTEND_EMAIL: Email used to authentificate to your API (hosted locally or remotely, eg. me@example.com)
+    BITCART_FRONTEND_PASSWORD: Password used to authentificate to your API (hosted locally or remotely)
+    BITCART_FRONTEND_STORE: The ID your store will represent (id=1 means first created store)
+    BITCART_ADMIN_HOST: The hostname of your website admin panel (eg. admin.example.com)
+    BITCART_ADMIN_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
+    BTC_NETWORK: The network to run bitcoin daemon on (eg. mainnet, testnet)
+    BTC_LIGHTNING: Whether to enable bitcoin lightning network or not (eg. true, false)
+    BCH_NETWORK: The network to run bitcoin cash daemon on (eg. mainnet, testnet)
+    LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
+    LTC_LIGHTNING: Whether to enable litecoin lightning network or not (eg. true, false)
+    GZRO_NETWORK: The network to run gravity daemon on (eg. mainnet, testnet)
+    GZRO_LIGHTNING: Whether to enable gravity lightning network or not (eg. true, false)
+    BSTY_NETWORK: The network to run globalboost daemon on (eg. mainnet, testnet)
+    BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
+    BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
+    
+END
+}
+
+START=true
+HAS_DOCKER=true
+STARTUP_REGISTER=true
+SYSTEMD_RELOAD=true
+while (( "$#" )); do
+  case "$1" in
+    -h)
+      display_help
+      exit 0
+      ;;
+    --help)
+      display_help
+      exit 0
+      ;;
+    --install-only)
+      START=false
+      shift 1
+      ;;
+    --docker-unavailable)
+      START=false
+      HAS_DOCKER=false
+      shift 1
+      ;;
+    --no-startup-register)
+      STARTUP_REGISTER=false
+      shift 1
+      ;;
+    --no-systemd-reload)
+      SYSTEMD_RELOAD=false
+      shift 1
+      ;;
+    --) # end argument parsing
+      shift
+      break
+      ;;
+    -*|--*=) # unsupported flags
+      echo "Error: Unsupported flag $1" >&2
+      display_help
+      exit 1
+      ;;
+    *) # preserve positional arguments
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+
+BITCART_BASE_DIRECTORY="$(pwd)"
+BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
+
 if [[ "$BITCART_HOST" == *.local ]] ; then
     echo "Local setup detected."
     if [[ "$BITCART_NOHOSTSEDIT" = true ]] ; then
@@ -31,8 +142,7 @@ if [[ "$BITCART_HOST" == *.local ]] ; then
 EOF
     fi
 fi
-        
-echo "Creating config file..."
+
 mkdir -p compose/conf
 mkdir -p compose/images
 mkdir -p compose/images/products
@@ -46,7 +156,8 @@ BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
 EOF
 echo "
-Creating docker config file with parameters:
+-------SETUP-----------
+Parameters passed:
 BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 BITCART_FRONTEND_HOST=$BITCART_FRONTEND_HOST
@@ -56,7 +167,10 @@ BITCART_FRONTEND_PASSWORD=$BITCART_FRONTEND_PASSWORD
 BITCART_FRONTEND_STORE=$BITCART_FRONTEND_STORE
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
 BITCART_ADMIN_URL=$BITCART_ADMIN_URL
-BITCART_ADMIN_TOKEN=$BITCART_ADMIN_TOKEN
+BITCART_INSTALL=${BITCART_INSTALL:-all}
+BITCART_REVERSEPROXY=${BITCART_REVERSEPROXY:-nginx-https}
+BITCART_CRYPTOS=${BITCART_CRYPTOS:-btc}
+BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
 BTC_NETWORK=${BTC_NETWORK:-mainnet}
 BTC_LIGHTNING=${BTC_LIGHTNING:-true}
 BCH_NETWORK=${BCH_NETWORK:-mainnet}
@@ -66,45 +180,196 @@ GZRO_NETWORK=${GZRO_NETWORK:-mainnet}
 GZRO_LIGHTNING=${GZRO_LIGHTNING:-true}
 BSTY_NETWORK=${BSTY_NETWORK:-mainnet}
 BSTY_LIGHTNING=${BSTY_LIGHTNING:-true}
-BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
+----------------------
+Additional exported variables:
+BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
+BITCART_ENV_FILE=$BITCART_ENV_FILE
+----------------------
 "
-echo "
-Generating docker image based on parameters:
-BITCART_INSTALL=${BITCART_INSTALL:-all}
-BITCART_REVERSEPROXY=${BITCART_REVERSEPROXY:-nginx-https}
-BITCART_CRYPTOS=${BITCART_CRYPTOS:-btc}
-BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
-"
-cat > generator-env.sh << EOF
-export BITCART_INSTALL=${BITCART_INSTALL:-all}
-export BITCART_REVERSEPROXY=${BITCART_REVERSEPROXY:-nginx-https}
-export BITCART_CRYPTOS=${BITCART_CRYPTOS:-btc}
-export BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
+# Init the variables when a user log interactively
+touch "$BASH_PROFILE_SCRIPT"
+cat > ${BASH_PROFILE_SCRIPT} << EOF
+#!/bin/bash
+export COMPOSE_HTTP_TIMEOUT="180"
+export BITCART_BASE_DIRECTORY="$BITCART_BASE_DIRECTORY"
+export BITCART_INSTALL="${BITCART_INSTALL:-all}"
+export BITCART_REVERSEPROXY="${BITCART_REVERSEPROXY:-nginx-https}"
+export BITCART_CRYPTOS="${BITCART_CRYPTOS:-btc}"
+export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
+export BITCART_ENV_FILE="$BITCART_ENV_FILE"
+if cat "\$BITCART_ENV_FILE" &> /dev/null; then
+  while IFS= read -r line; do
+    ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line"
+  done < "\$BITCART_ENV_FILE"
+fi
 EOF
-./build.sh
-cat > env.sh << EOF
-export BITCART_HOST=$BITCART_HOST
-export BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
-export BITCART_FRONTEND_HOST=$BITCART_FRONTEND_HOST
-export BITCART_FRONTEND_URL=$BITCART_FRONTEND_URL
-export BITCART_FRONTEND_EMAIL=$BITCART_FRONTEND_EMAIL
-export BITCART_FRONTEND_PASSWORD=$BITCART_FRONTEND_PASSWORD
-export BITCART_FRONTEND_STORE=$BITCART_FRONTEND_STORE
-export BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
-export BITCART_ADMIN_URL=$BITCART_ADMIN_URL
-export BITCART_ADMIN_TOKEN=$BITCART_ADMIN_TOKEN
-export BITCART_CRYPTOS=${BITCART_CRYPTOS:-btc}
-export BTC_NETWORK=$BTC_NETWORK
-export BTC_LIGHTNING=$BTC_LIGHTNING
-export BCH_NETWORK=$BCH_NETWORK
-export LTC_NETWORK=$LTC_NETWORK
-export LTC_LIGHTNING=$LTC_LIGHTNING
-export GZRO_NETWORK=$GZRO_NETWORK
-export GZRO_LIGHTNING=$GZRO_LIGHTNING
-export BSTY_NETWORK=$BSTY_NETWORK
-export BSTY_LIGHTNING=$BSTY_LIGHTNING
-EOF
-chmod +x env.sh
-echo "Pulling images..."
-docker pull mrnaif/bitcart:stable
+
+chmod +x ${BASH_PROFILE_SCRIPT}
+
+echo -e "BitcartCC environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
+
+. helpers.sh
+bitcart_update_docker_env
+
+echo -e "BitcartCC docker-compose parameters saved in $BITCART_ENV_FILE\n"
+
+. "$BASH_PROFILE_SCRIPT"
+
+if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]]; then
+    if ! [[ -x "$(command -v curl)" ]]; then
+        apt-get update 2>error
+        apt-get install -y \
+            curl \
+            apt-transport-https \
+            ca-certificates \
+            software-properties-common \
+            2>error
+    fi
+    if ! [[ -x "$(command -v docker)" ]]; then
+        if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]]; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # Mac OS	
+                if ! [[ -x "$(command -v brew)" ]]; then
+                    # Brew is not installed, install it now
+                    echo "Homebrew, the package manager for Mac OS, is not installed. Installing it now..."
+                    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+                fi
+                if [[ -x "$(command -v brew)" ]]; then
+                    echo "Homebrew is installed, but Docker isn't. Installing it now using brew..."
+                    # Brew is installed, install docker now
+                    # This sequence is a bit strange, but it's what what needed to get it working on a fresh Mac OS X Mojave install
+                    brew cask install docker
+                    brew install docker
+                    brew link docker
+                fi
+            else
+                # Not Mac OS
+                echo "Trying to install docker..."
+                curl -fsSL https://get.docker.com -o get-docker.sh
+                chmod +x get-docker.sh
+                sh get-docker.sh
+                rm get-docker.sh
+            fi
+        elif [[ "$(uname -m)" == "aarch64" ]]; then
+            echo "Trying to install docker for armv7 on a aarch64 board..."
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+            RELEASE=$(lsb_release -cs)
+            if [[ "$RELEASE" == "bionic" ]]; then
+                RELEASE=xenial
+            fi
+            if [[ -x "$(command -v dpkg)" ]]; then
+                dpkg --add-architecture armhf
+            fi
+            add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $RELEASE stable"
+            apt-get update -y
+            # zlib1g:armhf is needed for docker-compose, but we install it here as we changed dpkg here
+            apt-get install -y docker-ce:armhf zlib1g:armhf
+        fi
+    fi
+
+    if ! [[ -x "$(command -v docker-compose)" ]]; then
+        if ! [[ "$OSTYPE" == "darwin"* ]] && $HAS_DOCKER; then
+            echo "Trying to install docker-compose by using the docker-compose-builder ($(uname -m))"
+            ! [[ -d "dist" ]] && mkdir dist
+            docker run --rm -v "$(pwd)/dist:/dist" mrnaif/docker-compose-builder:1.25.4
+            mv dist/docker-compose /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+            rm -rf "dist"
+        fi
+    fi
+fi
+
+if $HAS_DOCKER; then
+    if ! [[ -x "$(command -v docker)" ]]; then
+        echo "Failed to install 'docker'. Please install docker manually, then retry."
+        exit 1
+    fi
+
+    if ! [[ -x "$(command -v docker-compose)" ]]; then
+        echo "Failed to install 'docker-compose'. Please install docker-compose manually, then retry."
+        exit 1
+    fi
+fi
+
+# Generate the docker compose
+if $HAS_DOCKER; then
+    if ! ./build.sh; then
+        echo "Failed to generate the docker-compose"
+        exit 1
+    fi
+fi
+   
+# Schedule for reboot
+if $STARTUP_REGISTER && [[ -x "$(command -v systemctl)" ]]; then
+    # Use systemd
+    if [[ -e "/etc/init/start_containers.conf" ]]; then
+        echo -e "Uninstalling upstart script /etc/init/start_containers.conf"
+        rm "/etc/init/start_containers.conf"
+        initctl reload-configuration
+    fi
+    echo "Adding bitcartcc.service to systemd"
+    echo "
+[Unit]
+Description=BitcartCC service
+After=docker.service network-online.target
+Requires=docker.service network-online.target
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c  '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./start.sh'
+ExecStop=/bin/bash -c   '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh'
+ExecReload=/bin/bash -c '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh && ./start.sh'
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/bitcartcc.service
+
+    if ! [[ -f "/etc/docker/daemon.json" ]] && [ -w "/etc/docker" ]; then
+        echo "{
+\"log-driver\": \"json-file\",
+\"log-opts\": {\"max-size\": \"5m\", \"max-file\": \"3\"}
+}" > /etc/docker/daemon.json
+        echo "Setting limited log files in /etc/docker/daemon.json"
+        $SYSTEMD_RELOAD && $START && systemctl restart docker
+    fi
+
+    echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc.service\n"
+    if $SYSTEMD_RELOAD; then
+        systemctl daemon-reload
+        systemctl enable bitcartcc
+        if $START; then
+            echo "BitcartCC starting... this can take 5 to 10 minutes..."
+            systemctl start bitcartcc
+            echo "BitcartCC started"
+        fi
+    else
+        systemctl --no-reload enable bitcartcc
+    fi
+elif $STARTUP_REGISTER && [[ -x "$(command -v initctl)" ]]; then
+    # Use upstart
+    echo "Using upstart"
+    echo "
+# File is saved under /etc/init/start_containers.conf
+# After file is modified, update config with : $ initctl reload-configuration
+description     \"Start containers (see http://askubuntu.com/a/22105 and http://askubuntu.com/questions/612928/how-to-run-docker-compose-at-bootup)\"
+start on filesystem and started docker
+stop on runlevel [!2345]
+# if you want it to automatically restart if it crashes, leave the next line in
+# respawn # might cause over charge
+script
+    . \"$BASH_PROFILE_SCRIPT\"
+    cd \"$BITCART_BASE_DIRECTORY\"
+    ./start.sh
+end script" > /etc/init/start_containers.conf
+    echo -e "BitcartCC upstart configured in /etc/init/start_containers.conf\n"
+
+    if $START; then
+        initctl reload-configuration
+    fi
+fi
+
+if $START; then
+    ./start.sh
+elif $HAS_DOCKER; then
+    docker-compose -f compose/generated.yml pull
+fi
+
 echo "Setup done."

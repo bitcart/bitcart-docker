@@ -3,6 +3,7 @@ FROM python:3.6-alpine
 ENV ELECTRUM_USER electrum
 ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV IN_DOCKER=1
+LABEL org.bitcartcc.image=bch-daemon
 
 RUN adduser -D $ELECTRUM_USER && \
     mkdir -p ${ELECTRUM_HOME}/.electrum/ /data/ && \

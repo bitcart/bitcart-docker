@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-source env.sh
-accepted_modes=(production dev)
-echo Availables modes: ${accepted_modes[*]}
-value=${1:-production}
 
-if ! [[ " ${accepted_modes[*]} " == *"$value"* ]]; then
-    echo Selected mode $value is not supported
-    exit 1
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	# Mac OS
+	BASH_PROFILE_SCRIPT="$HOME/bitcartcc-env.sh"
+
+else
+	# Linux
+	BASH_PROFILE_SCRIPT="/etc/profile.d/bitcartcc-env.sh"
 fi
-echo Selected mode: $value
-if [ "$value" == "production" ];then
-    USER_UID=${UID} USER_GID=${GID} docker-compose -f compose/generated.yml up --remove-orphans -d
-elif [ "$value" == "dev" ];then
-    USER_UID=${UID} USER_GID=${GID} docker-compose -f docker-compose.dev.yml up --remove-orphans -d
-fi
+
+. ${BASH_PROFILE_SCRIPT}
+
+cd "$BITCART_BASE_DIRECTORY"
+USER_UID=${UID} USER_GID=${GID} docker-compose -f compose/generated.yml up --remove-orphans -d
