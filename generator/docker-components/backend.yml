@@ -28,4 +28,4 @@ services:
     volumes:
       - ./conf:/app/conf
       - ./images:/app/images
-      - ${pwd}/queue:/app/queue
+      - ${PWD}/queue:/app/queue
