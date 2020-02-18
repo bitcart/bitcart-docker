@@ -4,6 +4,8 @@
 .env
 env.sh
 generator-env.sh
+listener.pid
+queue
 conf/
 .vscode/
 #pycharm
