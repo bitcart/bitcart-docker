@@ -1,7 +1,6 @@
 import glob
 import importlib
 import shutil
-from os import getenv
 from os.path import basename, exists, isfile
 from os.path import join as path_join
 from shlex import shlex
@@ -21,12 +20,13 @@ from constants import (
     RULES_PYTHON_DIR,
     RULES_PYTHON_PKG,
 )
+from utils import env
 
 
 def add_components() -> Set[str]:
     components: Set[str] = set()
     # add daemons
-    cryptos = getenv("BITCART_CRYPTOS", "btc")
+    cryptos = env("CRYPTOS", "btc")
     splitter = shlex(cryptos, posix=True)
     splitter.whitespace = ","
     splitter.whitespace_split = True
@@ -37,9 +37,7 @@ def add_components() -> Set[str]:
             if value:
                 components.add(value["component"])
     # bitcart backend and frontend
-    to_install = getenv("BITCART_INSTALL", "all")
-    if not to_install:
-        to_install = "all"
+    to_install = env("INSTALL", "all")
     if to_install == "all":
         components.update(BACKEND_COMPONENTS + FRONTEND_COMPONENTS)
     elif to_install == "backend":
@@ -47,9 +45,7 @@ def add_components() -> Set[str]:
     elif to_install == "frontend":
         components.update(FRONTEND_COMPONENTS)
     # reverse proxy
-    reverseproxy = getenv("BITCART_REVERSEPROXY", "nginx-https")
-    if not reverseproxy:
-        reverseproxy == "nginx-https"
+    reverseproxy = env("REVERSEPROXY", "nginx-https")
     if reverseproxy == "nginx-https":
         components.update(
             ["nginx", "nginx-https", "bitcart-nginx", "bitcart-nginx-https"]
@@ -59,7 +55,7 @@ def add_components() -> Set[str]:
     else:
         components.add("bitcart-noreverseproxy")
     # additional components
-    components.update(getenv("BITCART_ADDITIONAL_COMPONENTS", "").split())
+    components.update(env("ADDITIONAL_COMPONENTS", "").split())
     HAS_CRYPTO = False
     for i in components:
         if i in CRYPTO_COMPONENTS:
