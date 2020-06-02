@@ -1,5 +1,5 @@
 from constants import CRYPTO_COMPONENTS
-from utils import env
+from utils import env, custom_port_allowed
 
 
 def rule(services):
@@ -7,7 +7,7 @@ def rule(services):
         items = ["backend", "store", "admin"]
         items.extend(CRYPTO_COMPONENTS)
         for i in items:
-            if services.get(i):
+            if services.get(i) and custom_port_allowed(i):
                 expose = services[i].get("expose", []).copy()
                 custom_port = env(f"{i.upper()}_PORT")
                 for key, port in enumerate(expose):
