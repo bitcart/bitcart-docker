@@ -97,9 +97,6 @@ export BITCART_INSTALL={install}
 export BITCART_CRYPTOS={cryptos}
 export BITCART_REVERSEPROXY={reverseproxy}
 export BITCART_ADDITIONAL_COMPONENTS={additional_components}
-export BITCART_FRONTEND_EMAIL={store_email}
-export BITCART_FRONTEND_PASSWORD={store_pass}
-export BITCART_FRONTEND_STORE={store_id}
     """
     protocol = "https://" if reverseproxy == "nginx-https" else "http://"
     if alldomain:

@@ -36,9 +36,6 @@ Environment variables:
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
     BITCART_FRONTEND_HOST: The hostname of your website store (eg. example.com)
     BITCART_FRONTEND_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
-    BITCART_FRONTEND_EMAIL: Email used to authentificate to your API (hosted locally or remotely, eg. me@example.com)
-    BITCART_FRONTEND_PASSWORD: Password used to authentificate to your API (hosted locally or remotely)
-    BITCART_FRONTEND_STORE: The ID your store will represent (id=1 means first created store)
     BITCART_ADMIN_HOST: The hostname of your website admin panel (eg. admin.example.com)
     BITCART_ADMIN_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
     BTC_NETWORK: The network to run bitcoin daemon on (eg. mainnet, testnet)
@@ -151,9 +148,6 @@ BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 BITCART_FRONTEND_HOST=$BITCART_FRONTEND_HOST
 BITCART_FRONTEND_URL=$BITCART_FRONTEND_URL
-BITCART_FRONTEND_EMAIL=$BITCART_FRONTEND_EMAIL
-BITCART_FRONTEND_PASSWORD=$BITCART_FRONTEND_PASSWORD
-BITCART_FRONTEND_STORE=$BITCART_FRONTEND_STORE
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
 BITCART_ADMIN_URL=$BITCART_ADMIN_URL
 BITCART_INSTALL=${BITCART_INSTALL:-all}
