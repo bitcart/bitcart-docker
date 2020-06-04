@@ -2,34 +2,7 @@
 
 set +x
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OS
-
-    if [[ $EUID -eq 0 ]]; then
-        # Running as root is discouraged on Mac OS. Run under the current user instead.
-        echo "This script should not be run as root."
-        exit 1
-    fi
-
-    BASH_PROFILE_SCRIPT="$HOME/bitcartcc-env.sh"
-
-    # Mac OS doesn't use /etc/profile.d/xxx.sh. Instead we create a new file and load that from ~/.bash_profile
-    if [[ ! -f "$HOME/.bash_profile" ]]; then
-        touch "$HOME/.bash_profile"
-    fi
-    if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile") ]]; then
-        # Line does not exist, add it
-        echo ". \"$BASH_PROFILE_SCRIPT\"" >> "$HOME/.bash_profile"
-    fi
-
-else
-    BASH_PROFILE_SCRIPT="/etc/profile.d/bitcartcc-env.sh"
-
-    if [[ $EUID -ne 0 ]]; then
-        echo "This script must be run as root after running \"sudo su -\""
-        exit 1
-    fi
-fi
+. helpers.sh
 
 function display_help () {
 cat <<-END
@@ -38,6 +11,9 @@ Usage:
 Install BitcartCC on this server
 This script must be run as root, except on Mac OS
     -h, --help: Show help
+    --name name: Configure new deployment name. Affects naming of profile env files and
+    startup config files. Allows multiple deployments on one server. 
+    Empty by default
     --install-only: Run install only
     --docker-unavailable: Same as --install-only, but will also skip install steps requiring docker
     --no-startup-register: Do not register BitcartCC to start via systemctl or upstart
@@ -83,6 +59,8 @@ START=true
 HAS_DOCKER=true
 STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
+NAME_INPUT=false
+NAME=
 while (( "$#" )); do
   case "$1" in
     -h)
@@ -110,6 +88,10 @@ while (( "$#" )); do
       SYSTEMD_RELOAD=false
       shift 1
       ;;
+    --name)
+      NAME_INPUT=true
+      shift 1
+      ;;
     --) # end argument parsing
       shift
       break
@@ -120,14 +102,21 @@ while (( "$#" )); do
       exit 1
       ;;
     *) # preserve positional arguments
+      if $NAME_INPUT; then
+        NAME="-$1"
+        NAME_INPUT=false
+      fi
       PARAMS="$PARAMS $1"
       shift
       ;;
   esac
 done
 
+get_profile_file "$NAME"
+
 BITCART_BASE_DIRECTORY="$(pwd)"
 BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
+BITCART_DEPLOYMENT_CONFIG="$BITCART_BASE_DIRECTORY/.deploy"
 
 if [[ "$BITCART_HOST" == *.local ]] ; then
     echo "Local setup detected."
@@ -187,6 +176,10 @@ BITCART_ENV_FILE=$BITCART_ENV_FILE
 ----------------------
 "
 # Init the variables when a user log interactively
+cat > ${BITCART_DEPLOYMENT_CONFIG} << EOF
+#!/bin/bash
+NAME=$NAME
+EOF
 touch "$BASH_PROFILE_SCRIPT"
 cat > ${BASH_PROFILE_SCRIPT} << EOF
 #!/bin/bash
@@ -205,10 +198,12 @@ fi
 EOF
 
 chmod +x ${BASH_PROFILE_SCRIPT}
+chmod +x ${BITCART_DEPLOYMENT_CONFIG}
+
 
 echo -e "BitcartCC environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
+echo -e "BitcartCC deployment config saved in $BITCART_DEPLOYMENT_CONFIG\n"
 
-. helpers.sh
 bitcart_update_docker_env
 
 echo -e "BitcartCC docker-compose parameters saved in $BITCART_ENV_FILE\n"
@@ -307,7 +302,7 @@ if $STARTUP_REGISTER && [[ -x "$(command -v systemctl)" ]]; then
         rm "/etc/init/start_containers.conf"
         initctl reload-configuration
     fi
-    echo "Adding bitcartcc.service to systemd"
+    echo "Adding bitcartcc$NAME.service to systemd"
     echo "
 [Unit]
 Description=BitcartCC service
@@ -320,7 +315,7 @@ ExecStart=/bin/bash -c  '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECT
 ExecStop=/bin/bash -c   '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh'
 ExecReload=/bin/bash -c '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh && ./start.sh'
 [Install]
-WantedBy=multi-user.target" > /etc/systemd/system/bitcartcc.service
+WantedBy=multi-user.target" > "/etc/systemd/system/bitcartcc$NAME.service"
 
     if ! [[ -f "/etc/docker/daemon.json" ]] && [ -w "/etc/docker" ]; then
         echo "{
@@ -334,14 +329,14 @@ WantedBy=multi-user.target" > /etc/systemd/system/bitcartcc.service
     echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc.service\n"
     if $SYSTEMD_RELOAD; then
         systemctl daemon-reload
-        systemctl enable bitcartcc
+        systemctl enable "bitcartcc$NAME"
         if $START; then
             echo "BitcartCC starting... this can take 5 to 10 minutes..."
-            systemctl start bitcartcc
+            systemctl start "bitcartcc$NAME"
             echo "BitcartCC started"
         fi
     else
-        systemctl --no-reload enable bitcartcc
+        systemctl --no-reload enable "bitcartcc$NAME"
     fi
 elif $STARTUP_REGISTER && [[ -x "$(command -v initctl)" ]]; then
     # Use upstart

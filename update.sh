@@ -2,17 +2,11 @@
 
 set -e
 
+. helpers.sh
+get_profile_file "$NAME" false
+
 export USER_UID=${UID} 
 export USER_GID=${GID}
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	# Mac OS
-	BASH_PROFILE_SCRIPT="$HOME/bitcartcc-env.sh"
-
-else
-	# Linux
-	BASH_PROFILE_SCRIPT="/etc/profile.d/bitcartcc-env.sh"
-fi
 
 . ${BASH_PROFILE_SCRIPT}
 

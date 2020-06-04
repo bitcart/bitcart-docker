@@ -2,6 +2,7 @@
 /compose/bitcart/
 #conf
 .env
+.deploy
 env.sh
 generator-env.sh
 listener.pid
