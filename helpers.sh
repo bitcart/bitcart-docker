@@ -20,6 +20,7 @@ GZRO_LIGHTNING=$GZRO_LIGHTNING
 BSTY_NETWORK=$BSTY_NETWORK
 BSTY_LIGHTNING=$BSTY_LIGHTNING
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
+$(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
 EOF
 }
 
