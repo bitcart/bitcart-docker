@@ -167,6 +167,7 @@ BSTY_LIGHTNING=${BSTY_LIGHTNING:-true}
 Additional exported variables:
 BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
 BITCART_ENV_FILE=$BITCART_ENV_FILE
+BITCART_DEPLOYMENT_CONFIG=$BITCART_DEPLOYMENT_CONFIG
 ----------------------
 "
 # Init the variables when a user log interactively
