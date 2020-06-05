@@ -11,5 +11,5 @@ docker run -v "$PWD/compose:/app/compose" \
     -e "BITCART_CRYPTOS=${BITCART_CRYPTOS:-btc}" \
     -e "BITCART_REVERSEPROXY=${BITCART_REVERSEPROXY:-nginx-https}" \
     -e "BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS" \
-    --env-file <(set | awk -F "=" '{print "\n"$0}' | grep "BITCART_") \
+    --env-file <(env | grep BITCART_) \
     --rm $BITCARTGEN_DOCKER_IMAGE
