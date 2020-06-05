@@ -186,7 +186,7 @@ export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
 export BITCART_ENV_FILE="$BITCART_ENV_FILE"
 if cat "\$BITCART_ENV_FILE" &> /dev/null; then
   while IFS= read -r line; do
-    ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line"
+    ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line" || true
   done < "\$BITCART_ENV_FILE"
 fi
 EOF
@@ -320,7 +320,7 @@ WantedBy=multi-user.target" > "/etc/systemd/system/bitcartcc$NAME.service"
         $SYSTEMD_RELOAD && $START && systemctl restart docker
     fi
 
-    echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc.service\n"
+    echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc$NAME.service\n"
     if $SYSTEMD_RELOAD; then
         systemctl daemon-reload
         systemctl enable "bitcartcc$NAME"
