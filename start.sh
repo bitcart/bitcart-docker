@@ -7,7 +7,7 @@ get_profile_file "$NAME" false
 
 cd "$BITCART_BASE_DIRECTORY"
 # setup pipe and it's listener
-mkfifo queue
+mkfifo queue &> /dev/null
 nohup sh -c "tail -f queue | sh" > /dev/null &
 echo $! > listener.pid
 USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d
