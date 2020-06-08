@@ -34,7 +34,7 @@ fi
 . helpers.sh
 bitcart_update_docker_env
 # stop listener
-kill $(cat listener.pid)
+kill $(cat listener.pid) &> /dev/null || true
 docker-compose -f compose/generated.yml pull
 ./start.sh
 
