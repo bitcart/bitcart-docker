@@ -1,7 +1,5 @@
 # bitcart-docker
 
-Docker images now available!
-
 Using provided scripts(easy)
 ----------------------------
 Now, to install bitcart, if you're on linux system(these scripts for windows will be added soon), 
