@@ -47,13 +47,9 @@ def add_components() -> Set[str]:
     # reverse proxy
     reverseproxy = env("REVERSEPROXY", "nginx-https")
     if reverseproxy == "nginx-https":
-        components.update(
-            ["nginx", "nginx-https", "bitcart-nginx", "bitcart-nginx-https"]
-        )
+        components.update(["nginx", "nginx-https"])
     elif reverseproxy == "nginx":
-        components.update(["nginx", "bitcart-nginx"])
-    else:
-        components.add("bitcart-noreverseproxy")
+        components.update(["nginx"])
     # additional components
     components.update(env("ADDITIONAL_COMPONENTS", "").split())
     HAS_CRYPTO = False
