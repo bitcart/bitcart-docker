@@ -7,9 +7,14 @@ services:
       BTC_LIGHTNING: ${BTC_LIGHTNING:-true}
     expose:
       - "5000"
+    volumes:
+      - "bitcoin_datadir:/home/electrum/.electrum"
 
   backend:
     depends_on:
       - bitcoin
     links:
       - bitcoin
+
+volumes:
+  bitcoin_datadir:

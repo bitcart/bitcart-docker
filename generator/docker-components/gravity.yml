@@ -6,9 +6,14 @@ services:
       GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
     expose:
       - "5002"
+    volumes:
+      - "gravity_datadir:/home/electrum/.electrum-gzro"
 
   backend:
     depends_on:
       - gravity
     links:
       - gravity
+
+volumes:
+  gravity_datadir:

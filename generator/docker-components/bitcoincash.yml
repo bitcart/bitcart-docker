@@ -6,9 +6,14 @@ services:
       BCH_NETWORK: ${BCH_NETWORK:-mainnet}
     expose:
       - "5004"
+    volumes:
+      - "bitcoincash_datadir:/home/electrum/.electron-cash"
 
   backend:
     depends_on:
       - bitcoincash
     links:
       - bitcoincash
+    
+volumes:
+  bitcoincash_datadir:

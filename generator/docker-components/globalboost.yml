@@ -7,9 +7,14 @@ services:
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-true}
     expose:
       - "5003"
+    volumes:
+      - "globalboost_datadir:/home/electrum/.electrum-bsty"
 
   backend:
     depends_on:
       - globalboost
     links:
       - globalboost
+
+volumes:
+  globalboost_datadir:

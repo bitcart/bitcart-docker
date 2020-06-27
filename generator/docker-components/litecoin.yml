@@ -6,9 +6,14 @@ services:
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
     expose:
       - "5001"
+    volumes:
+      - "litecoin_datadir:/home/electrum/.electrum-ltc"
 
   backend:
     depends_on:
       - litecoin
     links:
       - litecoin
+
+volumes:
+  litecoin_datadir:

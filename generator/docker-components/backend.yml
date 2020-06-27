@@ -29,3 +29,9 @@ services:
       - ./conf:/app/conf
       - ./images:/app/images
       - ${PWD}/queue:/app/queue
+
+  dramatiq:
+    depends_on:
+      - backend
+    links:
+      - backend
