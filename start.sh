@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 . helpers.sh
-get_profile_file "$NAME" false
+get_profile_file "$SCRIPTS_POSTFIX" false
 
 . ${BASH_PROFILE_SCRIPT}
 

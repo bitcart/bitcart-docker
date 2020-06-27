@@ -58,6 +58,7 @@ STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
 NAME_INPUT=false
 NAME=
+SCRIPTS_POSTFIX=
 while (( "$#" )); do
   case "$1" in
     -h)
@@ -100,7 +101,8 @@ while (( "$#" )); do
       ;;
     *) # preserve positional arguments
       if $NAME_INPUT; then
-        NAME="-$1"
+        NAME="$1"
+        SCRIPTS_POSTFIX="-$NAME"
         NAME_INPUT=false
       fi
       PARAMS="$PARAMS $1"
@@ -109,7 +111,7 @@ while (( "$#" )); do
   esac
 done
 
-get_profile_file "$NAME"
+get_profile_file "$SCRIPTS_POSTFIX"
 
 BITCART_BASE_DIRECTORY="$(pwd)"
 BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
@@ -174,6 +176,7 @@ BITCART_DEPLOYMENT_CONFIG=$BITCART_DEPLOYMENT_CONFIG
 cat > ${BITCART_DEPLOYMENT_CONFIG} << EOF
 #!/bin/bash
 NAME=$NAME
+SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
 EOF
 touch "$BASH_PROFILE_SCRIPT"
 cat > ${BASH_PROFILE_SCRIPT} << EOF
@@ -297,7 +300,7 @@ if $STARTUP_REGISTER && [[ -x "$(command -v systemctl)" ]]; then
         rm "/etc/init/start_containers.conf"
         initctl reload-configuration
     fi
-    echo "Adding bitcartcc$NAME.service to systemd"
+    echo "Adding bitcartcc$SCRIPTS_POSTFIX.service to systemd"
     echo "
 [Unit]
 Description=BitcartCC service
@@ -310,7 +313,7 @@ ExecStart=/bin/bash -c  '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECT
 ExecStop=/bin/bash -c   '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh'
 ExecReload=/bin/bash -c '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh && ./start.sh'
 [Install]
-WantedBy=multi-user.target" > "/etc/systemd/system/bitcartcc$NAME.service"
+WantedBy=multi-user.target" > "/etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.service"
 
     if ! [[ -f "/etc/docker/daemon.json" ]] && [ -w "/etc/docker" ]; then
         echo "{
@@ -321,17 +324,17 @@ WantedBy=multi-user.target" > "/etc/systemd/system/bitcartcc$NAME.service"
         $SYSTEMD_RELOAD && $START && systemctl restart docker
     fi
 
-    echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc$NAME.service\n"
+    echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.service\n"
     if $SYSTEMD_RELOAD; then
         systemctl daemon-reload
-        systemctl enable "bitcartcc$NAME"
+        systemctl enable "bitcartcc$SCRIPTS_POSTFIX"
         if $START; then
             echo "BitcartCC starting... this can take 5 to 10 minutes..."
-            systemctl start "bitcartcc$NAME"
+            systemctl start "bitcartcc$SCRIPTS_POSTFIX"
             echo "BitcartCC started"
         fi
     else
-        systemctl --no-reload enable "bitcartcc$NAME"
+        systemctl --no-reload enable "bitcartcc$SCRIPTS_POSTFIX"
     fi
 elif $STARTUP_REGISTER && [[ -x "$(command -v initctl)" ]]; then
     # Use upstart

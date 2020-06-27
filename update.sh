@@ -3,7 +3,7 @@
 set -e
 
 . helpers.sh
-get_profile_file "$NAME" false
+get_profile_file "$SCRIPTS_POSTFIX" false
 
 export USER_UID=${UID} 
 export USER_GID=${GID}
