@@ -16,8 +16,3 @@ services:
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-true}
     volumes:
       - ./conf:/app/conf
-  backend:
-    depends_on:
-      - dramatiq
-    links:
-      - dramatiq
