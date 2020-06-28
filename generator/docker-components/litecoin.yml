@@ -7,7 +7,7 @@ services:
     expose:
       - "5001"
     volumes:
-      - "litecoin_datadir:/home/electrum/.electrum-ltc"
+      - "litecoin_datadir:/data"
 
   backend:
     depends_on:

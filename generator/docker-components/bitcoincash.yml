@@ -7,7 +7,7 @@ services:
     expose:
       - "5004"
     volumes:
-      - "bitcoincash_datadir:/home/electrum/.electron-cash"
+      - "bitcoincash_datadir:/data"
 
   backend:
     depends_on:

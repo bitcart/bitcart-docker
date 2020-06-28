@@ -2,13 +2,14 @@ FROM python:3.6-alpine
 
 ENV ELECTRUM_USER electrum
 ENV ELECTRUM_HOME /home/$ELECTRUM_USER
+ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.electrum-bsty
 ENV IN_DOCKER=1
 LABEL org.bitcartcc.image=bsty-daemon
 
 RUN adduser -D $ELECTRUM_USER && \
-    mkdir -p ${ELECTRUM_HOME}/.electrum/ /data/ && \
-    ln -sf ${ELECTRUM_HOME}/.electrum/ /data/ && \
-    chown ${ELECTRUM_USER} ${ELECTRUM_HOME}/.electrum && \
+    mkdir -p $ELECTRUM_DIRECTORY /data/ && \
+    ln -sf $ELECTRUM_DIRECTORY /data/ && \
+    chown ${ELECTRUM_USER} $ELECTRUM_DIRECTORY && \
     mkdir -p $ELECTRUM_HOME/site && \
     chown ${ELECTRUM_USER} $ELECTRUM_HOME/site
 

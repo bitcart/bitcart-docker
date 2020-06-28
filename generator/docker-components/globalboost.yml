@@ -8,7 +8,7 @@ services:
     expose:
       - "5003"
     volumes:
-      - "globalboost_datadir:/home/electrum/.electrum-bsty"
+      - "globalboost_datadir:/data"
 
   backend:
     depends_on:
