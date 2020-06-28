@@ -17,8 +17,9 @@ COPY bitcart $ELECTRUM_HOME/site
 
 RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake autoconf libtool file git make && \
     cd $ELECTRUM_HOME/site && \
-    pip3 install --no-cache-dir -r requirements/base.txt && \
-    pip3 install --no-cache-dir -r requirements/daemons/bch.txt && \
+    pip3 install -r requirements/base.txt && \
+    pip3 install -r requirements/daemons/bch.txt && \
+    rm -rf /root/.cache/pip && \
     apk del build-deps
 
 USER $ELECTRUM_USER

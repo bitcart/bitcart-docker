@@ -25,8 +25,9 @@ RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake au
     cd .. && \
     rm -rf secp256k1 && \
     cd $ELECTRUM_HOME/site && \
-    pip3 install --no-cache-dir -r requirements/base.txt && \
-    pip3 install --no-cache-dir -r requirements/daemons/btc.txt && \
+    pip3 install -r requirements/base.txt && \
+    pip3 install -r requirements/daemons/btc.txt && \
+    rm -rf /root/.cache/pip && \
     apk del build-deps
 
 USER $ELECTRUM_USER
