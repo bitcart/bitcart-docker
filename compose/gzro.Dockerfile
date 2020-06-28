@@ -7,8 +7,8 @@ ENV IN_DOCKER=1
 LABEL org.bitcartcc.image=gzro-daemon
 
 RUN adduser -D $ELECTRUM_USER && \
-    mkdir -p $ELECTRUM_DIRECTORY /data/ && \
-    ln -sf $ELECTRUM_DIRECTORY /data/ && \
+    mkdir -p /data/ && \
+    ln -sf /data/ $ELECTRUM_DIRECTORY && \
     chown ${ELECTRUM_USER} $ELECTRUM_DIRECTORY && \
     mkdir -p $ELECTRUM_HOME/site && \
     chown ${ELECTRUM_USER} $ELECTRUM_HOME/site
