@@ -4,6 +4,7 @@ services:
     image: mrnaif/bitcart-gzro:stable
     environment:
       GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
+      GZRO_LIGHTNING: ${GZRO_LIGHTNING:-false}
     expose:
       - "5002"
     volumes:

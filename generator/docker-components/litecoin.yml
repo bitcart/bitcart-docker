@@ -4,6 +4,7 @@ services:
     image: mrnaif/bitcart-ltc:stable
     environment:
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
+      LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
     expose:
       - "5001"
     volumes:

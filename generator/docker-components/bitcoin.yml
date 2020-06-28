@@ -4,7 +4,7 @@ services:
     image: mrnaif/bitcart-btc:stable
     environment:
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
-      BTC_LIGHTNING: ${BTC_LIGHTNING:-true}
+      BTC_LIGHTNING: ${BTC_LIGHTNING:-false}
     expose:
       - "5000"
     volumes:

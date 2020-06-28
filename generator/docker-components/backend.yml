@@ -14,14 +14,14 @@ services:
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
-      BTC_LIGHTNING: ${BTC_LIGHTNING:-true}
+      BTC_LIGHTNING: ${BTC_LIGHTNING:-false}
       BCH_NETWORK: ${BCH_NETWORK:-mainnet}
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
-      LTC_LIGHTNING: ${LTC_LIGHTNING:-true}
+      LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
       GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
-      GZRO_LIGHTNING: ${GZRO_LIGHTNING:-true}
+      GZRO_LIGHTNING: ${GZRO_LIGHTNING:-false}
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
-      BSTY_LIGHTNING: ${BSTY_LIGHTNING:-true}
+      BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
     expose:
       - "8000"
     user: "${USER_UID}:${USER_GID}"
