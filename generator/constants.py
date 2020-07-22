@@ -1,5 +1,5 @@
-from os import getenv
 import os
+from os import getenv
 
 COMPOSE_DIR = "compose" if getenv("IN_DOCKER") else "../compose"
 COMPONENTS_DIR = "docker-components"
