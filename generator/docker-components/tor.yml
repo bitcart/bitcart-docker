@@ -5,7 +5,6 @@ services:
   backend:
     environment:
       HIDDENSERVICE_NAME: BitcartCC Merchants API
-      HIDDENSERVICE_REVERSEPROXY: nginx
     volumes:
       - "tor_servicesdir:/var/lib/tor/hidden_services"
       - "tor_torrcdir:/usr/local/etc/tor/"
@@ -13,7 +12,6 @@ services:
   admin:
     environment:
       HIDDENSERVICE_NAME: BitcartCC Admin Panel
-      HIDDENSERVICE_REVERSEPROXY: nginx
     volumes:
       - "tor_servicesdir:/var/lib/tor/hidden_services"
       - "tor_torrcdir:/usr/local/etc/tor/"
@@ -21,7 +19,6 @@ services:
   store:
     environment:
       HIDDENSERVICE_NAME: BitcartCC Store
-      HIDDENSERVICE_REVERSEPROXY: nginx
     volumes:
       - "tor_servicesdir:/var/lib/tor/hidden_services"
       - "tor_torrcdir:/usr/local/etc/tor/"
