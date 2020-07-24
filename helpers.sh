@@ -55,3 +55,8 @@ get_profile_file() {
         fi
     fi
 }
+
+load_env() {
+    get_profile_file "$SCRIPTS_POSTFIX" false
+    . ${BASH_PROFILE_SCRIPT}
+}

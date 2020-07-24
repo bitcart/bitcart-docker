@@ -3,12 +3,10 @@
 set -e
 
 . helpers.sh
-get_profile_file "$SCRIPTS_POSTFIX" false
+load_env
 
 export USER_UID=${UID} 
 export USER_GID=${GID}
-
-. ${BASH_PROFILE_SCRIPT}
 
 cd "$BITCART_BASE_DIRECTORY"
 

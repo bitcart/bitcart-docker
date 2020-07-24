@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
 . helpers.sh
-get_profile_file "$SCRIPTS_POSTFIX" false
-
-. ${BASH_PROFILE_SCRIPT}
+load_env
 
 cd "$BITCART_BASE_DIRECTORY"
 # stop listener
