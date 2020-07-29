@@ -16,14 +16,13 @@ services:
       BITCART_ADMIN_SOCKS_PROXY: socks5h://tor:9050
     volumes:
       - "tor_servicesdir:/var/lib/tor/hidden_services"
-      - "tor_torrcdir:/usr/local/etc/tor/"
 
   store:
     environment:
       HIDDENSERVICE_NAME: BitcartCC-Store
+      BITCART_FRONTEND_SOCKS_PROXY: socks5h://tor:9050
     volumes:
       - "tor_servicesdir:/var/lib/tor/hidden_services"
-      - "tor_torrcdir:/usr/local/etc/tor/"
 
   nginx:
     volumes:

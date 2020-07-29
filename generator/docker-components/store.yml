@@ -4,7 +4,7 @@ services:
     image: mrnaif/bitcart-frontend
     expose:
       - "3000"
-    command: yarn start
+    command: /usr/local/bin/docker-entrypoint.sh
     environment:
       BITCART_FRONTEND_URL: ${BITCART_FRONTEND_URL}
       VIRTUAL_NETWORK: nginx-proxy
