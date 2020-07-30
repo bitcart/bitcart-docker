@@ -1,5 +1,5 @@
-from os import getenv
 import os
+from os import getenv
 
 COMPOSE_DIR = "compose" if getenv("IN_DOCKER") else "../compose"
 COMPONENTS_DIR = "docker-components"
@@ -15,6 +15,9 @@ CRYPTOS = {
     "bsty": {"component": "globalboost"},
     "bch": {"component": "bitcoincash"},
 }
+TOR_CRYPTOS = {
+    "btc": CRYPTOS["btc"]
+}  # cryptos to enable tor proxy for, restricted by coingecko (cloudflare) blocking tor exit nodes
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
 BACKEND_COMPONENTS = ["backend", "dramatiq", "postgres", "redis"]
 FRONTEND_COMPONENTS = ["store", "admin"]

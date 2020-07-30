@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+
+  backend:
+    environment:
+      HIDDENSERVICE_NAME: BitcartCC-Merchants-API
+      TORRC_FILE: /usr/local/etc/tor/torrc-2
+    volumes:
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+      - "tor_torrcdir:/usr/local/etc/tor/"
+
+  admin:
+    environment:
+      HIDDENSERVICE_NAME: BitcartCC-Admin-Panel
+      BITCART_ADMIN_SOCKS_PROXY: socks5h://tor:9050
+    volumes:
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+
+  store:
+    environment:
+      HIDDENSERVICE_NAME: BitcartCC-Store
+      BITCART_FRONTEND_SOCKS_PROXY: socks5h://tor:9050
+    volumes:
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+
+  nginx:
+    volumes:
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+  nginx-gen:
+    volumes:
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+
+  tor:
+    restart: unless-stopped
+    image: mrnaif/tor:0.4.3.6
+    environment:
+      TOR_PASSWORD: bitcartcc
+      TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
+      TOR_EXTRA_ARGS: |
+        CookieAuthentication 1
+    expose:
+      - "9050" # SOCKS
+      - "9051" # Tor Control
+    volumes:
+      - "tor_datadir:/home/tor/.tor"
+      - "tor_torrcdir:/usr/local/etc/tor"
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+
+  tor-gen:
+    restart: unless-stopped
+    image: mrnaif/docker-gen:0.7.5
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
+      - "tor_torrcdir:/usr/local/etc/tor"
+    entrypoint: /usr/local/bin/docker-gen -notify-sighup tor -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
+    links:
+      - tor
+
+volumes:
+    tor_datadir:
+    tor_torrcdir:
+    tor_servicesdir:
