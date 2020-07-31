@@ -4,7 +4,7 @@ services:
     image: mrnaif/bitcart-admin
     expose:
       - "4000"
-    command: /usr/local/bin/docker-entrypoint.sh
+    command: ./docker-entrypoint.sh
     environment:
       BITCART_ADMIN_URL: ${BITCART_ADMIN_URL}
       VIRTUAL_NETWORK: nginx-proxy
