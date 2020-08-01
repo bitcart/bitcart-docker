@@ -1,10 +1,11 @@
 import glob
 import importlib
 import shutil
+from collections import UserDict
 from os.path import basename, exists, isfile
 from os.path import join as path_join
 from shlex import shlex
-from typing import Set, Union
+from typing import Union
 
 import oyaml as yaml
 
@@ -23,8 +24,21 @@ from constants import (
 from utils import env
 
 
-def add_components() -> Set[str]:
-    components: Set[str] = set()
+class OrderedSet(UserDict):
+    def add(self, v):
+        self.data[v] = None
+
+    def update(self, *args, **kwargs):
+        for s in args:
+            for e in s:
+                self.add(e)
+
+    def __repr__(self):
+        return f"{{{', '.join(map(repr, self.data.keys()))}}}"
+
+
+def add_components() -> OrderedSet:
+    components = OrderedSet()
     # add daemons
     cryptos = env("CRYPTOS", "btc")
     splitter = shlex(cryptos, posix=True)
@@ -51,7 +65,11 @@ def add_components() -> Set[str]:
     elif reverseproxy == "nginx":
         components.update(["nginx"])
     # additional components
-    components.update(env("ADDITIONAL_COMPONENTS", "").split())
+    additional_components = env("ADDITIONAL_COMPONENTS", "")
+    splitter = shlex(additional_components, posix=True)
+    splitter.whitespace = ","
+    splitter.whitespace_split = True
+    components.update([item.strip() for item in splitter])
     HAS_CRYPTO = False
     for i in components:
         if i in CRYPTO_COMPONENTS:
@@ -123,7 +141,7 @@ def execute_rules(rules, services):
         i.rule(services)
 
 
-def generate(components: Set[str]):
+def generate(components: OrderedSet):
     # generated yaml
     services: Union[dict, list] = []
     networks: Union[dict, list] = []
