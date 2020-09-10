@@ -5,7 +5,7 @@ Using provided scripts(easy)
 To install BitcartCC, if you're on linux system(these scripts for windows will be added soon),
 to download, set up, and run your BitcartCC instance, it is a matter of few commands:
 
-    git clone https://github.com/MrNaif2018/bitcart-docker
+    git clone https://github.com/bitcartcc/bitcart-docker
     cd bitcart-docker
     # set needed environment variables, see below
     ./setup.sh
@@ -53,7 +53,7 @@ Basically via deployment steps above (:
 
 Or you can use our CLI wizard to install BitcartCC on remote servers:
 
-    wget https://github.com/MrNaif2018/bitcart-docker/releases/download/0.0.1/bitcart-cli && chmod +x bitcart-cli && ./bitcart-cli
+    wget https://github.com/bitcartcc/bitcart-docker/releases/download/0.0.1/bitcart-cli && chmod +x bitcart-cli && ./bitcart-cli
 
 Development builds
 ------------------

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 sudo apt install -y git
 branch=${1:-master}
-rm -rf compose/bitcart && git clone --depth=1 https://github.com/MrNaif2018/bitcart -b $branch compose/bitcart
+rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcartcc/bitcart -b $branch compose/bitcart
 cd compose/bitcart
 rm -rf .git
 cat > conf/.env << EOF

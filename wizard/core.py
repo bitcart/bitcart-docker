@@ -91,7 +91,7 @@ def connect(
     commands = f"""
 sudo apt install git
 sudo rm -rf bitcart-docker
-git clone https://github.com/MrNaif2018/bitcart-docker
+git clone https://github.com/bitcartcc/bitcart-docker
 cd bitcart-docker
 export BITCART_INSTALL={install}
 export BITCART_CRYPTOS={cryptos}
