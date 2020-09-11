@@ -17,7 +17,7 @@ texts = {
     "alldomain": "Enter root domain for all services: ",
     "api_domain": "Enter domain for Bitcart Merchants API: ",
     "admin_domain": "Enter domain for Bitcart Admin Panel: ",
-    "frontend_domain": "Enter domain for Bitcart Store: ",
+    "store_domain": "Enter domain for Bitcart Store: ",
     "cryptos": "Which cryptos to add[btc]: ",
     "reverseproxy": "Which reverseproxy to use[nginx-https]: ",
     "additional_components": "Which additional components to add[none]:",
@@ -47,7 +47,7 @@ checks = [
         "check": lambda x: verify_install_bitcart(x),
     },
     {
-        "vars": ["api_domain", "admin_domain", "frontend_domain"],
+        "vars": ["api_domain", "admin_domain", "store_domain"],
         "args": ["onedomain_mode"],
         "check": lambda x: not verify_install_bitcart(x),
     },
@@ -57,7 +57,7 @@ checks = [
         "check": lambda x: x in ["frontend", "backend", "all"],
     },
     {
-        "vars": ["admin_domain", "frontend_domain"],
+        "vars": ["admin_domain", "store_domain"],
         "args": ["install"],
         "check": lambda x: x in ["frontend", "all"],
     },
@@ -77,7 +77,7 @@ def connect(
     alldomain="",
     admin_domain="",
     api_domain="",
-    frontend_domain="",
+    store_domain="",
     store_email="",
     store_pass="",
     store_id=1,
@@ -101,14 +101,14 @@ export BITCART_ADDITIONAL_COMPONENTS={additional_components}
     protocol = "https://" if reverseproxy == "nginx-https" else "http://"
     if alldomain:
         api_domain = "api." + alldomain
-        frontend_domain = alldomain
+        store_domain = alldomain
         admin_domain = "admin." + alldomain
     commands += f"""
 export BITCART_HOST={api_domain}
-export BITCART_FRONTEND_HOST={frontend_domain}
+export BITCART_STORE_HOST={store_domain}
 export BITCART_ADMIN_HOST={admin_domain}
 export BITCART_ADMIN_URL={protocol+api_domain}
-export BITCART_FRONTEND_URL={protocol+api_domain}
+export BITCART_STORE_URL={protocol+api_domain}
 """
     commands += "./setup.sh\n"
     if start_bitcart:

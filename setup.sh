@@ -34,8 +34,8 @@ Environment variables:
     BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, none)
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
-    BITCART_FRONTEND_HOST: The hostname of your website store (eg. example.com)
-    BITCART_FRONTEND_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
+    BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
+    BITCART_STORE_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
     BITCART_ADMIN_HOST: The hostname of your website admin panel (eg. admin.example.com)
     BITCART_ADMIN_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
     BTC_NETWORK: The network to run bitcoin daemon on (eg. mainnet, testnet)
@@ -124,7 +124,7 @@ if [[ "$BITCART_HOST" == *.local ]] ; then
     else
         echo "WARNING! Modifying /etc/hosts to make local setup work. It may require superuser privileges."
         cat >> /etc/hosts << EOF
-127.0.0.1   $BITCART_FRONTEND_HOST
+127.0.0.1   $BITCART_STORE_HOST
 127.0.0.1   $BITCART_HOST
 127.0.0.1   $BITCART_ADMIN_HOST
 EOF
@@ -148,8 +148,8 @@ echo "
 Parameters passed:
 BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
-BITCART_FRONTEND_HOST=$BITCART_FRONTEND_HOST
-BITCART_FRONTEND_URL=$BITCART_FRONTEND_URL
+BITCART_STORE_HOST=$BITCART_STORE_HOST
+BITCART_STORE_URL=$BITCART_STORE_URL
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
 BITCART_ADMIN_URL=$BITCART_ADMIN_URL
 BITCART_INSTALL=${BITCART_INSTALL:-all}
