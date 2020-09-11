@@ -1,7 +1,7 @@
 services:
   gravity:
     restart: unless-stopped
-    image: mrnaif/bitcart-gzro:stable
+    image: bitcartcc/bitcart-gzro:stable
     environment:
       GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
       GZRO_LIGHTNING: ${GZRO_LIGHTNING:-false}

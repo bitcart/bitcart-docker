@@ -1,7 +1,7 @@
 services:
   backend:
     restart: unless-stopped
-    image: mrnaif/bitcart:stable
+    image: bitcartcc/bitcart:stable
     command: /usr/local/bin/docker-entrypoint.sh
     environment:
       DB_PORT: 5432

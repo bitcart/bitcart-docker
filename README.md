@@ -71,7 +71,7 @@ When doing some changes in generator, it is usually tested via local python inst
 If it is needed to test generator in docker, then run those commands:
 
     cd generator
-    docker build -t mrnaif/docker-compose-generator .
+    docker build -t bitcartcc/docker-compose-generator .
     cd ..
     ./build.sh # now uses local image
 

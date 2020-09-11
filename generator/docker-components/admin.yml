@@ -1,7 +1,7 @@
 services:
   admin:
     restart: unless-stopped
-    image: mrnaif/bitcart-admin
+    image: bitcartcc/bitcart-admin
     expose:
       - "4000"
     command: ./docker-entrypoint.sh

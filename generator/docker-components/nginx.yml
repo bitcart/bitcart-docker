@@ -14,7 +14,7 @@ services:
 
   nginx-gen:
     restart: unless-stopped
-    image: mrnaif/docker-gen:0.7.5
+    image: bitcartcc/docker-gen:0.7.5
     container_name: nginx-gen
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"

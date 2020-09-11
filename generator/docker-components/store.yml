@@ -1,15 +1,15 @@
 services:
   store:
     restart: unless-stopped
-    image: mrnaif/bitcart-frontend
+    image: bitcartcc/bitcart-store
     expose:
       - "3000"
     command: ./docker-entrypoint.sh
     environment:
-      BITCART_FRONTEND_URL: ${BITCART_FRONTEND_URL}
+      BITCART_STORE_URL: ${BITCART_STORE_URL}
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 3000
-      VIRTUAL_HOST: ${BITCART_FRONTEND_HOST}
+      VIRTUAL_HOST: ${BITCART_STORE_HOST}
       VIRTUAL_HOST_NAME: "bitcart-store"
-      LETSENCRYPT_HOST: ${BITCART_FRONTEND_HOST}
+      LETSENCRYPT_HOST: ${BITCART_STORE_HOST}
       LETSENCRYPT_EMAIL: ${BITCART_LETSENCRYPT_EMAIL:-<no value>}

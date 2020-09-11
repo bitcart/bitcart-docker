@@ -1,7 +1,7 @@
 services:
   bitcoin:
     restart: unless-stopped
-    image: mrnaif/bitcart-btc:stable
+    image: bitcartcc/bitcart-btc:stable
     environment:
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
       BTC_LIGHTNING: ${BTC_LIGHTNING:-false}

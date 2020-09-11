@@ -1,7 +1,7 @@
 services:
   dramatiq:
     restart: unless-stopped
-    image: mrnaif/bitcart:stable
+    image: bitcartcc/bitcart:stable
     command: dramatiq api.tasks
     environment:
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
