@@ -1,7 +1,7 @@
 services:
   database:
     restart: unless-stopped
-    image: postgres:alpine
+    image: postgres:12-alpine
     environment:
       - "POSTGRES_DB=bitcart"
       - "POSTGRES_USER=postgres"
