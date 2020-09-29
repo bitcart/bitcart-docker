@@ -19,7 +19,7 @@ RUN apk add --virtual build-deps --no-cache gcc python3-dev musl-dev automake au
     git clone https://github.com/bitcoin/secp256k1 && \
     cd secp256k1 && \
     ./autogen.sh && \
-    ./configure && \
+    ./configure --enable-module-recovery && \
     make && \
     make install && \
     cd .. && \
