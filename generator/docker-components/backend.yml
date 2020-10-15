@@ -30,7 +30,7 @@ services:
       - ./images:/app/images
       - ${PWD}/queue:/app/queue
 
-  dramatiq:
+  worker:
     depends_on:
       - backend
     links:

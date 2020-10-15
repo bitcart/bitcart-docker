@@ -1,8 +1,8 @@
 services:
-  dramatiq:
+  worker:
     restart: unless-stopped
     image: bitcartcc/bitcart:stable
-    command: dramatiq api.tasks
+    command: python3 worker.py
     environment:
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}

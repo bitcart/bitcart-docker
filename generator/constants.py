@@ -19,5 +19,5 @@ TOR_CRYPTOS = {
     "btc": CRYPTOS["btc"]
 }  # cryptos to enable tor proxy for, restricted by coingecko (cloudflare) blocking tor exit nodes
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
-BACKEND_COMPONENTS = ["backend", "dramatiq", "postgres", "redis"]
+BACKEND_COMPONENTS = ["backend", "worker", "postgres", "redis"]
 FRONTEND_COMPONENTS = ["store", "admin"]
