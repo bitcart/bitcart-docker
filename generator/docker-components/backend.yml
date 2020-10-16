@@ -22,6 +22,7 @@ services:
       GZRO_LIGHTNING: ${GZRO_LIGHTNING:-false}
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
+      UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
     expose:
       - "8000"
     user: "${USER_UID}:${USER_GID}"

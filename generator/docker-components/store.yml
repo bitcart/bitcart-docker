@@ -1,7 +1,7 @@
 services:
   store:
     restart: unless-stopped
-    image: bitcartcc/bitcart-store
+    image: bitcartcc/bitcart-store:stable
     expose:
       - "3000"
     command: ./docker-entrypoint.sh
