@@ -17,4 +17,7 @@ services:
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
     volumes:
       - ./conf:/app/conf
-      - ./logs:/app/logs
+      - "bitcart_logs:/app/logs"
+
+volumes:
+  bitcart_logs:

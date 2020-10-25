@@ -132,7 +132,6 @@ EOF
 fi
 
 mkdir -p compose/conf
-mkdir -p compose/logs
 mkdir -p compose/images
 mkdir -p compose/images/products
 cat > compose/conf/.env << EOF

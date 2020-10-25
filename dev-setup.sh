@@ -15,5 +15,4 @@ BCH_HOST=bitcoincash
 EOF
 mkdir -p images
 mkdir -p images/products
-mkdir -p logs
 cd ../..
