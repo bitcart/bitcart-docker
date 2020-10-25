@@ -15,6 +15,7 @@ services:
       GZRO_LIGHTNING: ${GZRO_LIGHTNING:-false}
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
+    user: "${USER_UID}:${USER_GID}"
     volumes:
       - ./conf:/app/conf
       - "bitcart_logs:/app/logs"
