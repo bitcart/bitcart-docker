@@ -4,6 +4,7 @@ services:
     image: bitcartcc/bitcart:stable
     command: python3 worker.py
     environment:
+      LOG_FILE: logs/bitcart-log.log
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
       BTC_LIGHTNING: ${BTC_LIGHTNING:-false}
@@ -16,3 +17,4 @@ services:
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
     volumes:
       - ./conf:/app/conf
+      - ./logs:/app/logs

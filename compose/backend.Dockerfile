@@ -16,6 +16,8 @@ RUN adduser -D electrum && \
     apk del build-deps
 USER electrum
 RUN mkdir -p /app/images && \
-    mkdir -p /app/images/products
+    mkdir -p /app/images/products && \
+    mkdir -p /app/logs
 VOLUME /app/images
+VOLUME /app/logs
 CMD ["sh"]

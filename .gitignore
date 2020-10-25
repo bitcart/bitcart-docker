@@ -21,4 +21,5 @@ __pycache__/
 #generated configs
 compose/generated.yml
 compose/images
+compose/logs
 .mypy_cache

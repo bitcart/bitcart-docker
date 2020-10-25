@@ -4,6 +4,7 @@ services:
     image: bitcartcc/bitcart:stable
     command: /usr/local/bin/docker-entrypoint.sh
     environment:
+      LOG_FILE: logs/bitcart-log.log
       DB_PORT: 5432
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy
@@ -28,6 +29,7 @@ services:
     user: "${USER_UID}:${USER_GID}"
     volumes:
       - ./conf:/app/conf
+      - ./logs:/app/logs
       - ./images:/app/images
       - ${PWD}/queue:/app/queue
 
