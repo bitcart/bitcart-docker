@@ -5,6 +5,7 @@ services:
     command: python3 worker.py
     environment:
       LOG_FILE: logs/bitcart-log.log
+      LOG_DIR: logs
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
       BTC_LIGHTNING: ${BTC_LIGHTNING:-false}

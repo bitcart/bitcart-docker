@@ -5,6 +5,7 @@ services:
     command: /usr/local/bin/docker-entrypoint.sh
     environment:
       LOG_FILE: logs/bitcart-log.log
+      LOG_DIR: logs
       DB_PORT: 5432
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy
