@@ -10,6 +10,13 @@ services:
       - "tor_servicesdir:/var/lib/tor/hidden_services"
       - "tor_torrcdir:/usr/local/etc/tor/"
 
+  worker:
+    environment:
+      TORRC_FILE: /usr/local/etc/tor/torrc-2
+    volumes:
+      - "tor_servicesdir:/var/lib/tor/hidden_services"
+      - "tor_torrcdir:/usr/local/etc/tor/"
+
   admin:
     environment:
       HIDDENSERVICE_NAME: BitcartCC-Admin-Panel
