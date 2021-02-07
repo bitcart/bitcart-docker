@@ -123,11 +123,9 @@ if [[ "$BITCART_HOST" == *.local ]] ; then
         echo "Not modifying hosts."
     else
         echo "WARNING! Modifying /etc/hosts to make local setup work. It may require superuser privileges."
-        cat >> /etc/hosts << EOF
-127.0.0.1   $BITCART_STORE_HOST
-127.0.0.1   $BITCART_HOST
-127.0.0.1   $BITCART_ADMIN_HOST
-EOF
+        modify_host 172.17.0.1 $BITCART_STORE_HOST
+        modify_host 172.17.0.1 $BITCART_HOST
+        modify_host 172.17.0.1 $BITCART_ADMIN_HOST
     fi
 fi
 

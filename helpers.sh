@@ -60,3 +60,24 @@ load_env() {
     get_profile_file "$SCRIPTS_POSTFIX" false
     . ${BASH_PROFILE_SCRIPT}
 }
+
+try() {
+    "$@" || true
+}
+
+remove_host() {
+    if [ -n "$(grep -w "$1$" /etc/hosts)" ]; then
+        try sed -ie "/[[:space:]]$1/d" /etc/hosts
+    fi
+}
+
+add_host() {
+    if [ -z "$(grep -P "[[:space:]]$2" /etc/hosts)" ]; then
+        try printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts > /dev/null
+    fi
+}
+
+modify_host() {
+    remove_host $2
+    add_host $1 $2
+}
