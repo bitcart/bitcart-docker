@@ -12,8 +12,8 @@ COPY bitcart $ELECTRUM_HOME/site
 
 RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev openssl-dev rust cargo && \
     cd $ELECTRUM_HOME/site && \
-    pip3 install --no-warn-script-location --user -r requirements/base.txt && \
-    pip3 install --no-warn-script-location --user -r requirements/daemons/btc.txt
+    pip3 install --no-warn-script-location --user -r requirements/deterministic/base.txt && \
+    pip3 install --no-warn-script-location --user -r requirements/deterministic/daemons/btc.txt
 
 FROM base AS build-image
 
