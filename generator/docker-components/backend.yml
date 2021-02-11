@@ -27,7 +27,6 @@ services:
       UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
     expose:
       - "8000"
-    user: "${USER_UID}:${USER_GID}"
     volumes:
       - ./conf:/app/conf
       - "bitcart_logs:/app/logs"
