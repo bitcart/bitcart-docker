@@ -22,22 +22,49 @@
 
 {{ end }}
 {{ define "redirects" }}
-	{{ range $container := $.Containers }}
-		{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
-		{{ if (eq $serviceName "backend") }}
-			location /api {
-				proxy_pass http://backend:8000;
-			}
+	{{ if eq $.HostName "bitcart-store" }}
+		{{ range $container := $.Containers }}
+			{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+			{{ if (eq $serviceName "backend") }}
+				location /api {
+					proxy_pass http://backend:8000;
+				}
+			{{ end }}
+			{{ if (eq $serviceName "admin") }}
+				location /admin {
+					proxy_pass http://admin:4000;
+				}
+			{{ end }}
 		{{ end }}
-		{{ if (eq $serviceName "store") }}
-			location / {
-				proxy_pass http://store:3000;
-			}
+	{{ end }}
+	{{ if eq $.HostName "bitcart-admin" }}
+		{{ range $container := $.Containers }}
+			{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+			{{ if (eq $serviceName "backend") }}
+				location /api {
+					proxy_pass http://backend:8000;
+				}
+			{{ end }}
+			{{ if (eq $serviceName "store") }}
+				location /store {
+					proxy_pass http://store:3000;
+				}
+			{{ end }}
 		{{ end }}
-		{{ if (eq $serviceName "admin") }}
-			location /admin {
-				proxy_pass http://admin:4000;
-			}
+	{{ end }}
+	{{ if eq $.HostName "bitcart-backend" }}
+		{{ range $container := $.Containers }}
+			{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+			{{ if (eq $serviceName "admin") }}
+				location /admin {
+					proxy_pass http://admin:4000;
+				}
+			{{ end }}
+			{{ if (eq $serviceName "store") }}
+				location /store {
+					proxy_pass http://store:3000;
+				}
+			{{ end }}
 		{{ end }}
 	{{ end }}
 {{ end }}
