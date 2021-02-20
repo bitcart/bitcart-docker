@@ -1,7 +1,8 @@
-from PyQt5 import QtWidgets
 import sys
-import core
 import traceback
+
+import core
+from PyQt5 import QtWidgets
 
 
 class MainWindow(QtWidgets.QWidget):

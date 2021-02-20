@@ -11,20 +11,14 @@ def rule(services):
     # replace defaults
     if services.get("store"):
         with modify_key(services, "backend", "environment") as environment:
-            environment["BITCART_BACKEND_ROOTPATH"] = environment[
-                "BITCART_BACKEND_ROOTPATH"
-            ].replace("-}", "-/api}")
+            environment["BITCART_BACKEND_ROOTPATH"] = environment["BITCART_BACKEND_ROOTPATH"].replace("-}", "-/api}")
         with modify_key(services, "admin", "environment") as environment:
-            environment["BITCART_ADMIN_ROOTPATH"] = environment[
-                "BITCART_ADMIN_ROOTPATH"
-            ].replace("/", "/admin")
+            environment["BITCART_ADMIN_ROOTPATH"] = environment["BITCART_ADMIN_ROOTPATH"].replace("/", "/admin")
             environment["BITCART_ADMIN_URL"] = API_URL
         with modify_key(services, "store", "environment") as environment:
             environment["BITCART_STORE_URL"] = API_URL
     elif services.get("admin"):
         with modify_key(services, "backend", "environment") as environment:
-            environment["BITCART_BACKEND_ROOTPATH"] = environment[
-                "BITCART_BACKEND_ROOTPATH"
-            ].replace("-}", "-/api}")
+            environment["BITCART_BACKEND_ROOTPATH"] = environment["BITCART_BACKEND_ROOTPATH"].replace("-}", "-/api}")
         with modify_key(services, "admin", "environment") as environment:
             environment["BITCART_ADMIN_URL"] = API_URL

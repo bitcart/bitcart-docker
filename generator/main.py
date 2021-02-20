@@ -1,6 +1,5 @@
 import glob
 import importlib
-import shutil
 from collections import UserDict
 from os.path import basename, exists, isfile
 from os.path import join as path_join
@@ -8,7 +7,6 @@ from shlex import shlex
 from typing import Union
 
 import oyaml as yaml
-
 from constants import (
     BACKEND_COMPONENTS,
     COMPONENTS_DIR,
@@ -124,9 +122,7 @@ def merge(services):
 def load_rules():
     modules = glob.glob(path_join(RULES_DIR, "*.py"))
     loaded = [
-        importlib.import_module(
-            f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG
-        )
+        importlib.import_module(f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG)
         for f in modules
         if isfile(f) and not f.endswith("__init__.py")
     ]

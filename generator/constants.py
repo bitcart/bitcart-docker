@@ -37,12 +37,7 @@ BITCART_STORE_URL = env("STORE_URL")
 # Note: do not change the order, it's the order preferred (root) service is chosen
 HOST_COMPONENTS = ["store", "admin", "backend"]
 
-ONE_DOMAIN_MODE = (
-    not BITCART_ADMIN_HOST
-    and not BITCART_STORE_HOST
-    and not BITCART_ADMIN_URL
-    and not BITCART_STORE_URL
-)
+ONE_DOMAIN_MODE = not BITCART_ADMIN_HOST and not BITCART_STORE_HOST and not BITCART_ADMIN_URL and not BITCART_STORE_URL
 
 REVERSE_PROXY = env("REVERSEPROXY", "nginx-https")
 BITCART_PROTOCOL = "https" if REVERSE_PROXY in HTTPS_REVERSE_PROXIES else "http"
