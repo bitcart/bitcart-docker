@@ -17,6 +17,7 @@ from constants import (
     CRYPTOS,
     FRONTEND_COMPONENTS,
     GENERATED_NAME,
+    REVERSE_PROXY,
     RULES_DIR,
     RULES_PYTHON_DIR,
     RULES_PYTHON_PKG,
@@ -59,10 +60,9 @@ def add_components() -> OrderedSet:
     elif to_install == "frontend":
         components.update(FRONTEND_COMPONENTS)
     # reverse proxy
-    reverseproxy = env("REVERSEPROXY", "nginx-https")
-    if reverseproxy == "nginx-https":
+    if REVERSE_PROXY == "nginx-https":
         components.update(["nginx", "nginx-https"])
-    elif reverseproxy == "nginx":
+    elif REVERSE_PROXY == "nginx":
         components.update(["nginx"])
     # additional components
     additional_components = env("ADDITIONAL_COMPONENTS", "")

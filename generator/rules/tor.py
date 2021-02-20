@@ -8,7 +8,7 @@ def rule(services):
     if services.get("tor"):
         for i in items:
             if services.get(i):
-                with modify_key(services[i], "environment") as environment:
+                with modify_key(services, i, "environment") as environment:
                     if has_nginx:
                         environment["HIDDENSERVICE_REVERSEPROXY"] = "nginx"
                     else:
@@ -18,7 +18,7 @@ def rule(services):
         for env_name, service in TOR_CRYPTOS.items():
             service_name = service["component"]
             if services.get(service_name):
-                with modify_key(services[service_name], "environment") as environment:
+                with modify_key(services, service_name, "environment") as environment:
                     environment[f"{env_name.upper()}_PROXY_URL"] = "socks5://tor:9050"
                     environment[
                         f"{env_name.upper()}_FIAT_EXCHANGE"
