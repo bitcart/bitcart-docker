@@ -40,7 +40,7 @@ bitcart_stop_listener() {
 }
 
 bitcart_start() {
-    bitcart_start_listener
+    bitcart_start_listener || true
     USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d
 }
 
