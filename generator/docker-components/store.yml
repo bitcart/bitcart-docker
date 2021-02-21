@@ -6,7 +6,7 @@ services:
       - "3000"
     command: ./docker-entrypoint.sh
     environment:
-      BITCART_STORE_URL: ${BITCART_STORE_URL}
+      BITCART_STORE_API_URL: ${BITCART_STORE_API_URL}
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 3000
       VIRTUAL_HOST: ${BITCART_STORE_HOST}

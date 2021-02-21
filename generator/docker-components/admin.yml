@@ -6,7 +6,7 @@ services:
       - "4000"
     command: ./docker-entrypoint.sh
     environment:
-      BITCART_ADMIN_URL: ${BITCART_ADMIN_URL}
+      BITCART_ADMIN_API_URL: ${BITCART_ADMIN_API_URL}
       VIRTUAL_NETWORK: nginx-proxy
       VIRTUAL_PORT: 4000
       VIRTUAL_HOST: ${BITCART_ADMIN_HOST}

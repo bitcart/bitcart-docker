@@ -107,8 +107,8 @@ export BITCART_ADDITIONAL_COMPONENTS={additional_components}
 export BITCART_HOST={api_domain}
 export BITCART_STORE_HOST={store_domain}
 export BITCART_ADMIN_HOST={admin_domain}
-export BITCART_ADMIN_URL={protocol+api_domain}
-export BITCART_STORE_URL={protocol+api_domain}
+export BITCART_ADMIN_API_URL={protocol+api_domain}
+export BITCART_STORE_API_URL={protocol+api_domain}
 """
     commands += "./setup.sh\n"
     if start_bitcart:
