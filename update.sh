@@ -31,10 +31,9 @@ fi
 
 . helpers.sh
 bitcart_update_docker_env
-# stop listener
-kill $(cat listener.pid) &> /dev/null || true
-docker-compose -f compose/generated.yml pull
-./start.sh
+bitcart_stop_listener
+bitcart_pull
+bitcart_start
 
 set +e
 docker image prune -af --filter "label=org.bitcartcc.image" --filter "label!=org.bitcartcc.image=docker-compose-generator"

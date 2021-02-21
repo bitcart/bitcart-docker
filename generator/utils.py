@@ -30,7 +30,7 @@ class ModifyKey:
         self.default = default
         self.save_key = save_key or key
         self.key_exists = self.services.get(self.service)
-        self.copied = {}
+        self.copied = self.default
 
     def __enter__(self):
         if self.key_exists:

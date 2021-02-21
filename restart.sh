@@ -4,4 +4,4 @@
 load_env
 
 cd "$BITCART_BASE_DIRECTORY"
-bitcart_start
+bitcart_restart

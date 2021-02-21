@@ -1,5 +1,16 @@
 version: 2
 jobs:
+  cansetup:
+    docker:
+      - image: circleci/python:3.7
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Test installation
+          command: |
+            cd .circleci
+            sudo ./test-install.sh
   deploy:
     docker:
       - image: circleci/python:3.7
@@ -19,8 +30,11 @@ workflows:
   version: 2
   build:
     jobs:
+      - cansetup
       - deploy:
           context: global
+          requires:
+            - cansetup
           filters:
             branches:
               only: master

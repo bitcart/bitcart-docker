@@ -27,11 +27,14 @@ This script will:
 * Start BitcartCC
 You can run again this script if you desire to change your configuration.
 Make sure you own a domain with DNS record pointing to your website.
-Passing domain ending with .local will automatically edit /etc/hosts and make it work.
+Passing domain ending with .local will automatically edit /etc/hosts to make it work.
 Environment variables:
     BITCART_INSTALL: installation template to use (eg. all, backend, frontend)
     BITCART_CRYPTOS: comma-separated list of cryptocurrencies to enable (eg. btc)
     BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, none)
+    REVERSEPROXY_HTTP_PORT: The port the reverse proxy binds to for public HTTP requests. Default: 80
+    REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
+    REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
     BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
@@ -111,24 +114,49 @@ while (( "$#" )); do
   esac
 done
 
+# Check root, and set correct profile file for the platform
 get_profile_file "$SCRIPTS_POSTFIX"
+
+# Set settings default values
+[[ $BITCART_LETSENCRYPT_EMAIL == *@example.com ]] && echo "BITCART_LETSENCRYPT_EMAIL ends with @example.com, setting to empty email instead" && BITCART_LETSENCRYPT_EMAIL=""
+
+: "${BITCART_LETSENCRYPT_EMAIL:=}"
+: "${BITCART_INSTALL:=all}"
+: "${BITCART_CRYPTOS:=btc}"
+: "${BITCART_REVERSEPROXY:=nginx-https}"
+: "${REVERSEPROXY_DEFAULT_HOST:=none}"
+: "${REVERSEPROXY_HTTP_PORT:=80}"
+: "${REVERSEPROXY_HTTPS_PORT:=443}"
+
+# Crypto default settings (adjust to add a new coin)
+: "${BTC_NETWORK:=mainnet}"
+: "${BTC_LIGHTNING:=false}"
+: "${BCH_NETWORK:=mainnet}"
+: "${LTC_NETWORK:=mainnet}"
+: "${LTC_LIGHTNING:=false}"
+: "${GZRO_NETWORK:=mainnet}"
+: "${GZRO_LIGHTNING:=false}"
+: "${BSTY_NETWORK:=mainnet}"
+: "${BSTY_LIGHTNING:=false}"
 
 BITCART_BASE_DIRECTORY="$(pwd)"
 BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
 BITCART_DEPLOYMENT_CONFIG="$BITCART_BASE_DIRECTORY/.deploy"
 
-if [[ "$BITCART_HOST" == *.local ]] ; then
-    echo "Local setup detected."
-    if [[ "$BITCART_NOHOSTSEDIT" = true ]] ; then
-        echo "Not modifying hosts."
-    else
-        echo "WARNING! Modifying /etc/hosts to make local setup work. It may require superuser privileges."
-        modify_host 172.17.0.1 $BITCART_STORE_HOST
-        modify_host 172.17.0.1 $BITCART_HOST
-        modify_host 172.17.0.1 $BITCART_ADMIN_HOST
+# Validate some settings
+if [[ "$BITCART_REVERSEPROXY" == "nginx" ]] || [[ "$BITCART_REVERSEPROXY" == "nginx-https" ]] && [[ "$BITCART_HOST" ]]; then
+    DOMAIN_NAME="$(echo "$BITCART_HOST" | grep -E '^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$')"
+    if [[ ! "$DOMAIN_NAME" ]]; then
+        echo "BITCART_REVERSEPROXY is set to $BITCART_REVERSEPROXY, so BITCART_HOST must be a domain name which point to this server, but the current value of BITCART_HOST ('$BITCART_HOST') is not a valid domain name."
+        return
     fi
+    BITCART_HOST="$DOMAIN_NAME"
 fi
 
+# Local setup modifications
+apply_local_modifications
+
+# Adjust backend for docker
 mkdir -p compose/conf
 mkdir -p compose/images
 mkdir -p compose/images/products
@@ -141,28 +169,32 @@ GZRO_HOST=gravity
 BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
 EOF
+
 echo "
 -------SETUP-----------
 Parameters passed:
 BITCART_HOST=$BITCART_HOST
+REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
+REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
+REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 BITCART_STORE_HOST=$BITCART_STORE_HOST
 BITCART_STORE_URL=$BITCART_STORE_URL
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
 BITCART_ADMIN_URL=$BITCART_ADMIN_URL
-BITCART_INSTALL=${BITCART_INSTALL:-all}
-BITCART_REVERSEPROXY=${BITCART_REVERSEPROXY:-nginx-https}
-BITCART_CRYPTOS=${BITCART_CRYPTOS:-btc}
+BITCART_INSTALL=$BITCART_INSTALL
+BITCART_REVERSEPROXY=$BITCART_REVERSEPROXY
+BITCART_CRYPTOS=$BITCART_CRYPTOS
 BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
-BTC_NETWORK=${BTC_NETWORK:-mainnet}
-BTC_LIGHTNING=${BTC_LIGHTNING:-false}
-BCH_NETWORK=${BCH_NETWORK:-mainnet}
-LTC_NETWORK=${LTC_NETWORK:-mainnet}
-LTC_LIGHTNING=${LTC_LIGHTNING:-false}
-GZRO_NETWORK=${GZRO_NETWORK:-mainnet}
-GZRO_LIGHTNING=${GZRO_LIGHTNING:-false}
-BSTY_NETWORK=${BSTY_NETWORK:-mainnet}
-BSTY_LIGHTNING=${BSTY_LIGHTNING:-false}
+BTC_NETWORK=$BTC_NETWORK
+BTC_LIGHTNING=$BTC_LIGHTNING
+BCH_NETWORK=$BCH_NETWORK
+LTC_NETWORK=$LTC_NETWORK
+LTC_LIGHTNING=$LTC_LIGHTNING
+GZRO_NETWORK=$GZRO_NETWORK
+GZRO_LIGHTNING=$GZRO_LIGHTNING
+BSTY_NETWORK=$BSTY_NETWORK
+BSTY_LIGHTNING=$BSTY_LIGHTNING
 ----------------------
 Additional exported variables:
 BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
@@ -170,12 +202,15 @@ BITCART_ENV_FILE=$BITCART_ENV_FILE
 BITCART_DEPLOYMENT_CONFIG=$BITCART_DEPLOYMENT_CONFIG
 ----------------------
 "
-# Init the variables when a user log interactively
+
+# Configure deployment config to determine which deployment name to use
 cat > ${BITCART_DEPLOYMENT_CONFIG} << EOF
 #!/bin/bash
 NAME=$NAME
 SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
 EOF
+
+# Init the variables when a user log interactively
 touch "$BASH_PROFILE_SCRIPT"
 cat > ${BASH_PROFILE_SCRIPT} << EOF
 #!/bin/bash
@@ -206,6 +241,7 @@ echo -e "BitcartCC docker-compose parameters saved in $BITCART_ENV_FILE\n"
 
 . "$BASH_PROFILE_SCRIPT"
 
+# Try to install docker
 if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]]; then
     if ! [[ -x "$(command -v curl)" ]]; then
         apt-get update 2>error
@@ -217,7 +253,7 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
             2>error
     fi
     if ! [[ -x "$(command -v docker)" ]]; then
-        if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]]; then
+        if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]] || [[ "$(uname -m)" == "aarch64" ]]; then
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 # Mac OS	
                 if ! [[ -x "$(command -v brew)" ]]; then
@@ -241,20 +277,9 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
                 sh get-docker.sh
                 rm get-docker.sh
             fi
-        elif [[ "$(uname -m)" == "aarch64" ]]; then
-            echo "Trying to install docker for armv7 on a aarch64 board..."
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-            RELEASE=$(lsb_release -cs)
-            if [[ "$RELEASE" == "bionic" ]]; then
-                RELEASE=xenial
-            fi
-            if [[ -x "$(command -v dpkg)" ]]; then
-                dpkg --add-architecture armhf
-            fi
-            add-apt-repository "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $RELEASE stable"
-            apt-get update -y
-            # zlib1g:armhf is needed for docker-compose, but we install it here as we changed dpkg here
-            apt-get install -y docker-ce:armhf zlib1g:armhf
+        else
+            echo "Unsupported architecture $(uname -m)"
+            exit 1
         fi
     fi
 
@@ -360,7 +385,7 @@ fi
 if $START; then
     ./start.sh
 elif $HAS_DOCKER; then
-    docker-compose -f compose/generated.yml pull
+    bitcart_pull
 fi
 
 echo "Setup done."
