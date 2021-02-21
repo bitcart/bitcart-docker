@@ -1,7 +1,7 @@
-import paramiko
-import warnings
-import time
 import getpass
+import warnings
+
+import paramiko
 
 warnings.filterwarnings(action="ignore", module=".*paramiko.*")
 

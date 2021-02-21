@@ -21,6 +21,37 @@
 	{{ end }}
 
 {{ end }}
+{{ define "redirects" }}
+	{{ if eq $.HostName "bitcart-store" }}
+		{{ range $container := $.Containers }}
+			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
+				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+				{{ if (eq $serviceName "backend") }}
+					location /api/ {
+						proxy_pass http://backend:8000/;
+					}
+				{{ end }}
+				{{ if (eq $serviceName "admin") }}
+					location /admin {
+						proxy_pass http://admin:4000;
+					}
+				{{ end }}
+			{{ end }}
+		{{ end }}
+	{{ end }}
+	{{ if eq $.HostName "bitcart-admin" }}
+		{{ range $container := $.Containers }}
+			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
+				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+				{{ if (eq $serviceName "backend") }}
+					location /api/ {
+						proxy_pass http://backend:8000/;
+					}
+				{{ end }}
+			{{ end }}
+		{{ end }}
+	{{ end }}
+{{ end }}
 
 # If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
 # scheme used to connect to this server
@@ -158,6 +189,7 @@ server {
 	location / {
 		proxy_pass http://{{ trim $upstream_name }};
 	}
+	{{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 	{{ end }}
 {{ end }}
@@ -288,7 +320,7 @@ server {
 	ssl_trusted_certificate {{ printf "/etc/nginx/certs/%s.chain.pem" $cert }};
 	{{ end }}
 
-	{{ if (not (or (eq $https_method "noredirect") (eq $hsts "off"))) }}
+	{{ if (and (ne $https_method "noredirect") (ne $hsts "off")) }}
 	add_header Strict-Transport-Security "{{ trim $hsts }}" always;
 	{{ end }}
 
@@ -320,6 +352,7 @@ server {
 		include /etc/nginx/vhost.d/default_location;
 		{{ end }}
 	}
+	{{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
 {{ end }}
@@ -366,6 +399,7 @@ server {
 		include /etc/nginx/vhost.d/default_location;
 		{{ end }}
 	}
+	{{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
 {{ if (and (not $is_https) (exists "/etc/nginx/certs/default.crt") (exists "/etc/nginx/certs/default.key")) }}
@@ -385,4 +419,7 @@ server {
 {{ end }}
 {{ end }}
 {{ end }}
+{{ end }}
+{{ if $.Env.ADDITIONAL_NGINX_CONFIG }}
+{{ $.Env.ADDITIONAL_NGINX_CONFIG}}
 {{ end }}

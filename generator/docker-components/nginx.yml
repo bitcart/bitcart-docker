@@ -4,8 +4,8 @@ services:
     image: nginx:stable
     container_name: nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "${REVERSEPROXY_HTTP_PORT:-80}:80"
+      - "${REVERSEPROXY_HTTPS_PORT:-443}:443"
     volumes:
       - "nginx_conf:/etc/nginx/conf.d"
       - "nginx_vhost:/etc/nginx/vhost.d"
@@ -16,6 +16,8 @@ services:
     restart: unless-stopped
     image: bitcartcc/docker-gen:0.7.5
     container_name: nginx-gen
+    environment:
+      DEFAULT_HOST: ${REVERSEPROXY_DEFAULT_HOST:-none}
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
@@ -28,7 +30,7 @@ services:
       - nginx
 
 volumes:
-  nginx_conf: 
-  nginx_vhost: 
-  nginx_html: 
-  nginx_certs: 
+  nginx_conf:
+  nginx_vhost:
+  nginx_html:
+  nginx_certs:

@@ -1,4 +1,5 @@
 import getpass
+
 import core
 
 for var, text in core.texts.items():

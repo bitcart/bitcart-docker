@@ -1,17 +1,15 @@
-# pylint: disable=no-member
-import logging
-
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.dispatcher import FSMContext
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.utils.markdown import hcode
-import asyncio
-import core
-import traceback
 import functools
+import logging
 import os
 import sys
+import traceback
+
+import core
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.markdown import hcode
 
 
 def get_or_ask(var, ask=False, cast=str):
@@ -67,7 +65,7 @@ async def install(message: types.Message):
     await bot.send_message(message.chat.id, texts[0])
 
 
-def make_func(name, pos):
+def make_func(name, pos):  # noqa: C901
     async def process(message: types.Message, state: FSMContext):
         cont = True
         skip = 0
@@ -88,14 +86,10 @@ def make_func(name, pos):
                         cont = False
                         skip += len(check["vars"])
                         break
-
         if cont:
             await Install.next()
         else:
-            if (
-                install not in ["backend", "frontend", "all"]
-                and states[pos + skip + 1] == "api_domain"
-            ):
+            if install not in ["backend", "frontend", "all"] and states[pos + skip + 1] == "api_domain":
                 skip += 3
             for _ in range(skip + 1):
                 await Install.next()
@@ -114,15 +108,9 @@ for var, text in list(core.texts.items())[:-1]:
 @dp.message_handler(state=Install.start_bitcart)
 async def process_start(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data["start_bitcart"] = (
-            core.defaults["start_bitcart"]
-            if message.text == "default"
-            else message.text
-        )
+        data["start_bitcart"] = core.defaults["start_bitcart"] if message.text == "default" else message.text
         try:
-            await bot.send_message(
-                message.chat.id, "Starting installation, please wait..."
-            )
+            await bot.send_message(message.chat.id, "Starting installation, please wait...")
             kwargs = {key: data[key] for key in core.texts if key in data}
             kwargs["print_func"] = functools.partial(print, file=open(os.devnull, "w"))
             kwargs.pop("onedomain_mode", None)
@@ -130,14 +118,11 @@ async def process_start(message: types.Message, state: FSMContext):
             if core.verify_install_bitcart(data["start_bitcart"]):
                 await bot.send_message(message.chat.id, "Successfully started bitcart!")
             else:
-                await bot.send_message(
-                    message.chat.id, "Successfully installed bitcart!"
-                )
+                await bot.send_message(message.chat.id, "Successfully installed bitcart!")
         except Exception:
             await bot.send_message(
                 message.chat.id,
-                "Error connecting to server/installing.\n"
-                + hcode(traceback.format_exc().splitlines()[-1]),
+                "Error connecting to server/installing.\n" + hcode(traceback.format_exc().splitlines()[-1]),
             )
         data.state = None
 

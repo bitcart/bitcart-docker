@@ -25,6 +25,7 @@ services:
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
       UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
+      BITCART_BACKEND_ROOTPATH: ${BITCART_BACKEND_ROOTPATH:-}
     user: "${USER_UID}:${USER_GID}"
     expose:
       - "8000"
