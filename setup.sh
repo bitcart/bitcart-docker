@@ -11,6 +11,7 @@ Usage:
 Install BitcartCC on this server
 This script must be run as root, except on Mac OS
     -h, --help: Show help
+    -p: print settings and exit
     --name name: Configure new deployment name. Affects naming of profile env files and
     startup config files. Allows multiple deployments on one server. 
     Empty by default
@@ -60,6 +61,7 @@ HAS_DOCKER=true
 STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
 NAME_INPUT=false
+PREVIEW_SETTINGS=false
 NAME=
 SCRIPTS_POSTFIX=
 while (( "$#" )); do
@@ -71,6 +73,10 @@ while (( "$#" )); do
     --help)
       display_help
       exit 0
+      ;;
+    -p)
+      PREVIEW_SETTINGS=true
+      shift 1
       ;;
     --install-only)
       START=false
@@ -153,25 +159,7 @@ if [[ "$BITCART_REVERSEPROXY" == "nginx" ]] || [[ "$BITCART_REVERSEPROXY" == "ng
     BITCART_HOST="$DOMAIN_NAME"
 fi
 
-# Local setup modifications
-apply_local_modifications
-
-# Adjust backend for docker
-mkdir -p compose/conf
-mkdir -p compose/images
-mkdir -p compose/images/products
-cat > compose/conf/.env << EOF
-DB_HOST=database
-REDIS_HOST=redis://redis
-BTC_HOST=bitcoin
-LTC_HOST=litecoin
-GZRO_HOST=gravity
-BSTY_HOST=globalboost
-BCH_HOST=bitcoincash
-EOF
-
-echo "
--------SETUP-----------
+echo "-------SETUP-----------
 Parameters passed:
 BITCART_HOST=$BITCART_HOST
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
@@ -200,8 +188,28 @@ Additional exported variables:
 BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
 BITCART_ENV_FILE=$BITCART_ENV_FILE
 BITCART_DEPLOYMENT_CONFIG=$BITCART_DEPLOYMENT_CONFIG
-----------------------
-"
+----------------------"
+
+if $PREVIEW_SETTINGS; then
+    exit 0
+fi
+
+# Local setup modifications
+apply_local_modifications
+
+# Adjust backend for docker
+mkdir -p compose/conf
+mkdir -p compose/images
+mkdir -p compose/images/products
+cat > compose/conf/.env << EOF
+DB_HOST=database
+REDIS_HOST=redis://redis
+BTC_HOST=bitcoin
+LTC_HOST=litecoin
+GZRO_HOST=gravity
+BSTY_HOST=globalboost
+BCH_HOST=bitcoincash
+EOF
 
 # Configure deployment config to determine which deployment name to use
 cat > ${BITCART_DEPLOYMENT_CONFIG} << EOF
