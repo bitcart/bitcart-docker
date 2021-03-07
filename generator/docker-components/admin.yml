@@ -4,7 +4,7 @@ services:
     image: bitcartcc/bitcart-admin:stable
     expose:
       - "4000"
-    command: ./docker-entrypoint.sh
+    command: yarn start
     environment:
       BITCART_ADMIN_API_URL: ${BITCART_ADMIN_API_URL}
       VIRTUAL_NETWORK: nginx-proxy
