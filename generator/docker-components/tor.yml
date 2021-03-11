@@ -1,7 +1,6 @@
 version: "3"
 
 services:
-
   backend:
     environment:
       HIDDENSERVICE_NAME: BitcartCC-Merchants-API
@@ -40,7 +39,7 @@ services:
 
   tor:
     restart: unless-stopped
-    image: bitcartcc/tor:0.4.3.6
+    image: bitcartcc/tor:0.4.4.7
     environment:
       TOR_PASSWORD: bitcartcc
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
@@ -66,6 +65,6 @@ services:
       - tor
 
 volumes:
-    tor_datadir:
-    tor_torrcdir:
-    tor_servicesdir:
+  tor_datadir:
+  tor_torrcdir:
+  tor_servicesdir:
