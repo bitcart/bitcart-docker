@@ -120,7 +120,7 @@ def merge(services):
 
 
 def load_rules():
-    modules = glob.glob(path_join(RULES_DIR, "*.py"))
+    modules = sorted(glob.glob(path_join(RULES_DIR, "*.py")))
     loaded = [
         importlib.import_module(f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG)
         for f in modules
