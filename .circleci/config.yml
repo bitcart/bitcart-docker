@@ -19,6 +19,7 @@ jobs:
           name: run tests
           command: |
             make ci
+            codecov
 
   cansetup:
     machine:

@@ -24,3 +24,5 @@ compose/images
 .mypy_cache
 .coverage
 htmlcov/
+.pytest_cache/
+coverage.xml
