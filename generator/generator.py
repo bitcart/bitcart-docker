@@ -7,7 +7,8 @@ from shlex import shlex
 from typing import Union
 
 import oyaml as yaml
-from constants import (
+
+from .constants import (
     BACKEND_COMPONENTS,
     COMPONENTS_DIR,
     COMPOSE_DIR,
@@ -20,7 +21,7 @@ from constants import (
     RULES_PYTHON_DIR,
     RULES_PYTHON_PKG,
 )
-from utils import env
+from .utils import env
 
 
 class OrderedSet(UserDict):
@@ -161,9 +162,21 @@ def generate(components: OrderedSet):
         "networks": networks,
         "volumes": volumes,
     }
+    return data
+
+
+def save(data):
     with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
         yaml.dump(data, f, default_flow_style=False)
 
 
-components = add_components()
-generate(components)
+def generate_config():
+    return generate(add_components())
+
+
+def main():
+    save(generate_config())
+
+
+if __name__ == "__main__":
+    main()

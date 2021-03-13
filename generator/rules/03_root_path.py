@@ -1,7 +1,7 @@
 from os.path import join as urljoin
 
-from constants import BITCART_API_URL, ONE_DOMAIN_MODE
-from utils import modify_key
+from ..constants import BITCART_API_URL, ONE_DOMAIN_MODE
+from ..utils import modify_key
 
 
 def rule(services):

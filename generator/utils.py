@@ -9,13 +9,13 @@ def env(name, default=None):
 
 
 def custom_port_allowed(service):
-    from constants import CRYPTO_COMPONENTS
+    from .constants import CRYPTO_COMPONENTS
 
     return service not in CRYPTO_COMPONENTS or env(f"{service.upper()}_EXPOSE", False)
 
 
 def preferred_service(components):
-    from constants import HOST_COMPONENTS
+    from .constants import HOST_COMPONENTS
 
     for variant in HOST_COMPONENTS:
         if components.get(variant):

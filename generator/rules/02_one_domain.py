@@ -1,6 +1,6 @@
-from constants import BITCART_HOST, HOST_COMPONENTS, ONE_DOMAIN_MODE
-from utils import modify_key
-from utils import preferred_service as get_pref
+from ..constants import BITCART_HOST, HOST_COMPONENTS, ONE_DOMAIN_MODE
+from ..utils import modify_key
+from ..utils import preferred_service as get_pref
 
 
 def rule(services):

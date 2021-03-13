@@ -4,4 +4,4 @@ COPY . /app/
 WORKDIR /app
 RUN pip3 install -r requirements.txt
 ENV IN_DOCKER=true
-ENTRYPOINT [ "python3", "main.py"]
+ENTRYPOINT [ "python3", "-m", "generator"]

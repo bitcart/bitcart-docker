@@ -3,9 +3,9 @@ services:
     restart: unless-stopped
     image: postgres:12-alpine
     environment:
-      - "POSTGRES_DB=bitcart"
-      - "POSTGRES_USER=postgres"
-      - "POSTGRES_PASSWORD=123@"
+      POSTGRES_DB: bitcart
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123@
     volumes:
       - dbdata:/var/lib/postgresql/data
     expose:
@@ -15,6 +15,6 @@ services:
       - database
     links:
       - database
-    
+
 volumes:
   dbdata:

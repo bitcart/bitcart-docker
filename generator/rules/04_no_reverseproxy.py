@@ -1,5 +1,5 @@
-from constants import CRYPTO_COMPONENTS, HOST_COMPONENTS
-from utils import custom_port_allowed, env, modify_key
+from ..constants import CRYPTO_COMPONENTS, HOST_COMPONENTS
+from ..utils import custom_port_allowed, env, modify_key
 
 
 def rule(services):

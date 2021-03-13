@@ -1,5 +1,5 @@
-from constants import HOST_COMPONENTS, TOR_CRYPTOS
-from utils import modify_key
+from ..constants import HOST_COMPONENTS, TOR_CRYPTOS
+from ..utils import modify_key
 
 
 def rule(services):

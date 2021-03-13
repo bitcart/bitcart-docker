@@ -1,14 +1,16 @@
-from os import getenv
-
-from utils import env
-
 # Static constants
+import os
+from os import getenv
+from os.path import join as path_join
 
-COMPOSE_DIR = "compose" if getenv("IN_DOCKER") else "../compose"
-COMPONENTS_DIR = "docker-components"
-RULES_DIR = "rules"
+from .utils import env
+
+CURRENT_DIR = os.path.dirname(__file__)
+COMPOSE_DIR = "compose" if getenv("IN_DOCKER") else path_join(CURRENT_DIR, "..", "compose")
+COMPONENTS_DIR = path_join(CURRENT_DIR, "docker-components")
+RULES_DIR = path_join(CURRENT_DIR, "rules")
 RULES_PYTHON_PKG = "generator"
-RULES_PYTHON_DIR = "rules"
+RULES_PYTHON_DIR = "generator.rules"
 GENERATED_NAME = "generated.yml"
 HTTPS_REVERSE_PROXIES = ["nginx-https"]
 ALL_REVERSE_PROXIES = ["nginx"] + HTTPS_REVERSE_PROXIES

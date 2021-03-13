@@ -12,6 +12,9 @@ format:
 	isort .
 
 test:
-	true
+	pytest generator/tests/ ${ARGS}
+
+generate:
+	python3 -m generator
 
 ci: checkformat lint test
