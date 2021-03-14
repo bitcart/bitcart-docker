@@ -20,6 +20,7 @@ def test_installation_packs(pack, expected):
     set_env("INSTALL", pack)
     config = generate_config()
     check_service_list(config, expected, is_none=pack == "none")
+    # Cleanup
     delete_env("INSTALL")
 
 
