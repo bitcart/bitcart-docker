@@ -1,8 +1,9 @@
-def rule(services):
+def rule(services, settings):
     store = services.get("store")
     admin = services.get("admin")
-    back = services.get("backend")
-    if back and store:
-        store["links"] = ["backend"]
-    if back and admin:
-        admin["links"] = ["backend"]
+    backend = services.get("backend")
+    if backend:
+        if store:
+            store["links"] = ["backend"]
+        if admin:
+            admin["links"] = ["backend"]

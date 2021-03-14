@@ -1,3 +1,3 @@
-from .generator import main
+from . import run_generator
 
-main()
+run_generator()

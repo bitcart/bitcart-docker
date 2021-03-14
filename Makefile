@@ -15,6 +15,6 @@ test:
 	pytest generator/tests/ ${ARGS}
 
 generate:
-	python3 -m generator
+	@python3 -m generator
 
 ci: checkformat lint test

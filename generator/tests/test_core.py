@@ -1,6 +1,10 @@
-import pytest
+import os
+import tempfile
 
-from generator.generator import load_component
+import pytest
+import yaml
+
+from generator.generator import add_components, load_component, save
 
 THIRD_PARTY_IMAGES = ["nginx", "redis", "database", "letsencrypt-nginx-proxy-companion"]
 
@@ -18,10 +22,10 @@ def test_basic_structure(config):
     assert len(config["volumes"]) > 0
 
 
-def check_service(service, service_data, full_service=True):
+def check_service(service, service_data):
     assert isinstance(service_data, dict)
     assert len(service_data.keys()) > 0
-    if full_service:
+    if service_data.get("image") or service_data.get("build"):
         assert service_data.keys() >= {"restart", "image"}
         assert service in THIRD_PARTY_IMAGES or "bitcartcc" in service_data["image"]
         assert service_data["restart"] == "unless-stopped"
@@ -79,4 +83,35 @@ def test_all_components(all_components):
         assert component_data.keys() >= {"services"}
         services = component_data["services"]
         for service in services:
-            check_service(service, services[service], full_service=service == component)
+            check_service(service, services[service])
+
+
+def test_load_component():
+    data = load_component("backend")
+    assert isinstance(data, dict)
+    assert len(data.keys()) > 0
+    assert load_component("notexisting") == {}
+
+
+def test_ordered_set(settings):
+    components = add_components(settings)
+    viewable = repr(components)
+    assert "backend" in viewable
+    parsed_components = viewable.replace("{", "").replace("}", "").replace("'", "").split(", ")
+    assert list(components.keys()) == parsed_components
+
+
+def get_saved_config(config, path):
+    save(config, out_path=path)
+    with open(path) as f:
+        return f.read()
+
+
+def test_save_config(config):
+    with tempfile.TemporaryDirectory(prefix="bitcart-docker-tests-") as tmp:
+        path = os.path.join(tmp, "generated.yml")
+        output = get_saved_config(config, path)
+        # deterministic
+        assert output == get_saved_config(config, path)
+        # writing correct data
+        assert output == yaml.dump(config, default_flow_style=False)
