@@ -1,5 +1,8 @@
 import os
 
+from .constants import CRYPTO_COMPONENTS, HOST_COMPONENTS
+from .exceptions import ConfigError
+
 
 def env(name, default=None):
     value = os.getenv(f"BITCART_{name}", default)
@@ -9,17 +12,17 @@ def env(name, default=None):
 
 
 def custom_port_allowed(service):
-    from constants import CRYPTO_COMPONENTS
-
     return service not in CRYPTO_COMPONENTS or env(f"{service.upper()}_EXPOSE", False)
 
 
 def preferred_service(components):
-    from constants import HOST_COMPONENTS
-
     for variant in HOST_COMPONENTS:
         if components.get(variant):
             return variant
+
+
+def config_error(message):
+    raise ConfigError(f"ERROR: {message}")
 
 
 class ModifyKey:

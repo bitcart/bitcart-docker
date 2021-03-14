@@ -1,26 +1,26 @@
 import glob
 import importlib
+import sys
 from collections import UserDict
 from os.path import basename, exists, isfile
 from os.path import join as path_join
-from shlex import shlex
 from typing import Union
 
 import oyaml as yaml
-from constants import (
+
+from .constants import (
     BACKEND_COMPONENTS,
     COMPONENTS_DIR,
-    COMPOSE_DIR,
     CRYPTO_COMPONENTS,
     CRYPTOS,
     FRONTEND_COMPONENTS,
-    GENERATED_NAME,
-    REVERSE_PROXY,
+    GENERATED_PATH,
     RULES_DIR,
     RULES_PYTHON_DIR,
     RULES_PYTHON_PKG,
 )
-from utils import env
+from .settings import Settings
+from .utils import ConfigError
 
 
 class OrderedSet(UserDict):
@@ -36,38 +36,29 @@ class OrderedSet(UserDict):
         return f"{{{', '.join(map(repr, self.data.keys()))}}}"
 
 
-def add_components() -> OrderedSet:
+def add_components(settings: Settings) -> OrderedSet:
     components = OrderedSet()
     # add daemons
-    cryptos = env("CRYPTOS", "btc")
-    splitter = shlex(cryptos, posix=True)
-    splitter.whitespace = ","
-    splitter.whitespace_split = True
-    cryptos = [item.strip() for item in splitter]
-    for crypto in cryptos:
+    for crypto in settings.CRYPTOS:
         if crypto:
             value = CRYPTOS.get(crypto)
             if value:
                 components.add(value["component"])
-    # bitcart backend and frontend
-    to_install = env("INSTALL", "all")
-    if to_install == "all":
+    # installation packs
+    if settings.INSTALLATION_PACK == "all":
         components.update(BACKEND_COMPONENTS + FRONTEND_COMPONENTS)
-    elif to_install == "backend":
+    elif settings.INSTALLATION_PACK == "backend":
         components.update(BACKEND_COMPONENTS)
-    elif to_install == "frontend":
+    elif settings.INSTALLATION_PACK == "frontend":
         components.update(FRONTEND_COMPONENTS)
     # reverse proxy
-    if REVERSE_PROXY == "nginx-https":
+    if settings.REVERSE_PROXY == "nginx-https":
         components.update(["nginx", "nginx-https"])
-    elif REVERSE_PROXY == "nginx":
+    elif settings.REVERSE_PROXY == "nginx":
         components.update(["nginx"])
     # additional components
-    additional_components = env("ADDITIONAL_COMPONENTS", "")
-    splitter = shlex(additional_components, posix=True)
-    splitter.whitespace = ","
-    splitter.whitespace_split = True
-    components.update([item.strip() for item in splitter])
+    components.update(settings.ADDITIONAL_COMPONENTS)
+    # Add bitcoin if no valid cryptos specified
     HAS_CRYPTO = False
     for i in components:
         if i in CRYPTO_COMPONENTS:
@@ -96,8 +87,6 @@ def _merge(a, b, path=None):
                 _merge(a[key], b[key], path + [str(key)])
             elif isinstance(a[key], list) and isinstance(b[key], list):
                 a[key] += b[key]
-            elif a[key] == b[key]:
-                pass
         else:
             a[key] = b[key]
     return a
@@ -122,9 +111,7 @@ def merge(services):
 def load_rules():
     modules = sorted(glob.glob(path_join(RULES_DIR, "*.py")))
     loaded = [
-        importlib.import_module(f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG)
-        for f in modules
-        if isfile(f) and not f.endswith("__init__.py")
+        importlib.import_module(f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG) for f in modules if isfile(f)
     ]
     for i in loaded.copy():
         if not getattr(i, "rule", None) or not callable(i.rule):
@@ -132,12 +119,12 @@ def load_rules():
     return loaded
 
 
-def execute_rules(rules, services):
+def execute_rules(rules, services, settings):
     for i in rules:
-        i.rule(services)
+        i.rule(services, settings)
 
 
-def generate(components: OrderedSet):
+def generate(components: OrderedSet, settings: Settings):
     # generated yaml
     services: Union[dict, list] = []
     networks: Union[dict, list] = []
@@ -145,14 +132,14 @@ def generate(components: OrderedSet):
     for i in components:
         doc = load_component(i)
         if doc.get("services"):
-            services.append(doc["services"])  # type: ignore
-        if doc.get("networks"):
-            networks.append(doc["networks"])  # type: ignore
+            services.append(doc["services"])
+        if doc.get("networks"):  # pragma: no cover
+            networks.append(doc["networks"])
         if doc.get("volumes"):
-            volumes.append(doc["volumes"])  # type: ignore
+            volumes.append(doc["volumes"])
     services = merge(services)
     rules = load_rules()
-    execute_rules(rules, services)
+    execute_rules(rules, services, settings)
     networks = {j: i[j] for i in networks for j in i}
     volumes = {j: i[j] for i in volumes for j in i}
     data = {
@@ -161,9 +148,25 @@ def generate(components: OrderedSet):
         "networks": networks,
         "volumes": volumes,
     }
-    with open(path_join(COMPOSE_DIR, GENERATED_NAME), "w") as f:
+    return data
+
+
+def save(data, out_path=GENERATED_PATH):
+    with open(out_path, "w") as f:
         yaml.dump(data, f, default_flow_style=False)
 
 
-components = add_components()
-generate(components)
+def generate_config():
+    settings = Settings()
+    return generate(add_components(settings), settings)
+
+
+def main():  # pragma: no cover
+    try:
+        save(generate_config())
+    except ConfigError as e:
+        sys.exit(str(e))
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()

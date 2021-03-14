@@ -1,8 +1,8 @@
-from constants import HOST_COMPONENTS, TOR_CRYPTOS
-from utils import modify_key
+from ..constants import HOST_COMPONENTS, TOR_CRYPTOS
+from ..utils import modify_key
 
 
-def rule(services):
+def rule(services, settings):
     items = HOST_COMPONENTS
     has_nginx = services.get("nginx")
     if services.get("tor"):

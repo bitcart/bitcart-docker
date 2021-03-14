@@ -14,6 +14,6 @@ services:
       - bitcoincash
     links:
       - bitcoincash
-    
+
 volumes:
   bitcoincash_datadir:

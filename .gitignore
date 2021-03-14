@@ -22,3 +22,7 @@ __pycache__/
 compose/generated.yml
 compose/images
 .mypy_cache
+.coverage
+htmlcov/
+.pytest_cache/
+coverage.xml
