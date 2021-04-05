@@ -1,11 +1,11 @@
 import os
 
-from .constants import CRYPTO_COMPONENTS, HOST_COMPONENTS
+from .constants import CRYPTO_COMPONENTS, ENV_PREFIX, HOST_COMPONENTS
 from .exceptions import ConfigError
 
 
 def env(name, default=None):
-    value = os.getenv(f"BITCART_{name}", default)
+    value = os.getenv(f"{ENV_PREFIX}{name}", default)
     if not value:  # additional checks for empty values
         value = default
     return value
@@ -46,3 +46,22 @@ class ModifyKey:
 
 
 modify_key = ModifyKey
+
+
+def apply_recursive(data, func):
+    if isinstance(data, dict):
+        new_data = {}
+        for key, value in data.items():
+            to_delete, new = apply_recursive(value, func)
+            if not to_delete:
+                new_data[key] = new
+        return False, new_data
+    elif isinstance(data, list):
+        new_data = []
+        for value in data:
+            to_delete, new = apply_recursive(value, func)
+            if not to_delete:
+                new_data.append(new)
+        return False, new_data
+    else:
+        return func(data)

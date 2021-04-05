@@ -91,6 +91,7 @@ get_profile_file() {
             exit 1
         fi
     fi
+    export BASH_PROFILE_SCRIPT
 }
 
 load_env() {
