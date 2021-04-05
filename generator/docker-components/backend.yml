@@ -34,6 +34,7 @@ services:
     expose:
       - "8000"
     volumes:
+      - "bitcart_datadir:/datadir"
       - ./conf:/app/conf
       - "bitcart_logs:/app/logs"
       - ./images:/app/images
@@ -46,4 +47,5 @@ services:
       - backend
 
 volumes:
+  bitcart_datadir:
   bitcart_logs:
