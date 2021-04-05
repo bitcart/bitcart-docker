@@ -163,8 +163,8 @@ if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
         mkdir -p "$(dirname $BITCART_HOST_SSH_AUTHORIZED_KEYS)"
         touch $BITCART_HOST_SSH_AUTHORIZED_KEYS
     fi
-    BITCART_SSH_AUTHORIZED_KEYS="/app/host_authorized_keys"
-    BITCART_SSH_KEY_FILE="/app/host_id_rsa"
+    BITCART_SSH_AUTHORIZED_KEYS="/datadir/host_authorized_keys"
+    BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
 fi
 
 # Validate some settings
