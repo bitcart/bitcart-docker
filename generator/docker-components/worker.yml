@@ -2,6 +2,7 @@ services:
   worker:
     restart: unless-stopped
     image: bitcartcc/bitcart:stable
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
     command: python3 worker.py
     environment:
       LOG_FILE: logs/bitcart-log.log
@@ -17,12 +18,19 @@ services:
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
       UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
+      SSH_CONNECTION: "root@host.docker.internal"
+      SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
+      SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}
+      BASH_PROFILE_SCRIPT: ${BASH_PROFILE_SCRIPT}
     user: "${USER_UID}:${USER_GID}"
     expose:
       - "9020"
     volumes:
+      - "bitcart_datadir:/datadir"
       - ./conf:/app/conf
       - "bitcart_logs:/app/logs"
+      - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
 volumes:
+  bitcart_datadir:
   bitcart_logs:

@@ -22,5 +22,4 @@ if [ ! -z "$SSH_KEY_FILE" ] && [ -f "$SSH_AUTHORIZED_KEYS" ] && ! grep -q "bitca
     cat "$SSH_KEY_FILE.pub" >> "$SSH_AUTHORIZED_KEYS"
 fi
 
-alembic upgrade head
-gunicorn -c gunicorn.conf.py main:app
+exec "$@"
