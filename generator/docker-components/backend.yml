@@ -2,7 +2,8 @@ services:
   backend:
     restart: unless-stopped
     image: bitcartcc/bitcart:stable
-    command: /usr/local/bin/docker-entrypoint.sh
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    command: bash -c "alembic upgrade head && gunicorn -c gunicorn.conf.py main:app"
     environment:
       LOG_FILE: logs/bitcart-log.log
       LOG_DIR: logs
@@ -26,14 +27,19 @@ services:
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
       UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
       BITCART_BACKEND_ROOTPATH: ${BITCART_BACKEND_ROOTPATH:-}
+      SSH_CONNECTION: "root@host.docker.internal"
+      SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
+      SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}
+      BASH_PROFILE_SCRIPT: ${BASH_PROFILE_SCRIPT}
     user: "${USER_UID}:${USER_GID}"
     expose:
       - "8000"
     volumes:
+      - "bitcart_datadir:/datadir"
       - ./conf:/app/conf
       - "bitcart_logs:/app/logs"
       - ./images:/app/images
-      - ${PWD}/queue:/app/queue
+      - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
   worker:
     depends_on:
@@ -42,4 +48,5 @@ services:
       - backend
 
 volumes:
+  bitcart_datadir:
   bitcart_logs:

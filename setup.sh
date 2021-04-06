@@ -36,6 +36,7 @@ Environment variables:
     REVERSEPROXY_HTTP_PORT: The port the reverse proxy binds to for public HTTP requests. Default: 80
     REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
+    BITCART_ENABLE_SSH: Gives BitcartCC SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
     BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
@@ -133,6 +134,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${REVERSEPROXY_DEFAULT_HOST:=none}"
 : "${REVERSEPROXY_HTTP_PORT:=80}"
 : "${REVERSEPROXY_HTTPS_PORT:=443}"
+: "${BITCART_ENABLE_SSH:=true}"
 
 # Crypto default settings (adjust to add a new coin)
 : "${BTC_NETWORK:=mainnet}"
@@ -148,6 +150,22 @@ get_profile_file "$SCRIPTS_POSTFIX"
 BITCART_BASE_DIRECTORY="$(pwd)"
 BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
 BITCART_DEPLOYMENT_CONFIG="$BITCART_BASE_DIRECTORY/.deploy"
+
+# SSH settings
+BITCART_SSH_KEY_FILE=""
+
+if $BITCART_ENABLE_SSH && ! [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
+    BITCART_HOST_SSH_AUTHORIZED_KEYS=~/.ssh/authorized_keys
+fi
+
+if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
+    if ! [[ -f "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
+        mkdir -p "$(dirname $BITCART_HOST_SSH_AUTHORIZED_KEYS)"
+        touch $BITCART_HOST_SSH_AUTHORIZED_KEYS
+    fi
+    BITCART_SSH_AUTHORIZED_KEYS="/datadir/host_authorized_keys"
+    BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
+fi
 
 # Validate some settings
 if [[ "$BITCART_REVERSEPROXY" == "nginx" ]] || [[ "$BITCART_REVERSEPROXY" == "nginx-https" ]] && [[ "$BITCART_HOST" ]]; then
@@ -165,6 +183,7 @@ BITCART_HOST=$BITCART_HOST
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
 REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
+BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 BITCART_STORE_HOST=$BITCART_STORE_HOST
 BITCART_STORE_API_URL=$BITCART_STORE_API_URL
@@ -188,6 +207,9 @@ Additional exported variables:
 BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
 BITCART_ENV_FILE=$BITCART_ENV_FILE
 BITCART_DEPLOYMENT_CONFIG=$BITCART_DEPLOYMENT_CONFIG
+BITCART_SSH_KEY_FILE=$BITCART_SSH_KEY_FILE
+BITCART_SSH_AUTHORIZED_KEYS=$BITCART_SSH_AUTHORIZED_KEYS
+BITCART_HOST_SSH_AUTHORIZED_KEYS=$BITCART_HOST_SSH_AUTHORIZED_KEYS
 ----------------------"
 
 if $PREVIEW_SETTINGS; then
@@ -229,6 +251,7 @@ export BITCART_REVERSEPROXY="${BITCART_REVERSEPROXY:-nginx-https}"
 export BITCART_CRYPTOS="${BITCART_CRYPTOS:-btc}"
 export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
 export BITCART_ENV_FILE="$BITCART_ENV_FILE"
+export BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 if cat "\$BITCART_ENV_FILE" &> /dev/null; then
   while IFS= read -r line; do
     ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line" || true

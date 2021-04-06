@@ -8,6 +8,9 @@ BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
 REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
+BITCART_SSH_KEY_FILE=$BITCART_SSH_KEY_FILE
+BITCART_SSH_AUTHORIZED_KEYS=$BITCART_SSH_AUTHORIZED_KEYS
+BITCART_HOST_SSH_AUTHORIZED_KEYS=$BITCART_HOST_SSH_AUTHORIZED_KEYS
 BITCART_STORE_HOST=$BITCART_STORE_HOST
 BITCART_STORE_API_URL=$BITCART_STORE_API_URL
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
@@ -28,24 +31,11 @@ $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_ROOTPATH")
 EOF
 }
 
-bitcart_start_listener() {
-    # setup pipe and it's listener
-    mkfifo queue &> /dev/null
-    nohup sh -c "tail -f queue | sh" &> /dev/null &
-    echo $! > listener.pid
-}
-
-bitcart_stop_listener() {
-    kill $(cat listener.pid) &> /dev/null || true
-}
-
 bitcart_start() {
-    bitcart_start_listener || true
     USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d
 }
 
 bitcart_stop() {
-    bitcart_stop_listener
     USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml down
 }
 
@@ -88,6 +78,7 @@ get_profile_file() {
             exit 1
         fi
     fi
+    export BASH_PROFILE_SCRIPT
 }
 
 load_env() {

@@ -31,7 +31,6 @@ fi
 
 . helpers.sh
 bitcart_update_docker_env
-bitcart_stop_listener
 bitcart_pull
 bitcart_start
 
