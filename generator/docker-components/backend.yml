@@ -3,9 +3,9 @@ services:
     restart: unless-stopped
     image: bitcartcc/bitcart:stable
     entrypoint: /usr/local/bin/docker-entrypoint.sh
-    command: |
-      alembic upgrade head && \
-      gunicorn -c gunicorn.conf.py main:app
+    command: >
+      bash -c "alembic upgrade head
+      && gunicorn -c gunicorn.conf.py main:app"
     environment:
       LOG_FILE: logs/bitcart-log.log
       LOG_DIR: logs
