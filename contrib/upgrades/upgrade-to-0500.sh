@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-docker exec -it compose_database_1 psql -U postgres bitcart << EOF
+docker exec compose_database_1 psql -U postgres bitcart << EOF
 ALTER TABLE discountsxproducts RENAME CONSTRAINT discountsxproducts_discount_id_fkey TO discountsxproducts_discount_id_discounts_fkey;
 ALTER TABLE discountsxproducts RENAME CONSTRAINT discountsxproducts_product_id_fkey TO discountsxproducts_product_id_products_fkey;
 ALTER TABLE discounts RENAME CONSTRAINT discounts_user_id_fkey TO discounts_user_id_users_fkey;
