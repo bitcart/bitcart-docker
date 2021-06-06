@@ -20,3 +20,28 @@ ALTER TABLE wallets RENAME CONSTRAINT wallets_user_id_fkey TO wallets_user_id_us
 ALTER TABLE tokens RENAME CONSTRAINT tokens_user_id_fkey TO tokens_user_id_users_fkey;
 ALTER TABLE walletsxstores RENAME CONSTRAINT walletsxstores_wallet_id_fkey TO walletsxstores_wallet_id_wallets_fkey;
 EOF
+
+docker top compose_worker_1 && docker exec -i compose_worker_1 python3 << EOF
+import asyncio
+
+from api import models, settings
+
+
+async def update_templates(model):
+    for obj in await model.query.gino.all():
+        templates = obj.templates.copy()
+        for key in templates:
+            templates[key] = str(templates[key])
+        await obj.update(templates=templates).apply()
+
+
+async def main():
+    print("Updating configured templates...")
+    await settings.init_db()
+    await update_templates(models.Store)
+    await update_templates(models.Product)
+    print("Updating templates done")
+
+
+asyncio.run(main())
+EOF
