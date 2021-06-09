@@ -2,7 +2,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/python:3.7
+      - image: cimg/python:3.7
 
     working_directory: ~/repo
 
@@ -34,7 +34,7 @@ jobs:
             sudo ./test-install.sh
   deploy:
     docker:
-      - image: circleci/python:3.7
+      - image: cimg/python:3.7
     working_directory: ~/repo
     steps:
       - checkout
