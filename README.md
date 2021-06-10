@@ -8,16 +8,68 @@
 To install BitcartCC, if you're on linux system(these scripts for windows will be added soon),
 to download, set up, and run your BitcartCC instance, it is a matter of few commands:
 
-    git clone https://github.com/bitcartcc/bitcart-docker
-    cd bitcart-docker
-    # set needed environment variables, see below
-    ./setup.sh
+```bash
+sudo su -
+git clone https://github.com/bitcartcc/bitcart-docker
+cd bitcart-docker
+# set needed environment variables, see below
+./setup.sh
+```
 
 By default it will set up a systemd/upstart service to ensure your instance is running 24/7.
 To configure your installation you can set different environment variables.
 
 There are two types of environment variables: generator and app.
 To understand how generator works, see [Architecture](#architecture).
+
+Here is an example of the setup you will use in 90% cases. Replace `yourdomain.tld` with your actual domain (for bitcartcc demo, it was `bitcartcc.com`):
+
+```bash
+sudo su -
+git clone https://github.com/bitcartcc/bitcart-docker
+cd bitcart-docker
+export BITCART_HOST=yourdomain.tld
+./setup.sh
+```
+
+This setup utilizes the [one domain mode](https://docs.bitcartcc.com/guides/one-domain-mode). We recommend you to read about that.
+
+**Important: for everything to work, you will need to first set up DNS A records for** `BITCART_HOST`**,** `BITCART_ADMIN_HOST` **(if set) and** `BITCART_STORE_HOST` **(if set) to point to the server where you are deploying BitcartCC.**
+
+![DNS A records for bitcartcc demo](https://raw.githubusercontent.com/bitcartcc/bitcart-docs/master/.gitbook/assets/namecheap_dns_records.png)
+
+_**Tip:**_ All the `_HOST` environment variables determine on which host (domain, without protocol) to run a service. All the `_URL` environment variables are to specify the URL (with protocol, http:// or https://) of the BitcartCC Merchants API to use.
+
+_**Tip:**_ if you want to try out BitcartCC locally on your PC without a server, you can either enable [Tor support](https://docs.bitcartcc.com/guides/tor) or use local deployment mode.
+
+For that, replace `yourdomain.tld` with `bitcart.local` (or any domain ending in `.local`), and it will modify `/etc/hosts` for you, for it to work like a regular domain. If using local deployment mode, of course your instance will only be accessible from your PC.
+
+If not using the [one domain mode](https://docs.bitcartcc.com/guides/one-domain-mode), then you would probably run:
+
+```bash
+sudo su -
+git clone https://github.com/bitcartcc/bitcart-docker
+cd bitcart-docker
+export BITCART_HOST=api.yourdomain.tld
+export BITCART_ADMIN_HOST=admin.yourdomain.tld
+export BITCART_STORE_HOST=store.yourdomain.tld
+export BITCART_ADMIN_API_URL=https://api.yourdomain.tld
+export BITCART_STORE_API_URL=https://api.yourdomain.tld
+./setup.sh
+```
+
+Why was it done like so? It's because it is possible to run Merchants API on one server, and everything else on different servers.
+
+But in most cases, you can basically do:
+
+```bash
+# if https (BITCART_REVERSEPROXY=nginx-https, default)
+export BITCART_ADMIN_API_URL=https://$BITCART_HOST
+export BITCART_STORE_API_URL=https://$BITCART_HOST
+# if http (BITCART_REVERSEPROXY=nginx, local deployments, other)
+export BITCART_ADMIN_API_URL=http://$BITCART_HOST
+export BITCART_STORE_API_URL=http://$BITCART_HOST
+```
 
 ## Configuration
 
@@ -46,16 +98,43 @@ Here is a complete list of configuration settings:
 
 ## Live demo
 
-We have live demo available at https://admin.bitcartcc.com (admin), https://store.bitcartcc.com (store) and https://api.bitcartcc.com (merchants API).
+We have live demo available at:
+
+- [https://admin.bitcartcc.com](https://admin.bitcartcc.com/) BitcartCC Admin Panel
+- [https://store.bitcartcc.com](https://store.bitcartcc.com/) BitcartCC Ready Store POS
+- [https://api.bitcartcc.com](https://api.bitcartcc.com/) BitcartCC Merchants API
+
 Note that it isn't designed for your production use, it is for testing and learning.
 
 ## Guide: how demo was set up
 
 Basically via deployment steps above (:
 
-Or you can use our CLI wizard to install BitcartCC on remote servers:
+Here are the commands used on our demo, as of Februrary 2021, BitcartCC Version 0.2.2.0:
 
-    wget https://github.com/bitcartcc/bitcart-docker/releases/download/0.0.1/bitcart-cli && chmod +x bitcart-cli && ./bitcart-cli
+```bash
+sudo su -
+git clone https://github.com/bitcartcc/bitcart-docker
+cd bitcart-docker
+# host settings
+export BITCART_HOST=api.bitcartcc.com
+export BITCART_ADMIN_HOST=admin.bitcartcc.com
+export BITCART_STORE_HOST=store.bitcartcc.com
+export BITCART_ADMIN_API_URL=https://api.bitcartcc.com
+export BITCART_STORE_API_URL=https://api.bitcartcc.com
+# reverse proxy settings, we use none because we configure nginx manually
+export BITCART_REVERSEPROXY=none
+# cryptocurrency settings
+# we enable all currencies we support on the demo to test that they work
+export BITCART_CRYPTOS=btc,bch,ltc,gzro,bsty
+# lightning network for supported coins
+export BTC_LIGHTNING=true
+export LTC_LIGHTNING=true
+export BSTY_LIGHTNING=true
+# tor support
+export BITCART_ADDITIONAL_COMPONENTS=tor
+./setup.sh
+```
 
 ## Development builds
 
@@ -63,18 +142,20 @@ Currently the testing of individual pieces of BitcartCC is done via local develo
 
 When doing some changes in generator, it is usually tested via local python installation, like so:
 
-    cd generator
-    pip3 install oyaml
-    python3 main.py
-    cd ..
-    cat compose/generated.yml # see the generated output
+```bash
+cd generator
+pip3 install oyaml
+python3 main.py
+cd ..
+cat compose/generated.yml # see the generated output
+```
 
 If it is needed to test generator in docker, then run those commands:
 
-    cd generator
-    docker build -t bitcartcc/docker-compose-generator .
-    cd ..
-    ./build.sh # now uses local image
+```bash
+export BITCARTGEN_DOCKER_IMAGE=bitcartcc/docker-compose-generator:local
+./build.sh # now uses local image
+```
 
 ## Architecture
 
