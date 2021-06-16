@@ -18,6 +18,7 @@ CRYPTOS = {
     "gzro": {"component": "gravity"},
     "bsty": {"component": "globalboost"},
     "bch": {"component": "bitcoincash"},
+    "xrg": {"component": "ergon"},
 }
 TOR_CRYPTOS = {
     "btc": CRYPTOS["btc"]
