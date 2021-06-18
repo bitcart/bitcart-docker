@@ -12,6 +12,7 @@ LTC_HOST=litecoin
 GZRO_HOST=gravity
 BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
+XRG_HOST=ergon
 EOF
 mkdir -p images
 mkdir -p images/products

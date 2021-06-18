@@ -1,11 +1,11 @@
 services:
-  bitcoincash:
+  ergon:
     restart: unless-stopped
     image: bitcartcc/bitcart-xrg:stable
     environment:
       XRG_NETWORK: ${XRG_NETWORK:-mainnet}
     expose:
-      - "5004"
+      - "5005"
     volumes:
       - "ergon_datadir:/data"
 
