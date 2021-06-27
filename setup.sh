@@ -13,7 +13,7 @@ This script must be run as root, except on Mac OS
     -h, --help: Show help
     -p: print settings and exit
     --name name: Configure new deployment name. Affects naming of profile env files and
-    startup config files. Allows multiple deployments on one server. 
+    startup config files. Allows multiple deployments on one server.
     Empty by default
     --install-only: Run install only
     --docker-unavailable: Same as --install-only, but will also skip install steps requiring docker
@@ -46,6 +46,7 @@ Environment variables:
     BTC_NETWORK: The network to run bitcoin daemon on (eg. mainnet, testnet)
     BTC_LIGHTNING: Whether to enable bitcoin lightning network or not (eg. true, false)
     BCH_NETWORK: The network to run bitcoin cash daemon on (eg. mainnet, testnet)
+    XRG_NETWORK: The network to run ergon daemon on (eg. mainnet)
     LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
     LTC_LIGHTNING: Whether to enable litecoin lightning network or not (eg. true, false)
     GZRO_NETWORK: The network to run gravity daemon on (eg. mainnet, testnet)
@@ -53,7 +54,7 @@ Environment variables:
     BSTY_NETWORK: The network to run globalboost daemon on (eg. mainnet, testnet)
     BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
-    
+
 END
 }
 
@@ -140,6 +141,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BTC_NETWORK:=mainnet}"
 : "${BTC_LIGHTNING:=false}"
 : "${BCH_NETWORK:=mainnet}"
+: "${XRG_NETWORK:=mainnet}"
 : "${LTC_NETWORK:=mainnet}"
 : "${LTC_LIGHTNING:=false}"
 : "${GZRO_NETWORK:=mainnet}"
@@ -196,6 +198,7 @@ BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
 BTC_NETWORK=$BTC_NETWORK
 BTC_LIGHTNING=$BTC_LIGHTNING
 BCH_NETWORK=$BCH_NETWORK
+XRG_NETWORK=$XRG_NETWORK
 LTC_NETWORK=$LTC_NETWORK
 LTC_LIGHTNING=$LTC_LIGHTNING
 GZRO_NETWORK=$GZRO_NETWORK
@@ -231,6 +234,7 @@ LTC_HOST=litecoin
 GZRO_HOST=gravity
 BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
+XRG_HOST=ergon
 EOF
 
 # Configure deployment config to determine which deployment name to use
@@ -286,7 +290,7 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
     if ! [[ -x "$(command -v docker)" ]]; then
         if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]] || [[ "$(uname -m)" == "aarch64" ]]; then
             if [[ "$OSTYPE" == "darwin"* ]]; then
-                # Mac OS	
+                # Mac OS
                 if ! [[ -x "$(command -v brew)" ]]; then
                     # Brew is not installed, install it now
                     echo "Homebrew, the package manager for Mac OS, is not installed. Installing it now..."
@@ -345,7 +349,7 @@ if $HAS_DOCKER; then
         exit 1
     fi
 fi
-   
+
 # Schedule for reboot
 if $STARTUP_REGISTER && [[ -x "$(command -v systemctl)" ]]; then
     # Use systemd
