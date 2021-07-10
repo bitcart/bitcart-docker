@@ -20,9 +20,7 @@ CRYPTOS = {
     "bch": {"component": "bitcoincash"},
     "xrg": {"component": "ergon"},
 }
-TOR_CRYPTOS = {
-    "btc": CRYPTOS["btc"]
-}  # cryptos to enable tor proxy for, restricted by coingecko (cloudflare) blocking tor exit nodes
+TOR_CRYPTOS = {"btc": CRYPTOS["btc"]}  # cryptos to enable tor proxy for
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
 
 # Installation packs
