@@ -121,3 +121,16 @@ apply_local_modifications() {
         fi
     fi
 }
+
+container_name() {
+    deployment_name=${NAME:-compose}
+    echo "${deployment_name}_$1"
+}
+
+bitcart_dump_db() {
+    backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
+    if [ ! -d "$backup_dir" ]; then
+        docker volume create backup_datadir
+    fi
+    docker exec $(container_name "database_1") pg_dumpall -c -U postgres > "$backup_dir/$1"
+}
