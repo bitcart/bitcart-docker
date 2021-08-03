@@ -26,7 +26,7 @@ else
     bitcart_stop
 
     echo "Backing up files …"
-    tar --exclude="$backup_dir/*" --exclude="$database_dir/*" -cvzf $backup_path $dbdump_path "$volumes_dir/$(container_name)*"
+    tar --exclude="$backup_dir/*" --exclude="$database_dir/*" -cvzf $backup_path $dbdump_path "$volumes_dir/$(container_name)"*
 
     echo "Restarting BitcartCC…"
     bitcart_start
