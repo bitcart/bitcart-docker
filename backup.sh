@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 
+. helpers.sh
+load_env
+
+cd "$BITCART_BASE_DIRECTORY"
+
 volumes_dir=/var/lib/docker/volumes
 backup_dir="$volumes_dir/backup_datadir"
+database_dir="$volumes_dir/$(container_name "dbdata")"
 timestamp=$(date "+%Y%m%d-%H%M%S")
 filename="$timestamp-backup.tar.gz"
 dumpname="$timestamp-postgres.sql"
 
 backup_path="$backup_dir/_data/${filename}"
 dbdump_path="$backup_dir/_data/${dumpname}"
-
-. helpers.sh
-load_env
-
-cd "$BITCART_BASE_DIRECTORY"
 
 echo "Dumping database …"
 bitcart_dump_db $dumpname
@@ -25,7 +26,7 @@ else
     bitcart_stop
 
     echo "Backing up files …"
-    tar --exclude="$backup_dir/*" -cvzf $backup_path $dbdump_path $volumes_dir
+    tar --exclude="$backup_dir/*" --exclude="$database_dir/*" -cvzf $backup_path $dbdump_path $volumes_dir
 
     echo "Restarting BitcartCC…"
     bitcart_start
