@@ -30,7 +30,7 @@ else
     for fname in bitcart_datadir bitcart_logs tor_servicesdir; do
         files+=("$volumes_dir/$(container_name $fname)")
     done
-    tar -cvzf $backup_path $dbdump_path "${files[@]}"
+    tar -cvzf $backup_path -C $volumes_dir $dbdump_path "${files[@]}"
 
     echo "Restarting BitcartCC…"
     bitcart_start
