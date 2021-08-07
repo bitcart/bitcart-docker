@@ -62,7 +62,7 @@ while (("$#")); do
 done
 
 . helpers.sh
-load_env
+load_env true
 
 cd "$BITCART_BASE_DIRECTORY"
 

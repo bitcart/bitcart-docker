@@ -83,7 +83,7 @@ get_profile_file() {
 }
 
 load_env() {
-    get_profile_file "$SCRIPTS_POSTFIX" false
+    get_profile_file "$SCRIPTS_POSTFIX" ${1:-false}
     . ${BASH_PROFILE_SCRIPT}
 }
 
@@ -133,4 +133,8 @@ bitcart_dump_db() {
         docker volume create backup_datadir
     fi
     docker exec $(container_name "database_1") pg_dumpall -c -U postgres > "$backup_dir/$1"
+}
+
+bitcart_restore_db() {
+    cat database.sql | docker exec -i $(container_name "database_1") psql -U postgres
 }
