@@ -4,7 +4,7 @@
 load_env
 
 cd "$BITCART_BASE_DIRECTORY"
-
+deployment_name=$(container_name)
 volumes_dir=/var/lib/docker/volumes
 backup_dir="$volumes_dir/backup_datadir"
 timestamp=$(date "+%Y%m%d-%H%M%S")
@@ -29,7 +29,8 @@ else
     for fname in bitcart_datadir bitcart_logs tor_servicesdir; do
         files+=("$(container_name $fname)")
     done
-    tar -cvzf $backup_path -C $volumes_dir --transform "s|^$container_name|volumes/$container_name|" "${files[@]}" \
+    # put all volumes to volumes directory and remove timestamps
+    tar -cvzf $backup_path -C $volumes_dir --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
         -C "$(dirname $dbdump_path)" --transform "s|$timestamp-||" --transform "s|$timestamp||" $dumpname
 
     echo "Restarting BitcartCC…"
