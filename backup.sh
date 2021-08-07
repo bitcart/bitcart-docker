@@ -9,7 +9,7 @@ volumes_dir=/var/lib/docker/volumes
 backup_dir="$volumes_dir/backup_datadir"
 timestamp=$(date "+%Y%m%d-%H%M%S")
 filename="$timestamp-backup.tar.gz"
-dumpname="$timestamp-postgres.sql"
+dumpname="$timestamp-database.sql"
 
 backup_path="$backup_dir/_data/${filename}"
 dbdump_path="$backup_dir/_data/${dumpname}"
@@ -29,7 +29,8 @@ else
     for fname in bitcart_datadir bitcart_logs tor_servicesdir; do
         files+=("$(container_name $fname)")
     done
-    tar -cvzf $backup_path -C $volumes_dir "${files[@]}" -C "$(dirname $dbdump_path)" $dumpname
+    tar -cvzf $backup_path -C $volumes_dir "${files[@]}" \ 
+    -C "$(dirname $dbdump_path)" --transform "s|$timestamp|" --transform "s|$timestamp-|" $dumpname
 
     echo "Restarting BitcartCC…"
     bitcart_start
