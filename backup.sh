@@ -26,19 +26,23 @@ else
     bitcart_stop
 
     echo "Backing up files …"
-    tar --exclude="$backup_dir/*" --exclude="$database_dir/*" -cvzf $backup_path $dbdump_path "$volumes_dir/$(container_name)"*
+    files=()
+    for fname in bitcart_datadir bitcart_logs tor_servicesdir; do
+        files+=("$volumes_dir/$(container_name $fname)")
+    done
+    tar -cvzf $backup_path $dbdump_path "${files[@]/#/-}"
 
     echo "Restarting BitcartCC…"
     bitcart_start
 fi
 
 delete_backup() {
-  echo "Deleting local backup …"
-  rm $backup_path
+    echo "Deleting local backup …"
+    rm $backup_path
 }
 
 case $BACKUP_PROVIDER in
-  "S3")
+"S3")
     echo "Uploading to S3 …"
     docker run --rm -v ~/.aws:/root/.aws -v $backup_path:/aws/$filename amazon/aws-cli s3 cp $filename s3://$S3_BUCKET/$S3_PATH
     delete_backup
@@ -50,7 +54,7 @@ case $BACKUP_PROVIDER in
     delete_backup
     ;;
 
-  *)
+*)
     echo "Backed up to $backup_path"
     ;;
 esac
