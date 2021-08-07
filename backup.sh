@@ -30,7 +30,7 @@ else
         files+=("$(container_name $fname)")
     done
     tar -cvzf $backup_path -C $volumes_dir "${files[@]}" \
-        -C "$(dirname $dbdump_path)" --transform "s|$timestamp||" --transform "s|$timestamp-||" $dumpname
+        -C "$(dirname $dbdump_path)" --transform "s|$timestamp-||" --transform "s|$timestamp||" $dumpname
 
     echo "Restarting BitcartCC…"
     bitcart_start
