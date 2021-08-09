@@ -33,7 +33,7 @@ EOF
 }
 
 bitcart_start() {
-    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d
+    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d $1
 }
 
 bitcart_stop() {
@@ -136,5 +136,6 @@ bitcart_dump_db() {
 }
 
 bitcart_restore_db() {
-    cat database.sql | docker exec -i $(container_name "database_1") psql -U postgres
+    bitcart_start database
+    cat $1 | docker exec -i $(container_name "database_1") psql -U postgres
 }
