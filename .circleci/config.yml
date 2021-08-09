@@ -22,12 +22,11 @@ jobs:
             codecov
 
   cansetup:
-    docker:
-      - image: cimg/python:3.7
+    machine:
+      image: ubuntu-2004:202107-02
     working_directory: ~/repo
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: Test installation
           command: |
