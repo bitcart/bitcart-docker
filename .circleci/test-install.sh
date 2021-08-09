@@ -2,7 +2,8 @@
 
 set -e
 
-apt-get remove docker-ce
+# We remove installed docker to test that our scripts can install it by themselves
+apt-get purge docker-ce docker-ce-cli containerd.io
 rm -rf /usr/local/bin/docker-compose
 
 cd ../..
