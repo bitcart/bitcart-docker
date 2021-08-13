@@ -23,7 +23,7 @@ jobs:
 
   cansetup:
     machine:
-      enabled: true
+      image: ubuntu-2004:202107-02
     working_directory: ~/repo
     steps:
       - checkout

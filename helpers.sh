@@ -33,7 +33,7 @@ EOF
 }
 
 bitcart_start() {
-    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d
+    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d $1
 }
 
 bitcart_stop() {
@@ -83,7 +83,7 @@ get_profile_file() {
 }
 
 load_env() {
-    get_profile_file "$SCRIPTS_POSTFIX" false
+    get_profile_file "$SCRIPTS_POSTFIX" ${1:-false}
     . ${BASH_PROFILE_SCRIPT}
 }
 
@@ -120,4 +120,22 @@ apply_local_modifications() {
             modify_host 172.17.0.1 $BITCART_ADMIN_HOST
         fi
     fi
+}
+
+container_name() {
+    deployment_name=${NAME:-compose}
+    echo "${deployment_name}_$1"
+}
+
+bitcart_dump_db() {
+    backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
+    if [ ! -d "$backup_dir" ]; then
+        docker volume create backup_datadir
+    fi
+    docker exec $(container_name "database_1") pg_dumpall -c -U postgres > "$backup_dir/$1"
+}
+
+bitcart_restore_db() {
+    bitcart_start database
+    cat $1 | docker exec -i $(container_name "database_1") psql -U postgres
 }

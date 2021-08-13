@@ -2,8 +2,7 @@
 
 set -e
 
-apt-get remove docker-ce
-rm -rf /usr/local/bin/docker-compose
+# TODO: test that docker itself is installed without issues automatically (circleci issue with docker preinstalled)
 
 cd ../..
 
