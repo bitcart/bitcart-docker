@@ -3,11 +3,11 @@
 set -e
 
 # We remove installed docker to test that our scripts can install it by themselves
-apt-get purge docker-ce docker-ce-cli containerd.io
-rm -rf /usr/local/bin/docker-compose
 # To simulate reboot
 systemctl reset-failed docker.service
 systemctl reset-failed docker.socket
+apt-get purge docker-ce docker-ce-cli containerd.io
+rm -rf /usr/local/bin/docker-compose
 
 cd ../..
 
