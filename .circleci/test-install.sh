@@ -6,7 +6,7 @@ set -e
 # To simulate reboot
 systemctl reset-failed docker.service
 systemctl reset-failed docker.socket
-apt-get purge docker-ce docker-ce-cli containerd.io
+apt-get remove docker-ce docker-ce-cli containerd.io
 rm -rf /usr/local/bin/docker-compose
 
 cd ../..
