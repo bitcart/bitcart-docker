@@ -2,12 +2,7 @@
 
 set -e
 
-# We remove installed docker to test that our scripts can install it by themselves
-# To simulate reboot
-systemctl reset-failed docker.service
-systemctl reset-failed docker.socket
-apt-get remove docker-ce docker-ce-cli containerd.io
-rm -rf /usr/local/bin/docker-compose
+# TODO: test that docker itself is installed without issues automatically (circleci issue with docker preinstalled)
 
 cd ../..
 
