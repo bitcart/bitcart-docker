@@ -14,5 +14,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openss
     pip install -r requirements/deterministic/production.txt && \
     rm -rf /root/.cache/pip
 USER electrum
-VOLUME /app/images
 CMD ["sh"]

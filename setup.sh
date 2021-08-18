@@ -4,8 +4,8 @@ set +x
 
 . helpers.sh
 
-function display_help () {
-cat <<-END
+function display_help() {
+    cat <<-END
 Usage:
 ------
 Install BitcartCC on this server
@@ -66,60 +66,60 @@ NAME_INPUT=false
 PREVIEW_SETTINGS=false
 NAME=
 SCRIPTS_POSTFIX=
-while (( "$#" )); do
-  case "$1" in
+while (("$#")); do
+    case "$1" in
     -h)
-      display_help
-      exit 0
-      ;;
+        display_help
+        exit 0
+        ;;
     --help)
-      display_help
-      exit 0
-      ;;
+        display_help
+        exit 0
+        ;;
     -p)
-      PREVIEW_SETTINGS=true
-      shift 1
-      ;;
+        PREVIEW_SETTINGS=true
+        shift 1
+        ;;
     --install-only)
-      START=false
-      shift 1
-      ;;
+        START=false
+        shift 1
+        ;;
     --docker-unavailable)
-      START=false
-      HAS_DOCKER=false
-      shift 1
-      ;;
+        START=false
+        HAS_DOCKER=false
+        shift 1
+        ;;
     --no-startup-register)
-      STARTUP_REGISTER=false
-      shift 1
-      ;;
+        STARTUP_REGISTER=false
+        shift 1
+        ;;
     --no-systemd-reload)
-      SYSTEMD_RELOAD=false
-      shift 1
-      ;;
+        SYSTEMD_RELOAD=false
+        shift 1
+        ;;
     --name)
-      NAME_INPUT=true
-      shift 1
-      ;;
+        NAME_INPUT=true
+        shift 1
+        ;;
     --) # end argument parsing
-      shift
-      break
-      ;;
-    -*|--*=) # unsupported flags
-      echo "Error: Unsupported flag $1" >&2
-      display_help
-      exit 1
-      ;;
+        shift
+        break
+        ;;
+    -* | --*=) # unsupported flags
+        echo "Error: Unsupported flag $1" >&2
+        display_help
+        exit 1
+        ;;
     *) # preserve positional arguments
-      if $NAME_INPUT; then
-        NAME="$1"
-        SCRIPTS_POSTFIX="-$NAME"
-        NAME_INPUT=false
-      fi
-      PARAMS="$PARAMS $1"
-      shift
-      ;;
-  esac
+        if $NAME_INPUT; then
+            NAME="$1"
+            SCRIPTS_POSTFIX="-$NAME"
+            NAME_INPUT=false
+        fi
+        PARAMS="$PARAMS $1"
+        shift
+        ;;
+    esac
 done
 
 # Check root, and set correct profile file for the platform
@@ -222,23 +222,8 @@ fi
 # Local setup modifications
 apply_local_modifications
 
-# Adjust backend for docker
-mkdir -p compose/conf
-mkdir -p compose/images
-mkdir -p compose/images/products
-cat > compose/conf/.env << EOF
-DB_HOST=database
-REDIS_HOST=redis://redis
-BTC_HOST=bitcoin
-LTC_HOST=litecoin
-GZRO_HOST=gravity
-BSTY_HOST=globalboost
-BCH_HOST=bitcoincash
-XRG_HOST=ergon
-EOF
-
 # Configure deployment config to determine which deployment name to use
-cat > ${BITCART_DEPLOYMENT_CONFIG} << EOF
+cat >${BITCART_DEPLOYMENT_CONFIG} <<EOF
 #!/bin/bash
 NAME=$NAME
 SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
@@ -246,7 +231,7 @@ EOF
 
 # Init the variables when a user log interactively
 touch "$BASH_PROFILE_SCRIPT"
-cat > ${BASH_PROFILE_SCRIPT} << EOF
+cat >${BASH_PROFILE_SCRIPT} <<EOF
 #!/bin/bash
 export COMPOSE_HTTP_TIMEOUT="180"
 export BITCART_BASE_DIRECTORY="$BITCART_BASE_DIRECTORY"
@@ -265,7 +250,6 @@ EOF
 
 chmod +x ${BASH_PROFILE_SCRIPT}
 chmod +x ${BITCART_DEPLOYMENT_CONFIG}
-
 
 echo -e "BitcartCC environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
 echo -e "BitcartCC deployment config saved in $BITCART_DEPLOYMENT_CONFIG\n"
@@ -371,13 +355,13 @@ ExecStart=/bin/bash -c  '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECT
 ExecStop=/bin/bash -c   '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh'
 ExecReload=/bin/bash -c '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh && ./start.sh'
 [Install]
-WantedBy=multi-user.target" > "/etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.service"
+WantedBy=multi-user.target" >"/etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.service"
 
     if ! [[ -f "/etc/docker/daemon.json" ]] && [ -w "/etc/docker" ]; then
         echo "{
 \"log-driver\": \"json-file\",
 \"log-opts\": {\"max-size\": \"5m\", \"max-file\": \"3\"}
-}" > /etc/docker/daemon.json
+}" >/etc/docker/daemon.json
         echo "Setting limited log files in /etc/docker/daemon.json"
         $SYSTEMD_RELOAD && $START && systemctl restart docker
     fi
@@ -409,7 +393,7 @@ script
     . \"$BASH_PROFILE_SCRIPT\"
     cd \"$BITCART_BASE_DIRECTORY\"
     ./start.sh
-end script" > /etc/init/start_containers.conf
+end script" >/etc/init/start_containers.conf
     echo -e "BitcartCC upstart configured in /etc/init/start_containers.conf\n"
 
     if $START; then

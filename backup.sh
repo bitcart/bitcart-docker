@@ -89,7 +89,7 @@ else
 
     echo "Backing up files …"
     files=()
-    for fname in bitcart_datadir bitcart_logs tor_servicesdir; do
+    for fname in bitcart_datadir tor_servicesdir; do
         files+=("$(container_name $fname)")
     done
     # put all volumes to volumes directory and remove timestamps

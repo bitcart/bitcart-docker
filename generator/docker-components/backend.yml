@@ -5,8 +5,8 @@ services:
     entrypoint: /usr/local/bin/docker-entrypoint.sh
     command: bash -c "alembic upgrade head && gunicorn -c gunicorn.conf.py main:app"
     environment:
-      LOG_FILE: logs/bitcart-log.log
-      LOG_DIR: logs
+      LOG_FILE: bitcart.log
+      BITCART_DATADIR: /datadir
       DB_PORT: 5432
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy
@@ -37,9 +37,6 @@ services:
       - "8000"
     volumes:
       - "bitcart_datadir:/datadir"
-      - ./conf:/app/conf
-      - "bitcart_logs:/app/logs"
-      - ./images:/app/images
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
   worker:
@@ -50,4 +47,3 @@ services:
 
 volumes:
   bitcart_datadir:
-  bitcart_logs:
