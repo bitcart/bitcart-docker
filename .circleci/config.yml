@@ -49,6 +49,7 @@ jobs:
           command: |
             cd generator
             docker login --username=$DOCKER_USER --password=$DOCKER_PASS
+            docker run --privileged --rm tonistiigi/binfmt --install ${BUILD_PLATFORMS}
             docker buildx build --push --platform ${BUILD_PLATFORMS} --tag mrnaif/docker-compose-generator:test .
 
 workflows:
