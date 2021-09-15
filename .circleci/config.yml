@@ -57,5 +57,3 @@ workflows:
     jobs:
       - deploy:
           context: global
-          requires:
-            - cansetup
