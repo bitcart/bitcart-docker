@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openss
     useradd --uid 1000 --gid electrum --shell /bin/bash --create-home electrum && \
     pip install -r requirements/deterministic/web.txt && \
     pip install -r requirements/deterministic/production.txt && \
-    apt-get purge python3-dev libffi-dev build-essential && \
+    apt-get purge -y python3-dev libffi-dev build-essential && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /root/.cache/pip
 USER electrum
