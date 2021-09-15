@@ -50,11 +50,20 @@ jobs:
             cd generator
             docker login --username=$DOCKER_USER --password=$DOCKER_PASS
             docker run --privileged --rm tonistiigi/binfmt --install ${BUILD_PLATFORMS}
-            docker buildx build --push --platform ${BUILD_PLATFORMS} --tag mrnaif/docker-compose-generator:test .
+            docker buildx build --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest .
 
 workflows:
   version: 2
   build:
     jobs:
+      - test
+      - cansetup:
+          requires:
+            - test
       - deploy:
           context: global
+          requires:
+            - cansetup
+          filters:
+            branches:
+              only: master
