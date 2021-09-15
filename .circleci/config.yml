@@ -35,7 +35,12 @@ jobs:
   deploy:
     docker:
       - image: cimg/python:3.7
+
+    environment:
+      BUILD_PLATFORMS: linux/amd64,linux/arm/v7,linux/arm64/v8
+
     working_directory: ~/repo
+
     steps:
       - checkout
       - setup_remote_docker
@@ -43,9 +48,8 @@ jobs:
           name: build docker image
           command: |
             cd generator
-            docker build -t bitcartcc/docker-compose-generator:latest .
             docker login --username=$DOCKER_USER --password=$DOCKER_PASS
-            docker push bitcartcc/docker-compose-generator:latest
+            docker buildx build --push --platform ${BUILD_PLATFORMS} --tag mrnaif/docker-compose-generator:test
 
 workflows:
   version: 2
@@ -59,6 +63,3 @@ workflows:
           context: global
           requires:
             - cansetup
-          filters:
-            branches:
-              only: master
