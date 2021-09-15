@@ -49,16 +49,12 @@ jobs:
           command: |
             cd generator
             docker login --username=$DOCKER_USER --password=$DOCKER_PASS
-            docker buildx build --push --platform ${BUILD_PLATFORMS} --tag mrnaif/docker-compose-generator:test
+            docker buildx build --push --platform ${BUILD_PLATFORMS} --tag mrnaif/docker-compose-generator:test .
 
 workflows:
   version: 2
   build:
     jobs:
-      - test
-      - cansetup:
-          requires:
-            - test
       - deploy:
           context: global
           requires:
