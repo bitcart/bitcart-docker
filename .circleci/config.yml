@@ -51,7 +51,7 @@ jobs:
           name: build docker image
           command: |
             cd generator
-            docker buildx build --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest .
+            docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest .
 
 workflows:
   version: 2
