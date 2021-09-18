@@ -20,9 +20,9 @@ Environment variables:
     S3_BUCKET: where to upload the backup via s3
     S3_PATH: path to the backup on the remote server
 Supported providers:
-* Local: keeps backups in backup_datadir docker volume (default)
-* SCP: uploads the backup to a remote server via scp
-* S3: uploads to s3://bucket/path
+* local: keeps backups in backup_datadir docker volume (default)
+* scp: uploads the backup to a remote server via scp
+* s3: uploads to s3://bucket/path
 END
 }
 
@@ -114,13 +114,13 @@ delete_backup() {
 }
 
 case $BACKUP_PROVIDER in
-"S3")
+"s3")
     echo "Uploading to S3 …"
     docker run --rm -v ~/.aws:/root/.aws -v $backup_path:/aws/$filename amazon/aws-cli s3 cp $filename s3://$S3_BUCKET/$S3_PATH
     delete_backup
     ;;
 
-"SCP")
+"scp")
     echo "Uploading via SCP …"
     scp $backup_path $SCP_TARGET
     delete_backup
