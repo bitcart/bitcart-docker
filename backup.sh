@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Add any volume names that need to be backed up here
+BACKUP_VOLUMES=(bitcart_datadir tor_servicesdir tor_datadir tor_relay_datadir)
+
 function display_help() {
     cat <<-END
 Usage:
@@ -89,8 +92,11 @@ else
 
     echo "Backing up files …"
     files=()
-    for fname in bitcart_datadir tor_servicesdir; do
-        files+=("$(container_name $fname)")
+    for fname in "${BACKUP_VOLUMES[@]}"; do
+        fname=$(container_name $fname)
+        if [ -d "$volumes_dir/$fname" ]; then
+            files+=("$fname")
+        fi
     done
     # put all volumes to volumes directory and remove timestamps
     tar -cvzf $backup_path -C $volumes_dir --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
