@@ -304,9 +304,9 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
 
     if ! [[ -x "$(command -v docker-compose)" ]]; then
         if ! [[ "$OSTYPE" == "darwin"* ]] && $HAS_DOCKER; then
-            echo "Trying to install docker-compose by using the docker-compose-builder ($(uname -m))"
+            echo "Trying to install docker-compose by using the bitcartcc/docker-compose ($(uname -m))"
             ! [[ -d "dist" ]] && mkdir dist
-            docker run --rm -v "$(pwd)/dist:/dist" bitcartcc/docker-compose-builder:1.25.4
+            docker run --rm -v "$(pwd)/dist:/dist" bitcartcc/docker-compose:1.28.6
             mv dist/docker-compose /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
             rm -rf "dist"

@@ -39,7 +39,7 @@ services:
 
   tor:
     restart: unless-stopped
-    image: bitcartcc/tor:0.4.4.7
+    image: bitcartcc/tor:0.4.6.5
     container_name: tor
     environment:
       TOR_PASSWORD: bitcartcc
