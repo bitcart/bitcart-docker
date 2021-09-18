@@ -54,7 +54,9 @@ Environment variables:
     BSTY_NETWORK: The network to run globalboost daemon on (eg. mainnet, testnet)
     BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
-
+Add-on specific variables:
+    TOR_RELAY_NICKNAME: If tor relay is activated, the relay nickname
+    TOR_RELAY_EMAIL: If tor relay is activated, the email for Tor to contact you regarding your relay
 END
 }
 
