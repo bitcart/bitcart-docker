@@ -51,8 +51,10 @@ repos:
     rev: v2.3.2
     hooks:
       - id: prettier
-  - repo: https://github.com/syntaqx/git-hooks
-    rev: v0.0.17
+  - repo: local
     hooks:
-      - id: circleci-config-validate
-      - id: shfmt
+      - id: docker-shell-shfmt
+        name: Run shfmt with docker
+        entry: mvdan/shfmt:latest -d -i 4
+        language: docker_image
+        types: [shell]
