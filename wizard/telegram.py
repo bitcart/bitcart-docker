@@ -65,7 +65,7 @@ async def install(message: types.Message):
     await bot.send_message(message.chat.id, texts[0])
 
 
-def make_func(name, pos):  # noqa: C901
+def make_func(name, pos):
     async def process(message: types.Message, state: FSMContext):
         cont = True
         skip = 0
