@@ -235,7 +235,7 @@ server {
 {{ $is_https := (and (ne $https_method "nohttps") (ne $cert "") (exists (printf "/etc/nginx/certs/%s.crt" $cert)) (exists (printf "/etc/nginx/certs/%s.key" $cert))) }}
 
 server {
-	server_name _; 
+	server_name _;
 	listen 80;
 	{{ if $enable_ipv6 }}
 	listen [::]:80;
