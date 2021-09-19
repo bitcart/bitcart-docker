@@ -18,15 +18,15 @@ def get_or_ask(var, ask=False, cast=str):
         return value
     else:
         if ask:
-            value = input("Enter {}: ".format(var))
+            value = input(f"Enter {var}: ")
             try:
                 value = cast(value)
             except (ValueError, TypeError):
-                print("Invalid value entered for {}, must be type {}".format(var, cast))
+                print(f"Invalid value entered for {var}, must be type {cast}")
                 sys.exit(1)
             return value
         else:
-            print("Please set {} environment variable".format(var))
+            print(f"Please set {var} environment variable")
             sys.exit(1)
 
 
