@@ -1,7 +1,7 @@
+black
+codecov
+flake8
+isort>=5
+pre-commit
 pytest
 pytest-cov
-flake8
-black
-isort>=5
-codecov
-pre-commit
