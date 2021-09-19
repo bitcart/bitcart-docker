@@ -4,7 +4,7 @@ COPY bitcart/cli /app
 
 RUN cd /app && \
     apk add --no-cache make && \
-    CGO_ENABLED=0 make build ARGS="-ldflags '-X main.Version=docker'" && \
+    CGO_ENABLED=0 make build ARGS="-ldflags '-X main.Version=docker -X main.envFile=/app/conf/.env'" && \
     chmod +x bitcart-cli
 
 
@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openss
     pip install -r requirements/deterministic/web.txt && \
     pip install -r requirements/deterministic/production.txt && \
     apt-get purge -y build-essential python3-dev libffi-dev && \
+    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /root/.cache/pip
 USER electrum
