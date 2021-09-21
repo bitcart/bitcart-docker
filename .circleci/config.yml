@@ -14,7 +14,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-lint-dependencies-{{ .Branch }}-{{ checksum "~/.pyenv/version" }}
+            - v1-lint-dependencies-{{ .Branch }}
 
       - restore_cache:
           keys:
@@ -23,7 +23,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            virtualenv ~/venv
+            virtualenv --python python3 ~/venv
             echo ". ~/venv/bin/activate" >> $BASH_ENV
             source $BASH_ENV
             pip install -U -r generator/test-requirements.txt
@@ -31,7 +31,7 @@ jobs:
       - save_cache:
           paths:
             - ~/venv
-          key: v1-lint-dependencies-{{ .Branch }}-{{ checksum "~/.pyenv/version" }}
+          key: v1-lint-dependencies-{{ .Branch }}
 
       - run:
           name: run pre-commit checks
