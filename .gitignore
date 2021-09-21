@@ -1,26 +1,13 @@
-#ignore tests and downloaded dirs
-/compose/bitcart/
-#conf
-.env
-.deploy
-env.sh
-generator-env.sh
-conf/
-.vscode/
-#pycharm
-.idea/
-#virtualenv
-venv/
-#backups
-backup/
-backups/
-#cache
-__pycache__/
-#generated configs
-compose/generated.yml
-compose/images
-.mypy_cache
 .coverage
-htmlcov/
+.deploy
+.env
+.idea/
+.mypy_cache
 .pytest_cache/
+.vscode/
+/compose/bitcart/
+__pycache__/
+compose/generated.yml
 coverage.xml
+htmlcov/
+venv/

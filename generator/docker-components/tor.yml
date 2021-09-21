@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   backend:
     environment:
@@ -39,7 +37,7 @@ services:
 
   tor:
     restart: unless-stopped
-    image: bitcartcc/tor:0.4.4.7
+    image: bitcartcc/tor:0.4.6.5
     container_name: tor
     environment:
       TOR_PASSWORD: bitcartcc
@@ -56,7 +54,7 @@ services:
 
   tor-gen:
     restart: unless-stopped
-    image: bitcartcc/docker-gen:0.7.5
+    image: bitcartcc/docker-gen:0.7.7
     container_name: tor-gen
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"

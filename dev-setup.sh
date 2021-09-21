@@ -4,7 +4,7 @@ branch=${1:-master}
 rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcartcc/bitcart -b $branch compose/bitcart
 cd compose/bitcart
 rm -rf .git
-cat > conf/.env << EOF
+cat >conf/.env <<EOF
 DB_HOST=database
 REDIS_HOST=redis://redis
 BTC_HOST=bitcoin
@@ -14,6 +14,4 @@ BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
 XRG_HOST=ergon
 EOF
-mkdir -p images
-mkdir -p images/products
 cd ../..

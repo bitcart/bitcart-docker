@@ -1,5 +1,36 @@
-version: 2
+version: 2.1
+
+orbs:
+  bitcartcc: bitcartcc/bitcartcc-shared@1
+
 jobs:
+  lint:
+    executor: bitcartcc/build-ubuntu
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-lint-pre-commit-{{ .Branch }}-{{ checksum ".pre-commit-config.yaml" }}
+
+      - run:
+          name: install pre-commit
+          command: |
+            curl https://pre-commit.com/install-local.py | python3 -
+
+      - run:
+          name: run pre-commit checks
+          command: |
+            pre-commit run --all-files --show-diff-on-failure
+
+      - save_cache:
+          paths:
+            - ~/.cache/pre-commit
+          key: v1-lint-pre-commit-{{ .Branch }}-{{ checksum ".pre-commit-config.yaml" }}
+
   test:
     docker:
       - image: cimg/python:3.7
@@ -22,8 +53,7 @@ jobs:
             codecov
 
   cansetup:
-    machine:
-      image: ubuntu-2004:202107-02
+    executor: bitcartcc/build-ubuntu
     working_directory: ~/repo
     steps:
       - checkout
@@ -33,25 +63,31 @@ jobs:
             cd .circleci
             sudo ./test-install.sh
   deploy:
-    docker:
-      - image: cimg/python:3.7
+    executor: bitcartcc/build-ubuntu
+
+    environment:
+      BUILD_PLATFORMS: linux/amd64,linux/arm/v7,linux/arm64/v8
+
     working_directory: ~/repo
+
     steps:
       - checkout
-      - setup_remote_docker
+      - bitcartcc/login-to-dockerhub
+      - bitcartcc/enable-buildx
       - run:
           name: build docker image
           command: |
             cd generator
-            docker build -t bitcartcc/docker-compose-generator:latest .
-            docker login --username=$DOCKER_USER --password=$DOCKER_PASS
-            docker push bitcartcc/docker-compose-generator:latest
+            docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest .
 
 workflows:
   version: 2
   build:
     jobs:
-      - test
+      - lint
+      - test:
+          requires:
+            - lint
       - cansetup:
           requires:
             - test

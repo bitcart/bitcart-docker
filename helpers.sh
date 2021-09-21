@@ -1,8 +1,8 @@
 [[ -f ".deploy" ]] && . .deploy
 
 bitcart_update_docker_env() {
-touch $BITCART_ENV_FILE
-cat > $BITCART_ENV_FILE << EOF
+    touch $BITCART_ENV_FILE
+    cat >$BITCART_ENV_FILE <<EOF
 BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
@@ -26,6 +26,8 @@ GZRO_NETWORK=$GZRO_NETWORK
 GZRO_LIGHTNING=$GZRO_LIGHTNING
 BSTY_NETWORK=$BSTY_NETWORK
 BSTY_LIGHTNING=$BSTY_LIGHTNING
+TOR_RELAY_NICKNAME=$TOR_RELAY_NICKNAME
+TOR_RELAY_EMAIL=$TOR_RELAY_EMAIL
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_ROOTPATH")
@@ -68,7 +70,7 @@ get_profile_file() {
         fi
         if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile") ]]; then
             # Line does not exist, add it
-            echo ". \"$BASH_PROFILE_SCRIPT\"" >> "$HOME/.bash_profile"
+            echo ". \"$BASH_PROFILE_SCRIPT\"" >>"$HOME/.bash_profile"
         fi
 
     else
@@ -99,7 +101,7 @@ remove_host() {
 
 add_host() {
     if [ -z "$(grep -P "[[:space:]]$2" /etc/hosts)" ]; then
-        try printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts > /dev/null
+        try printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
     fi
 }
 
@@ -109,9 +111,9 @@ modify_host() {
 }
 
 apply_local_modifications() {
-    if [[ "$BITCART_HOST" == *.local ]] ; then
+    if [[ "$BITCART_HOST" == *.local ]]; then
         echo "Local setup detected."
-        if [[ "$BITCART_NOHOSTSEDIT" = true ]] ; then
+        if [[ "$BITCART_NOHOSTSEDIT" = true ]]; then
             echo "Not modifying hosts."
         else
             echo "WARNING! Modifying /etc/hosts to make local setup work. It may require superuser privileges."
@@ -132,7 +134,7 @@ bitcart_dump_db() {
     if [ ! -d "$backup_dir" ]; then
         docker volume create backup_datadir
     fi
-    docker exec $(container_name "database_1") pg_dumpall -c -U postgres > "$backup_dir/$1"
+    docker exec $(container_name "database_1") pg_dumpall -c -U postgres >"$backup_dir/$1"
 }
 
 bitcart_restore_db() {

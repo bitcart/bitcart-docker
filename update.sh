@@ -5,7 +5,7 @@ set -e
 . helpers.sh
 load_env
 
-export USER_UID=${UID} 
+export USER_UID=${UID}
 export USER_GID=${GID}
 
 cd "$BITCART_BASE_DIRECTORY"
@@ -20,7 +20,7 @@ if ! [ -f "/etc/docker/daemon.json" ] && [ -w "/etc/docker" ]; then
     echo "{
 \"log-driver\": \"json-file\",
 \"log-opts\": {\"max-size\": \"5m\", \"max-file\": \"3\"}
-}" > /etc/docker/daemon.json
+}" >/etc/docker/daemon.json
     echo "Setting limited log files in /etc/docker/daemon.json"
 fi
 
