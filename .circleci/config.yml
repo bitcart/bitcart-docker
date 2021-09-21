@@ -14,29 +14,18 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-lint-dependencies-{{ .Branch }}
-
-      - restore_cache:
-          keys:
             - v1-lint-pre-commit-{{ .Branch }}-{{ checksum ".pre-commit-config.yaml" }}
 
       - run:
-          name: install dependencies
+          name: install pre-commit
           command: |
-            virtualenv --python python3 ~/venv
-            echo ". ~/venv/bin/activate" >> $BASH_ENV
-            source $BASH_ENV
-            pip install -U -r generator/test-requirements.txt
-
-      - save_cache:
-          paths:
-            - ~/venv
-          key: v1-lint-dependencies-{{ .Branch }}
+            curl https://pre-commit.com/install-local.py | python3 -
 
       - run:
           name: run pre-commit checks
           command: |
             pre-commit run --all-files --show-diff-on-failure
+
       - save_cache:
           paths:
             - ~/.cache/pre-commit
