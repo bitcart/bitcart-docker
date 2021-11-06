@@ -22,8 +22,6 @@ services:
       XRG_NETWORK: ${XRG_NETWORK:-mainnet}
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
       LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
-      GZRO_NETWORK: ${GZRO_NETWORK:-mainnet}
-      GZRO_LIGHTNING: ${GZRO_LIGHTNING:-false}
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
       UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest

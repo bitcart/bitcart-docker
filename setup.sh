@@ -49,8 +49,6 @@ Environment variables:
     XRG_NETWORK: The network to run ergon daemon on (eg. mainnet)
     LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
     LTC_LIGHTNING: Whether to enable litecoin lightning network or not (eg. true, false)
-    GZRO_NETWORK: The network to run gravity daemon on (eg. mainnet, testnet)
-    GZRO_LIGHTNING: Whether to enable gravity lightning network or not (eg. true, false)
     BSTY_NETWORK: The network to run globalboost daemon on (eg. mainnet, testnet)
     BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
@@ -146,8 +144,6 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${XRG_NETWORK:=mainnet}"
 : "${LTC_NETWORK:=mainnet}"
 : "${LTC_LIGHTNING:=false}"
-: "${GZRO_NETWORK:=mainnet}"
-: "${GZRO_LIGHTNING:=false}"
 : "${BSTY_NETWORK:=mainnet}"
 : "${BSTY_LIGHTNING:=false}"
 
@@ -203,8 +199,6 @@ BCH_NETWORK=$BCH_NETWORK
 XRG_NETWORK=$XRG_NETWORK
 LTC_NETWORK=$LTC_NETWORK
 LTC_LIGHTNING=$LTC_LIGHTNING
-GZRO_NETWORK=$GZRO_NETWORK
-GZRO_LIGHTNING=$GZRO_LIGHTNING
 BSTY_NETWORK=$BSTY_NETWORK
 BSTY_LIGHTNING=$BSTY_LIGHTNING
 ----------------------
