@@ -63,7 +63,7 @@ def test_one_domain_rule():
     check_root_path(services, "store", None)
     check_root_path(services, "admin", "/")
     check_root_path(services, "backend", "/api")
-    # Backebd preferred
+    # Backend preferred
     delete_env("ADDITIONAL_COMPONENTS")
     set_env("INSTALL", "backend")
     services = generate_config()["services"]
