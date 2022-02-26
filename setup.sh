@@ -52,6 +52,7 @@ Environment variables:
     BSTY_NETWORK: The network to run globalboost daemon on (eg. mainnet, testnet)
     BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
+    BITCART_EXCLUDE_COMPONENTS: A list of components to exclude from the result set
 Add-on specific variables:
     TOR_RELAY_NICKNAME: If tor relay is activated, the relay nickname
     TOR_RELAY_EMAIL: If tor relay is activated, the email for Tor to contact you regarding your relay
@@ -193,6 +194,7 @@ BITCART_INSTALL=$BITCART_INSTALL
 BITCART_REVERSEPROXY=$BITCART_REVERSEPROXY
 BITCART_CRYPTOS=$BITCART_CRYPTOS
 BITCART_ADDITIONAL_COMPONENTS=$BITCART_ADDITIONAL_COMPONENTS
+BITCART_EXCLUDE_COMPONENTS=$BITCART_EXCLUDE_COMPONENTS
 BTC_NETWORK=$BTC_NETWORK
 BTC_LIGHTNING=$BTC_LIGHTNING
 BCH_NETWORK=$BCH_NETWORK
@@ -235,6 +237,7 @@ export BITCART_INSTALL="${BITCART_INSTALL:-all}"
 export BITCART_REVERSEPROXY="${BITCART_REVERSEPROXY:-nginx-https}"
 export BITCART_CRYPTOS="${BITCART_CRYPTOS:-btc}"
 export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
+export BITCART_EXCLUDE_COMPONENTS="$BITCART_EXCLUDE_COMPONENTS"
 export BITCART_ENV_FILE="$BITCART_ENV_FILE"
 export BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 if cat "\$BITCART_ENV_FILE" &> /dev/null; then

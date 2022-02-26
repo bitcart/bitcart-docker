@@ -88,3 +88,32 @@ def test_additional_components(component, expected):
     check_service_list(config, expected, is_none=not component)
     # Cleanup
     delete_env("ADDITIONAL_COMPONENTS")
+
+
+def test_exclude_components_basic():
+    set_env("EXCLUDE_COMPONENTS", "invalid")
+    assert "invalid" not in generate_config()["services"]
+    set_env("EXCLUDE_COMPONENTS", "test1;test2")
+    assert Settings().EXCLUDE_COMPONENTS == ["test1;test2"]
+    set_env("EXCLUDE_COMPONENTS", "test1,test2")
+    assert Settings().EXCLUDE_COMPONENTS == ["test1", "test2"]
+    # Cleanup
+    delete_env("EXCLUDE_COMPONENTS")
+
+
+@pytest.mark.parametrize(
+    "component, expected",
+    [
+        ("admin", ["admin"]),
+        ("", ["admin"]),
+        ("admin,store", ["admin", "store"]),
+        ("", ["admin", "store"]),
+    ],
+    ids=["admin-empty", "admin", "admin-store-empty", "admin-store"],
+)
+def test_exclude_components(component, expected):
+    set_env("EXCLUDE_COMPONENTS", component)
+    config = generate_config()
+    check_service_list(config, expected, is_none=bool(component))
+    # Cleanup
+    delete_env("EXCLUDE_COMPONENTS")

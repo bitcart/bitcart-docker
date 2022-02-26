@@ -27,10 +27,18 @@ class OrderedSet(UserDict):
     def add(self, v):
         self.data[v] = None
 
+    def remove_key(self, v):
+        self.data.pop(v, None)
+
     def update(self, *args, **kwargs):
         for s in args:
             for e in s:
                 self.add(e)
+
+    def remove(self, *args, **kwargs):
+        for s in args:
+            for e in s:
+                self.remove_key(e)
 
     def __repr__(self):
         return f"{{{', '.join(map(repr, self.data.keys()))}}}"
@@ -58,6 +66,7 @@ def add_components(settings: Settings) -> OrderedSet:
         components.update(["nginx"])
     # additional components
     components.update(settings.ADDITIONAL_COMPONENTS)
+    components.remove(settings.EXCLUDE_COMPONENTS)
     # Add bitcoin if no valid cryptos specified
     HAS_CRYPTO = False
     for i in components:
