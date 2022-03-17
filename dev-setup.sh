@@ -12,5 +12,6 @@ LTC_HOST=litecoin
 BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
 XRG_HOST=ergon
+ETH_HOST=ethereum
 EOF
 cd ../..

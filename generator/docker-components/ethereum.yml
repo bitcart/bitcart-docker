@@ -1,0 +1,50 @@
+services:
+  geth:
+    image: ethereum/client-go:stable
+    restart: unless-stopped
+    expose:
+      - "8545"
+    volumes:
+      - "geth_datadir:/chaindata"
+    stop_signal: SIGINT
+    stop_grace_period: 2m
+    command:
+      - --datadir
+      - "/chaindata"
+      - --syncmode=light
+      - --http
+      - --http.api
+      - "personal,eth,net,web3,admin"
+      - --http.addr=0.0.0.0
+      - --http.vhosts=*
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "10"
+
+  ethereum:
+    restart: unless-stopped
+    image: bitcartcc/bitcart-eth:stable
+    environment:
+      ETH_NETWORK: ${ETH_NETWORK:-mainnet}
+      ETH_SERVER: http://geth:8545
+    expose:
+      - "5002"
+    volumes:
+      - "ethereum_datadir:/data"
+    depends_on:
+      - geth
+    links:
+      - geth
+
+  backend:
+    depends_on:
+      - ethereum
+    links:
+      - ethereum
+
+volumes:
+  ethereum_datadir:
+  geth_datadir:

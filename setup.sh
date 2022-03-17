@@ -46,6 +46,7 @@ Environment variables:
     BTC_NETWORK: The network to run bitcoin daemon on (eg. mainnet, testnet)
     BTC_LIGHTNING: Whether to enable bitcoin lightning network or not (eg. true, false)
     BCH_NETWORK: The network to run bitcoin cash daemon on (eg. mainnet, testnet)
+    ETH_NETWORK: The network to run ethereum daemon on (eg. mainnet, kovan)
     XRG_NETWORK: The network to run ergon daemon on (eg. mainnet)
     LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
     LTC_LIGHTNING: Whether to enable litecoin lightning network or not (eg. true, false)
@@ -142,6 +143,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BTC_NETWORK:=mainnet}"
 : "${BTC_LIGHTNING:=false}"
 : "${BCH_NETWORK:=mainnet}"
+: "${ETH_NETWORK:=mainnet}"
 : "${XRG_NETWORK:=mainnet}"
 : "${LTC_NETWORK:=mainnet}"
 : "${LTC_LIGHTNING:=false}"
@@ -198,6 +200,7 @@ BITCART_EXCLUDE_COMPONENTS=$BITCART_EXCLUDE_COMPONENTS
 BTC_NETWORK=$BTC_NETWORK
 BTC_LIGHTNING=$BTC_LIGHTNING
 BCH_NETWORK=$BCH_NETWORK
+ETH_NETWORK=$ETH_NETWORK
 XRG_NETWORK=$XRG_NETWORK
 LTC_NETWORK=$LTC_NETWORK
 LTC_LIGHTNING=$LTC_LIGHTNING

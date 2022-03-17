@@ -18,6 +18,7 @@ CRYPTOS = {
     "bsty": {"component": "globalboost"},
     "bch": {"component": "bitcoincash"},
     "xrg": {"component": "ergon"},
+    "eth": {"component": "ethereum"},
 }
 TOR_CRYPTOS = {"btc": CRYPTOS["btc"]}  # cryptos to enable tor proxy for
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
