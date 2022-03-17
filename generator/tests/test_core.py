@@ -6,7 +6,7 @@ import yaml
 
 from generator.generator import add_components, load_component, save
 
-THIRD_PARTY_IMAGES = ["nginx", "redis", "database", "letsencrypt-nginx-proxy-companion"]
+THIRD_PARTY_IMAGES = ["database", "geth", "letsencrypt-nginx-proxy-companion", "nginx", "redis"]
 
 
 def test_basic_structure(config):
@@ -47,7 +47,7 @@ def check_additional_keys(service, service_data):
     check_key(service, service_data, "links")
     check_key(service, service_data, "depends_on")
     check_key(service, service_data, "volumes")
-    check_key(service, service_data, "command", str)
+    check_key(service, service_data, "command", (str, list))
     check_key(service, service_data, "entrypoint", str)
     if "environment" in service_data:
         assert isinstance(service_data["environment"], dict)
