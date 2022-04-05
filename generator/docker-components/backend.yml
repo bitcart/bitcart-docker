@@ -20,6 +20,7 @@ services:
       BTC_LIGHTNING: ${BTC_LIGHTNING:-false}
       BCH_NETWORK: ${BCH_NETWORK:-mainnet}
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
+      BNB_NETWORK: ${BNB_NETWORK:-mainnet}
       XRG_NETWORK: ${XRG_NETWORK:-mainnet}
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
       LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
