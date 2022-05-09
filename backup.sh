@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Add any volume names that need to be backed up here
 BACKUP_VOLUMES=(bitcart_datadir tor_servicesdir tor_datadir tor_relay_datadir)
 
@@ -135,3 +137,5 @@ esac
 rm $dbdump_path
 
 echo "Backup done."
+
+set +e

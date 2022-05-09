@@ -36,6 +36,7 @@ EOF
 }
 
 bitcart_start() {
+    create_backup_volume
     USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --remove-orphans -d $1
 }
 
@@ -130,11 +131,15 @@ container_name() {
     echo "${deployment_name}_$1"
 }
 
-bitcart_dump_db() {
+create_backup_volume() {
     backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
     if [ ! -d "$backup_dir" ]; then
         docker volume create backup_datadir
     fi
+}
+
+bitcart_dump_db() {
+    create_backup_volume
     docker exec $(container_name "database_1") pg_dumpall -c -U postgres >"$backup_dir/$1"
 }
 

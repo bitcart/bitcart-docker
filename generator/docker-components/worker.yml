@@ -7,6 +7,7 @@ services:
     environment:
       LOG_FILE: bitcart.log
       BITCART_DATADIR: /datadir
+      BITCART_BACKUPS_DIR: /backups
       BITCART_CRYPTOS: ${BITCART_CRYPTOS:-btc}
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
       BTC_LIGHTNING: ${BTC_LIGHTNING:-false}
@@ -29,7 +30,10 @@ services:
       - "9020"
     volumes:
       - "bitcart_datadir:/datadir"
+      - "backup_datadir:/backups"
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
 volumes:
   bitcart_datadir:
+  backup_datadir:
+    external: true
