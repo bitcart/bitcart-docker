@@ -11,8 +11,8 @@ def env(name, default=None):
     return value
 
 
-def custom_port_allowed(service):
-    return service not in CRYPTO_COMPONENTS or env(f"{service.upper()}_EXPOSE", False)
+def custom_port_allowed(service, no_nginx):
+    return (service not in CRYPTO_COMPONENTS and no_nginx) or env(f"{service.upper()}_EXPOSE", False)
 
 
 def preferred_service(components):

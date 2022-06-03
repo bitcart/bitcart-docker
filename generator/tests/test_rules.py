@@ -97,11 +97,12 @@ def test_no_reverseproxy_rule():
                 assert "ports" in services[service]
             if service in CRYPTO_COMPONENTS:
                 assert "ports" not in services[service]
+    # check that it works even with nginx on
+    delete_env("REVERSEPROXY")
     set_env("BITCOIN_EXPOSE", "true")
     services = generate_config()["services"]
     assert "ports" in services["bitcoin"]
     # Cleanup
-    delete_env("REVERSEPROXY")
     delete_env("BITCOIN_EXPOSE")
 
 
