@@ -54,7 +54,7 @@ services:
 
   tor-gen:
     restart: unless-stopped
-    image: bitcartcc/docker-gen:0.8.2
+    image: bitcartcc/docker-gen:0.9.0
     container_name: tor-gen
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"

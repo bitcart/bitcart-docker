@@ -14,7 +14,7 @@ services:
 
   nginx-gen:
     restart: unless-stopped
-    image: bitcartcc/docker-gen:0.8.2
+    image: bitcartcc/docker-gen:0.9.0
     container_name: nginx-gen
     environment:
       DEFAULT_HOST: ${REVERSEPROXY_DEFAULT_HOST:-none}
