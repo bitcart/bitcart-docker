@@ -310,8 +310,8 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
         fi
     fi
 
-    if [[ "$(uname -m)" == "armv7l" ]] && [[ "$(uname -n)" == "raspberrypi" ]]; then
-        if [[ "$(apt list libseccomp2 2>/dev/null)" == *"2.3.3"* ]]; then
+    if [[ "$(uname -m)" == "armv7l" ]] && cat "/etc/os-release" 2>/dev/null | grep -q "VERSION_CODENAME=buster" 2>/dev/null; then
+        if [[ "$(apt list libseccomp2 2>/dev/null)" == *" 2.3"* ]]; then
             echo "Outdated version of libseccomp2, updating... (see: https://blog.samcater.com/fix-workaround-rpi4-docker-libseccomp2-docker-20/)"
             # https://blog.samcater.com/fix-workaround-rpi4-docker-libseccomp2-docker-20/
             apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC 648ACFD622F3D138
@@ -325,7 +325,7 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
         if ! [[ "$OSTYPE" == "darwin"* ]] && $HAS_DOCKER; then
             echo "Trying to install docker-compose by using the bitcartcc/docker-compose ($(uname -m))"
             ! [[ -d "dist" ]] && mkdir dist
-            docker run --rm -v "$(pwd)/dist:/dist" bitcartcc/docker-compose:1.28.6
+            docker run --rm -v "$(pwd)/dist:/dist" bitcartcc/docker-compose:1.29.2
             mv dist/docker-compose /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
             rm -rf "dist"
