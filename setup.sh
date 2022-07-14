@@ -249,6 +249,7 @@ export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
 export BITCART_EXCLUDE_COMPONENTS="$BITCART_EXCLUDE_COMPONENTS"
 export BITCART_ENV_FILE="$BITCART_ENV_FILE"
 export BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
+export BITCARTGEN_DOCKER_IMAGE="$BITCARTGEN_DOCKER_IMAGE"
 if cat "\$BITCART_ENV_FILE" &> /dev/null; then
   while IFS= read -r line; do
     ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line" || true
