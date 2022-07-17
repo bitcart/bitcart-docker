@@ -13,6 +13,7 @@ def rule(services, settings):
                         environment["HIDDENSERVICE_REVERSEPROXY"] = "nginx"
                     else:
                         environment["HIDDENSERVICE_IP"] = "172.17.0.1"
+                        environment["HIDDENSERVICE_VIRTUAL_PORT"] = int(environment.get("VIRTUAL_PORT", "80"))
         for env_name, service in TOR_CRYPTOS.items():
             service_name = service["component"]
             if services.get(service_name):

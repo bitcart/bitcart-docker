@@ -159,6 +159,10 @@ def test_tor_rule():
     for service in services:
         if service in HOST_COMPONENTS:
             assert "HIDDENSERVICE_IP" in services[service]["environment"]
+            assert (
+                services[service]["environment"]["HIDDENSERVICE_VIRTUAL_PORT"]
+                == services[service]["environment"]["VIRTUAL_PORT"]
+            )
     # Cleanup
     delete_env("ADDITIONAL_COMPONENTS")
     delete_env("REVERSEPROXY")
