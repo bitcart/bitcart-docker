@@ -145,10 +145,8 @@ Currently the testing of individual pieces of BitcartCC is done via local develo
 When doing some changes in generator, it is usually tested via local python installation, like so:
 
 ```bash
-cd generator
 pip3 install oyaml
-python3 main.py
-cd ..
+make generate
 cat compose/generated.yml # see the generated output
 ```
 
@@ -189,12 +187,12 @@ After merging data into complete setup, generator applies a set of rules on them
 Rules are python scripts, which can dynamically change some settings of components based on configuration settings or enabled components.
 
 Rules are loaded from `generator/rules` directory. Each rule is a python file.
-Each python file (.py) must define rule function, accepting a single parameter - services.
+Each python file (.py) must define `rule` function, accepting two parameters - `services` (dictionary of all services loaded) and `settings` (loaded from env variables).
 
 If such function exists, it will be called with current services dictionary.
 Rules can modify that based on different settings.
 There are a few default settings bundled with BitcartCC (for example, to expose ports to outside when no reverse proxy is enabled).
 You can create your own rules to add completely custom settings for your deployment.
-Your BitcartCC deployment is not only BitcartCC itself, but also a powerful and highly customizable ocker-compose stack generator.
+Your BitcartCC deployment is not only BitcartCC itself, but also a powerful and highly customizable docker-compose stack generator.
 
 After applying rules, the resulting data is written to compose/generated.yml file, which is final docker-compose.yml file used by startup scripts.
