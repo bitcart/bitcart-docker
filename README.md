@@ -112,7 +112,7 @@ Note that it isn't designed for your production use, it is for testing and learn
 
 Basically via deployment steps above (:
 
-Here are the commands used on our demo, as of Februrary 2021, BitcartCC Version 0.2.2.0:
+Here are the commands used on our demo, as of July 2022, BitcartCC Version 0.6.7.8:
 
 ```bash
 sudo su -
