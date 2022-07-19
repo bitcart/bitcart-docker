@@ -292,10 +292,14 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
                 if [[ -x "$(command -v brew)" ]]; then
                     echo "Homebrew is installed, but Docker isn't. Installing it now using brew..."
                     # Brew is installed, install docker now
-                    # This sequence is a bit strange, but it's what what needed to get it working on a fresh Mac OS X Mojave install
                     brew install --cask docker
-                    brew install docker
-                    brew link docker
+                    # Launch UI and wait for user to finish installation
+                    nohup open /Applications/Docker.app >/dev/null 2>&1 &
+                    echo "Please finish Docker installation from it's UI"
+                    timeout 5m bash -c 'while ! docker ps > /dev/null 2>&1; do
+  sleep 5
+  echo "Waiting for docker to come up"
+done'
                 fi
             else
                 # Not Mac OS

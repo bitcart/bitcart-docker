@@ -11,7 +11,6 @@ cd ../..
 cd bitcart-docker
 
 export BITCART_HOST=bitcart.local
-export REVERSEPROXY_DEFAULT_HOST=bitcart.local
 export BITCART_CRYPTOS=btc,ltc
 export BITCART_REVERSEPROXY=nginx
 export BTC_LIGHTNING=true

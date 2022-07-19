@@ -35,18 +35,6 @@ jobs:
             cd .circleci
             sudo ./test-install.sh
 
-  cansetup-macos:
-    macos:
-      xcode: 13.4.1
-    working_directory: ~/repo
-    steps:
-      - checkout
-      - run:
-          name: Test installation
-          command: |
-            cd .circleci
-            sudo ./test-install.sh
-
   deploy:
     executor: bitcartcc/build-ubuntu
 
@@ -79,13 +67,10 @@ workflows:
       - cansetup:
           requires:
             - test
-      - cansetup-macos:
-          requires:
-            - cansetup
       - deploy:
           context: global
           requires:
-            - cansetup-macos
+            - cansetup
           filters:
             branches:
               only: master
