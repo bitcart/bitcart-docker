@@ -287,7 +287,7 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
                 if ! [[ -x "$(command -v brew)" ]]; then
                     # Brew is not installed, install it now
                     echo "Homebrew, the package manager for Mac OS, is not installed. Installing it now..."
-                    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+                    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
                 fi
                 if [[ -x "$(command -v brew)" ]]; then
                     echo "Homebrew is installed, but Docker isn't. Installing it now using brew..."
