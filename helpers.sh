@@ -102,7 +102,7 @@ remove_host() {
 }
 
 add_host() {
-    if [ -z "$(grep -P "[[:space:]]$2" /etc/hosts)" ]; then
+    if [ -z "$(grep -E "[[:space:]]$2" /etc/hosts)" ]; then
         try printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
     fi
 }
