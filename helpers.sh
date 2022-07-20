@@ -97,13 +97,13 @@ try() {
 
 remove_host() {
     if [ -n "$(grep -w "$1$" /etc/hosts)" ]; then
-        try sed -ie "/[[:space:]]$1/d" /etc/hosts
+        try sudo sed -ie "/[[:space:]]$1/d" /etc/hosts
     fi
 }
 
 add_host() {
     if [ -z "$(grep -E "[[:space:]]$2" /etc/hosts)" ]; then
-        try printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
+        try sudo printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
     fi
 }
 
