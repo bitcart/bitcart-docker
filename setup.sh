@@ -327,7 +327,12 @@ done'
     fi
 
     if ! [[ -x "$(command -v docker-compose)" ]]; then
-        DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/download/latest/docker-compose-$(uname -s)-$(uname -m)"
+        OS=$(uname -s)
+        ARCH=$(uname -m)
+        if [[ "$OS" == "Darwin" ]] && [[ "$ARCH" == "arm64" ]]; then
+            ARCH="aarch64"
+        fi
+        DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
         echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
         sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
