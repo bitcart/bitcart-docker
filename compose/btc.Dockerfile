@@ -26,10 +26,9 @@ RUN adduser -D $ELECTRUM_USER && \
     apk add --no-cache libsecp256k1-dev
 
 COPY --from=compile-image --chown=electrum /root/.local $ELECTRUM_HOME/.local
-COPY --from=compile-image $ELECTRUM_HOME/site $ELECTRUM_HOME/site
+COPY --from=compile-image --chown=electrum $ELECTRUM_HOME/site $ELECTRUM_HOME/site
 
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
-VOLUME /data
 
 CMD ["python","daemons/btc.py"]

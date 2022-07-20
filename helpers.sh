@@ -37,11 +37,11 @@ EOF
 
 bitcart_start() {
     create_backup_volume
-    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
+    docker-compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
 }
 
 bitcart_stop() {
-    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml down
+    docker-compose -p "$NAME" -f compose/generated.yml down
 }
 
 bitcart_pull() {

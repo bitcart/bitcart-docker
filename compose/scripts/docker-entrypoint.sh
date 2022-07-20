@@ -3,9 +3,6 @@ set -ex
 
 # BitcartCC is configuring current instance or updating it via SSH access
 
-# Make host.docker.internal work (on linux-based docker engines)
-echo "$(/sbin/ip route | awk '/default/ { print $3 }')  host.docker.internal" >>/etc/hosts
-
 if [ ! -z "$SSH_KEY_FILE" ] && ! [ -f "$SSH_KEY_FILE" ]; then
     echo "Creating BitcartCC SSH key File..."
     ssh-keygen -t rsa -f "$SSH_KEY_FILE" -q -P "" -m PEM -C bitcartcc >/dev/null
@@ -22,4 +19,9 @@ if [ ! -z "$SSH_KEY_FILE" ] && [ -f "$SSH_AUTHORIZED_KEYS" ] && ! grep -q "bitca
     cat "$SSH_KEY_FILE.pub" >>"$SSH_AUTHORIZED_KEYS"
 fi
 
-exec "$@"
+# Fixing permissions
+if [ ! -z "$SSH_KEY_FILE" ]; then
+    chown electrum "$SSH_KEY_FILE"
+fi
+
+exec gosu electrum "$@"

@@ -5,9 +5,6 @@ set -e
 . helpers.sh
 load_env
 
-export USER_UID=${UID}
-export USER_GID=${GID}
-
 cd "$BITCART_BASE_DIRECTORY"
 
 if [[ "$1" != "--skip-git-pull" ]]; then

@@ -2,7 +2,6 @@ services:
   backend:
     restart: unless-stopped
     image: bitcartcc/bitcart:stable
-    entrypoint: /usr/local/bin/docker-entrypoint.sh
     command: bash -c "alembic upgrade head && gunicorn -c gunicorn.conf.py main:app"
     environment:
       LOG_FILE: bitcart.log
@@ -34,7 +33,8 @@ services:
       SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
       SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}
       BASH_PROFILE_SCRIPT: ${BASH_PROFILE_SCRIPT}
-    user: "${USER_UID}:${USER_GID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     expose:
       - "8000"
     volumes:
