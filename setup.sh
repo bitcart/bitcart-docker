@@ -327,14 +327,10 @@ done'
     fi
 
     if ! [[ -x "$(command -v docker-compose)" ]]; then
-        if ! [[ "$OSTYPE" == "darwin"* ]] && $HAS_DOCKER; then
-            echo "Trying to install docker-compose by using the bitcartcc/docker-compose ($(uname -m))"
-            ! [[ -d "dist" ]] && mkdir dist
-            docker run --rm -v "$(pwd)/dist:/dist" bitcartcc/docker-compose:1.29.2
-            mv dist/docker-compose /usr/local/bin/docker-compose
-            chmod +x /usr/local/bin/docker-compose
-            rm -rf "dist"
-        fi
+        DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/download/latest/docker-compose-$(uname -s)-$(uname -m)"
+        echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
+        sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
     fi
 fi
 
