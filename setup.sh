@@ -281,7 +281,7 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]
             2>error
     fi
     if ! [[ -x "$(command -v docker)" ]]; then
-        if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]] || [[ "$(uname -m)" == "aarch64" ]]; then
+        if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]] || [[ "$(uname -m)" == "aarch64" ]] || [[ "$(uname -m)" == "arm64" ]]; then
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 # Mac OS
                 if ! [[ -x "$(command -v brew)" ]]; then
