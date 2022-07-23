@@ -37,15 +37,15 @@ EOF
 
 bitcart_start() {
     create_backup_volume
-    docker-compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
+    docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
 }
 
 bitcart_stop() {
-    docker-compose -p "$NAME" -f compose/generated.yml down
+    docker compose -p "$NAME" -f compose/generated.yml down
 }
 
 bitcart_pull() {
-    docker-compose -f compose/generated.yml pull
+    docker compose -f compose/generated.yml pull
 }
 
 bitcart_restart() {
@@ -128,13 +128,18 @@ apply_local_modifications() {
 
 container_name() {
     deployment_name=${NAME:-compose}
+    echo "${deployment_name}-$1"
+}
+
+volume_name() {
+    deployment_name=${NAME:-compose}
     echo "${deployment_name}_$1"
 }
 
 create_backup_volume() {
     backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
     if [ ! -d "$backup_dir" ]; then
-        docker volume create backup_datadir
+        docker volume create backup_datadir >/dev/null 2>&1
     fi
 }
 
@@ -146,4 +151,18 @@ bitcart_dump_db() {
 bitcart_restore_db() {
     bitcart_start database
     cat $1 | docker exec -i $(container_name "database_1") psql -U postgres
+}
+
+install_docker_compose() {
+    OS=$(uname -s)
+    ARCH=$(uname -m)
+    if [[ "$OS" == "Darwin" ]] && [[ "$ARCH" == "arm64" ]]; then
+        ARCH="aarch64"
+    fi
+    DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
+    echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
+    sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/lib/docker/cli-plugins/docker-compose
+    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    # remove old docker-compose
+    sudo rm /usr/local/bin/docker-compose
 }

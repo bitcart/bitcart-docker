@@ -27,6 +27,10 @@ if ! ./build.sh; then
 fi
 
 . helpers.sh
+# Update docker-compose to v2 if needed
+if [ ! -z "$(docker-compose --version 2>/dev/null | grep docker-compose)" ]; then
+    install_docker_compose
+fi
 bitcart_update_docker_env
 bitcart_pull
 bitcart_start

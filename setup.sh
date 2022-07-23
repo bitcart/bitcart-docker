@@ -270,7 +270,7 @@ echo -e "BitcartCC docker-compose parameters saved in $BITCART_ENV_FILE\n"
 . "$BASH_PROFILE_SCRIPT"
 
 # Try to install docker
-if ! [[ -x "$(command -v docker)" ]] || ! [[ -x "$(command -v docker-compose)" ]]; then
+if ! [[ -x "$(command -v docker)" ]] || ! [[ $(docker compose version 2>/dev/null) ]]; then
     if ! [[ -x "$(command -v curl)" ]]; then
         apt-get update 2>error
         apt-get install -y \
@@ -326,16 +326,8 @@ done'
         fi
     fi
 
-    if ! [[ -x "$(command -v docker-compose)" ]]; then
-        OS=$(uname -s)
-        ARCH=$(uname -m)
-        if [[ "$OS" == "Darwin" ]] && [[ "$ARCH" == "arm64" ]]; then
-            ARCH="aarch64"
-        fi
-        DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
-        echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
-        sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
+    if ! [[ $(docker compose version 2>/dev/null) ]]; then
+        install_docker_compose
     fi
 fi
 
@@ -345,8 +337,8 @@ if $HAS_DOCKER; then
         exit 1
     fi
 
-    if ! [[ -x "$(command -v docker-compose)" ]]; then
-        echo "Failed to install 'docker-compose'. Please install docker-compose manually, then retry."
+    if ! [[ $(docker compose version 2>/dev/null) ]]; then
+        echo "Failed to install 'docker compose'. Please install docker compose manually, then retry."
         exit 1
     fi
 fi
