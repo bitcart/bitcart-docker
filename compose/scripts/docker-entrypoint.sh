@@ -19,9 +19,12 @@ if [ ! -z "$SSH_KEY_FILE" ] && [ -f "$SSH_AUTHORIZED_KEYS" ] && ! grep -q "bitca
     cat "$SSH_KEY_FILE.pub" >>"$SSH_AUTHORIZED_KEYS"
 fi
 
-# Fixing permissions
-if [ ! -z "$SSH_KEY_FILE" ]; then
-    chown electrum "$SSH_KEY_FILE"
-fi
+# Fix all permissions
+
+for volume in $BITCART_VOLUMES; do
+    if [ -d "$volume" ]; then
+        find "$volume" \! -user electrum -exec chown electrum '{}' +
+    fi
+done
 
 exec gosu electrum "$@"
