@@ -161,6 +161,7 @@ install_docker_compose() {
     fi
     DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
     echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
+    sudo mkdir -p /usr/local/lib/docker/cli-plugins
     sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/lib/docker/cli-plugins/docker-compose
     sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     # remove old docker-compose
