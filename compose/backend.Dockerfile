@@ -8,7 +8,7 @@ RUN cd /app && \
     chmod +x bitcart-cli
 
 
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-bullseye
 
 ARG TARGETPLATFORM
 ENV IN_DOCKER=1
