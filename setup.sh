@@ -270,7 +270,7 @@ echo -e "BitcartCC docker-compose parameters saved in $BITCART_ENV_FILE\n"
 . "$BASH_PROFILE_SCRIPT"
 
 # Try to install docker
-if ! [[ -x "$(command -v docker)" ]] || ! [[ $(docker compose version 2>/dev/null) ]]; then
+if ! [[ -x "$(command -v docker)" ]]; then
     if ! [[ -x "$(command -v curl)" ]]; then
         apt-get update 2>error
         apt-get install -y \
@@ -280,39 +280,37 @@ if ! [[ -x "$(command -v docker)" ]] || ! [[ $(docker compose version 2>/dev/nul
             software-properties-common \
             2>error
     fi
-    if ! [[ -x "$(command -v docker)" ]]; then
-        if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]] || [[ "$(uname -m)" == "aarch64" ]] || [[ "$(uname -m)" == "arm64" ]]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                # Mac OS
-                if ! [[ -x "$(command -v brew)" ]]; then
-                    # Brew is not installed, install it now
-                    echo "Homebrew, the package manager for Mac OS, is not installed. Installing it now..."
-                    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-                fi
-                if [[ -x "$(command -v brew)" ]]; then
-                    echo "Homebrew is installed, but Docker isn't. Installing it now using brew..."
-                    # Brew is installed, install docker now
-                    brew install --cask docker
-                    # Launch UI and wait for user to finish installation
-                    nohup open /Applications/Docker.app >/dev/null 2>&1 &
-                    echo "Please finish Docker installation from it's UI"
-                    timeout 5m bash -c 'while ! docker ps > /dev/null 2>&1; do
+    if [[ "$(uname -m)" == "x86_64" ]] || [[ "$(uname -m)" == "armv7l" ]] || [[ "$(uname -m)" == "aarch64" ]] || [[ "$(uname -m)" == "arm64" ]]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # Mac OS
+            if ! [[ -x "$(command -v brew)" ]]; then
+                # Brew is not installed, install it now
+                echo "Homebrew, the package manager for Mac OS, is not installed. Installing it now..."
+                /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            fi
+            if [[ -x "$(command -v brew)" ]]; then
+                echo "Homebrew is installed, but Docker isn't. Installing it now using brew..."
+                # Brew is installed, install docker now
+                brew install --cask docker
+                # Launch UI and wait for user to finish installation
+                nohup open /Applications/Docker.app >/dev/null 2>&1 &
+                echo "Please finish Docker installation from it's UI"
+                timeout 5m bash -c 'while ! docker ps > /dev/null 2>&1; do
   sleep 5
   echo "Waiting for docker to come up"
 done'
-                fi
-            else
-                # Not Mac OS
-                echo "Trying to install docker..."
-                curl -fsSL https://get.docker.com -o get-docker.sh
-                chmod +x get-docker.sh
-                sh get-docker.sh
-                rm get-docker.sh
             fi
         else
-            echo "Unsupported architecture $(uname -m)"
-            exit 1
+            # Not Mac OS
+            echo "Trying to install docker..."
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            chmod +x get-docker.sh
+            sh get-docker.sh
+            rm get-docker.sh
         fi
+    else
+        echo "Unsupported architecture $(uname -m)"
+        exit 1
     fi
 
     if [[ "$(uname -m)" == "armv7l" ]] && cat "/etc/os-release" 2>/dev/null | grep -q "VERSION_CODENAME=buster" 2>/dev/null; then
@@ -325,9 +323,9 @@ done'
             apt install libseccomp2 -t buster-backports
         fi
     fi
-
-    check_docker_compose
 fi
+
+check_docker_compose
 
 if $HAS_DOCKER; then
     if ! [[ -x "$(command -v docker)" ]]; then
