@@ -21,6 +21,7 @@ HiddenServiceDir /var/lib/tor/hidden_services/{{ $name }}
 							{{ end }}
 # Redirecting to {{ $containerOrReverseProxyName }}
 HiddenServicePort {{ $port }} {{ $ip }}:{{ $virtualPort }}
+HiddenServiceDirGroupReadable 1
 						{{ end }}
 					{{ end }}
 				{{ end }}
