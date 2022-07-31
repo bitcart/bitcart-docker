@@ -170,5 +170,5 @@ install_docker_compose() {
     sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/lib/docker/cli-plugins/docker-compose
     sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     # remove old docker-compose
-    sudo rm /usr/local/bin/docker-compose
+    sudo rm /usr/local/bin/docker-compose || true
 }
