@@ -131,11 +131,6 @@ container_name() {
     echo "${deployment_name}-$1"
 }
 
-volume_name() {
-    deployment_name=${NAME:-compose}
-    echo "${deployment_name}_$1"
-}
-
 create_backup_volume() {
     backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
     if [ ! -d "$backup_dir" ]; then
@@ -151,6 +146,16 @@ bitcart_dump_db() {
 bitcart_restore_db() {
     bitcart_start database
     cat $1 | docker exec -i $(container_name "database_1") psql -U postgres
+}
+
+version() {
+    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'
+}
+
+check_docker_compose() {
+    if [ ! -z "$(docker-compose --version 2>/dev/null | grep docker-compose)" ] || ! [[ $(docker compose version 2>/dev/null) ]] || [ $(version $(docker compose version --short)) -lt $(version "2.8.0") ]; then
+        install_docker_compose
+    fi
 }
 
 install_docker_compose() {

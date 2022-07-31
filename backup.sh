@@ -71,7 +71,7 @@ load_env true
 
 cd "$BITCART_BASE_DIRECTORY"
 
-deployment_name=$(volume_name)
+deployment_name=$(container_name)
 volumes_dir=/var/lib/docker/volumes
 backup_dir="$volumes_dir/backup_datadir"
 timestamp=$(date "+%Y%m%d-%H%M%S")
@@ -95,7 +95,7 @@ else
     echo "Backing up files …"
     files=()
     for fname in "${BACKUP_VOLUMES[@]}"; do
-        fname=$(volume_name $fname)
+        fname=$(container_name $fname)
         if [ -d "$volumes_dir/$fname" ]; then
             files+=("$fname")
         fi

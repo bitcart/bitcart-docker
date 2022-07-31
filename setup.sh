@@ -326,9 +326,7 @@ done'
         fi
     fi
 
-    if ! [[ $(docker compose version 2>/dev/null) ]]; then
-        install_docker_compose
-    fi
+    check_docker_compose
 fi
 
 if $HAS_DOCKER; then
