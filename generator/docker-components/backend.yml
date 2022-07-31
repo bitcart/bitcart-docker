@@ -7,6 +7,7 @@ services:
       LOG_FILE: bitcart.log
       BITCART_DATADIR: /datadir
       BITCART_BACKUPS_DIR: /backups
+      BITCART_VOLUMES: /datadir /backups
       DB_PORT: 5432
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy

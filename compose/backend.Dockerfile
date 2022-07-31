@@ -26,8 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openss
     chmod +x /usr/local/bin/gosu && \
     groupadd --gid 1000 electrum && \
     useradd --uid 1000 --gid electrum --shell /bin/bash --create-home electrum && \
-    mkdir -p /datadir /backups && \
-    chown electrum /datadir /backups && \
     setup-pypi-mirror.sh && \
     pip install -r requirements/deterministic/web.txt && \
     pip install -r requirements/deterministic/production.txt && \
