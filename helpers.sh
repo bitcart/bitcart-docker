@@ -131,6 +131,11 @@ container_name() {
     echo "${deployment_name}-$1"
 }
 
+volume_name() {
+    deployment_name=${NAME:-compose}
+    echo "${deployment_name}_$1"
+}
+
 create_backup_volume() {
     backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
     if [ ! -d "$backup_dir" ]; then
@@ -153,7 +158,7 @@ version() {
 }
 
 check_docker_compose() {
-    if [ ! -z "$(docker-compose --version 2>/dev/null | grep docker-compose)" ] || ! [[ $(docker compose version 2>/dev/null) ]] || [ $(version $(docker compose version --short)) -lt $(version "2.8.0") ]; then
+    if [ ! -z "$(docker-compose --version 2>/dev/null | grep docker-compose)" ] || ! [[ $(docker compose version 2>/dev/null) ]] || [ $(version $(docker compose version --short)) -lt $(version "2.9.0") ]; then
         install_docker_compose
     fi
 }
