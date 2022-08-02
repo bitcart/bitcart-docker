@@ -44,6 +44,7 @@ services:
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
       TOR_EXTRA_ARGS: |
         CookieAuthentication 1
+        DataDirectoryGroupReadable 1
     expose:
       - "9050" # SOCKS
       - "9051" # Tor Control

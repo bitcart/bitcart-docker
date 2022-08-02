@@ -37,15 +37,15 @@ EOF
 
 bitcart_start() {
     create_backup_volume
-    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
+    docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
 }
 
 bitcart_stop() {
-    USER_UID=${UID} USER_GID=${GID} docker-compose -p "$NAME" -f compose/generated.yml down
+    docker compose -p "$NAME" -f compose/generated.yml down
 }
 
 bitcart_pull() {
-    docker-compose -f compose/generated.yml pull
+    docker compose -f compose/generated.yml pull
 }
 
 bitcart_restart() {
@@ -97,13 +97,13 @@ try() {
 
 remove_host() {
     if [ -n "$(grep -w "$1$" /etc/hosts)" ]; then
-        try sed -ie "/[[:space:]]$1/d" /etc/hosts
+        try sudo sed -ie "/[[:space:]]$1/d" /etc/hosts
     fi
 }
 
 add_host() {
-    if [ -z "$(grep -P "[[:space:]]$2" /etc/hosts)" ]; then
-        try printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
+    if [ -z "$(grep -E "[[:space:]]$2" /etc/hosts)" ]; then
+        try sudo printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
     fi
 }
 
@@ -128,13 +128,18 @@ apply_local_modifications() {
 
 container_name() {
     deployment_name=${NAME:-compose}
+    echo "${deployment_name}-$1"
+}
+
+volume_name() {
+    deployment_name=${NAME:-compose}
     echo "${deployment_name}_$1"
 }
 
 create_backup_volume() {
     backup_dir="/var/lib/docker/volumes/backup_datadir/_data"
     if [ ! -d "$backup_dir" ]; then
-        docker volume create backup_datadir
+        docker volume create backup_datadir >/dev/null 2>&1
     fi
 }
 
@@ -146,4 +151,29 @@ bitcart_dump_db() {
 bitcart_restore_db() {
     bitcart_start database
     cat $1 | docker exec -i $(container_name "database_1") psql -U postgres
+}
+
+version() {
+    echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'
+}
+
+check_docker_compose() {
+    if [ ! -z "$(docker-compose --version 2>/dev/null | grep docker-compose)" ] || ! [[ $(docker compose version 2>/dev/null) ]] || [ $(version $(docker compose version --short)) -lt $(version "2.9.0") ]; then
+        install_docker_compose
+    fi
+}
+
+install_docker_compose() {
+    OS=$(uname -s)
+    ARCH=$(uname -m)
+    if [[ "$OS" == "Darwin" ]] && [[ "$ARCH" == "arm64" ]]; then
+        ARCH="aarch64"
+    fi
+    DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
+    echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
+    sudo mkdir -p /usr/local/lib/docker/cli-plugins
+    sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/lib/docker/cli-plugins/docker-compose
+    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    # remove old docker-compose
+    sudo rm /usr/local/bin/docker-compose || true
 }

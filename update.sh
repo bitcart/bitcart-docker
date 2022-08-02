@@ -5,9 +5,6 @@ set -e
 . helpers.sh
 load_env
 
-export USER_UID=${UID}
-export USER_GID=${GID}
-
 cd "$BITCART_BASE_DIRECTORY"
 
 if [[ "$1" != "--skip-git-pull" ]]; then
@@ -30,6 +27,7 @@ if ! ./build.sh; then
 fi
 
 . helpers.sh
+check_docker_compose
 bitcart_update_docker_env
 bitcart_pull
 bitcart_start
