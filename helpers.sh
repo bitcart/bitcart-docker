@@ -145,12 +145,12 @@ create_backup_volume() {
 
 bitcart_dump_db() {
     create_backup_volume
-    docker exec $(container_name "database_1") pg_dumpall -c -U postgres >"$backup_dir/$1"
+    docker exec $(container_name "database-1") pg_dumpall -c -U postgres >"$backup_dir/$1"
 }
 
 bitcart_restore_db() {
     bitcart_start database
-    cat $1 | docker exec -i $(container_name "database_1") psql -U postgres
+    cat $1 | docker exec -i $(container_name "database-1") psql -U postgres
 }
 
 version() {

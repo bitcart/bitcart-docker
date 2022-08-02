@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function convert_name() {
-    docker exec -i $(container_name worker_1) python3 <<EOF
+    docker exec -i $(container_name worker-1) python3 <<EOF
 s = "$1"
 s = s.replace("-log", "")
 parts = s.split(".")

@@ -64,13 +64,13 @@ workflows:
       - test:
           requires:
             - lint
-      # - cansetup:
-      #     requires:
-      #       - test
+      - cansetup:
+          requires:
+            - test
       - deploy:
           context: global
-          # requires:
-          #   - cansetup
+          requires:
+            - cansetup
           filters:
             branches:
               only: master

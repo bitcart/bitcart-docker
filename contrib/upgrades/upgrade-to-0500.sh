@@ -3,7 +3,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 . "${SCRIPT_DIR}/../../helpers.sh"
 load_env
 
-docker exec -i $(container_name database_1) psql -U postgres bitcart <<EOF
+docker exec -i $(container_name database-1) psql -U postgres bitcart <<EOF
 ALTER TABLE discountsxproducts RENAME CONSTRAINT discountsxproducts_discount_id_fkey TO discountsxproducts_discount_id_discounts_fkey;
 ALTER TABLE discountsxproducts RENAME CONSTRAINT discountsxproducts_product_id_fkey TO discountsxproducts_product_id_products_fkey;
 ALTER TABLE discounts RENAME CONSTRAINT discounts_user_id_fkey TO discounts_user_id_users_fkey;
@@ -25,7 +25,7 @@ ALTER TABLE tokens RENAME CONSTRAINT tokens_user_id_fkey TO tokens_user_id_users
 ALTER TABLE walletsxstores RENAME CONSTRAINT walletsxstores_wallet_id_fkey TO walletsxstores_wallet_id_wallets_fkey;
 EOF
 
-docker top $(container_name worker_1) >/dev/null 2>&1 && docker exec -i $(container_name worker_1) python3 <<EOF
+docker top $(container_name worker-1) >/dev/null 2>&1 && docker exec -i $(container_name worker-1) python3 <<EOF
 import asyncio
 
 from api import models, settings
