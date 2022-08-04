@@ -150,7 +150,6 @@ def test_tor_rule():
     for env_name, service in TOR_CRYPTOS.items():
         if services.get(service["component"]):
             assert f"{env_name.upper()}_PROXY_URL" in services[service["component"]]["environment"]
-            assert f"{env_name.upper()}_FIAT_EXCHANGE" in services[service["component"]]["environment"]
     for service in services:
         if service in HOST_COMPONENTS:
             assert services[service]["environment"]["HIDDENSERVICE_REVERSEPROXY"] == "nginx"
