@@ -25,7 +25,8 @@ getent group tor || groupadd --gid 19001 tor && usermod -a -G tor electrum
 
 for volume in $BITCART_VOLUMES; do
     if [ -d "$volume" ]; then
-        find "$volume" \! -user electrum -exec chown electrum '{}' +
+        # ignore authorized keys to not break ssh
+        find "$volume" \! -user electrum \! -wholename '/datadir/host_authorized_keys' -exec chown electrum '{}' +
     fi
 done
 
