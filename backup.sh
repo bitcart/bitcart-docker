@@ -101,7 +101,7 @@ else
         fi
     done
     # put all volumes to volumes directory and remove timestamps
-    tar -cvzf $backup_path -C $volumes_dir --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
+    tar -cvzf $backup_path -C $volumes_dir --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
         -C "$(dirname $dbdump_path)" --transform "s|$timestamp-||" --transform "s|$timestamp||" $dumpname
 
     if $RESTART_SERVICES; then
