@@ -5,7 +5,7 @@ set -ex
 
 if [ ! -z "$SSH_KEY_FILE" ] && ! [ -f "$SSH_KEY_FILE" ]; then
     echo "Creating BitcartCC SSH key File..."
-    ssh-keygen -t rsa -f "$SSH_KEY_FILE" -q -P "" -m PEM -C bitcartcc >/dev/null
+    ssh-keygen -t ed25519 -f "$SSH_KEY_FILE" -q -P "" -m PEM -C bitcartcc >/dev/null
     if [ -f "$SSH_AUTHORIZED_KEYS" ]; then
         # Because the file is mounted, sed -i does not work
         sed '/bitcartcc$/d' "$SSH_AUTHORIZED_KEYS" >"$SSH_AUTHORIZED_KEYS.new"
