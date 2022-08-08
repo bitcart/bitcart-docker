@@ -2,6 +2,9 @@ services:
   cloudflared:
     container_name: cloudflared-tunnel
     image: bitcartcc/cloudflared:2022.7.1
-    network_mode: host
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     restart: on-failure
+    depends_on:
+      - nginx
+    links:
+      - nginx
