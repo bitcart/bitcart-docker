@@ -59,6 +59,7 @@ Environment variables:
 Add-on specific variables:
     TOR_RELAY_NICKNAME: If tor relay is activated, the relay nickname
     TOR_RELAY_EMAIL: If tor relay is activated, the email for Tor to contact you regarding your relay
+    CLOUDFLARE_TUNNEL_TOKEN: Used to expose your instance to clearnet with a Cloudflare Tunnel
 END
 }
 
@@ -140,6 +141,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${REVERSEPROXY_HTTP_PORT:=80}"
 : "${REVERSEPROXY_HTTPS_PORT:=443}"
 : "${BITCART_ENABLE_SSH:=true}"
+: "${CLOUDFLARE_TUNNEL_TOKEN:=}"
 
 # Crypto default settings (adjust to add a new coin)
 : "${BTC_NETWORK:=mainnet}"
