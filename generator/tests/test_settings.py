@@ -119,12 +119,12 @@ def test_exclude_components(component, expected):
     delete_env("EXCLUDE_COMPONENTS")
 
 
-def test_ssl_hint():
-    set_env("SSL_ENABLED", "true")
+def test_https_hint():
+    set_env("HTTPS_ENABLED", "true")
     set_env("REVERSEPROXY", "nginx")
     config = generate_config()
     assert "letsencrypt-nginx-proxy-companion" not in config["services"]
     assert config["services"]["admin"]["environment"]["BITCART_ADMIN_API_URL"].startswith("https://")
     # Cleanup
-    delete_env("SSL_ENABLED")
+    delete_env("HTTPS_ENABLED")
     delete_env("REVERSEPROXY")

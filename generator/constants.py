@@ -44,6 +44,6 @@ AVAILABLE_SETTINGS = [
     ("STORE_HOST",),
     ("ADMIN_API_URL",),
     ("STORE_API_URL",),
-    ("SSL_ENABLED",),
+    ("HTTPS_ENABLED",),
 ]
 ENV_PREFIX = "BITCART_"

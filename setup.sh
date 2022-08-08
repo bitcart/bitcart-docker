@@ -56,7 +56,7 @@ Environment variables:
     BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
     BITCART_EXCLUDE_COMPONENTS: A list of components to exclude from the result set
-    BITCART_SSL_ENABLED: a special flag to rewrite bitcart API URLs to https. It does not enable ssl setup and is required for custom cases such as cloudflare tunnel.
+    BITCART_HTTPS_ENABLED: a special flag to rewrite bitcart API URLs to https. It does not enable https setup automatically and is required for custom cases such as cloudflare tunnel.
 Add-on specific variables:
     TOR_RELAY_NICKNAME: If tor relay is activated, the relay nickname
     TOR_RELAY_EMAIL: If tor relay is activated, the email for Tor to contact you regarding your relay
