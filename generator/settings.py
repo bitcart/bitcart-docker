@@ -33,7 +33,7 @@ class Settings:
             and not self.ADMIN_API_URL
             and not self.STORE_API_URL
         )
-        self.PROTOCOL = "https" if self.REVERSE_PROXY in HTTPS_REVERSE_PROXIES else "http"
+        self.PROTOCOL = "https" if self.SSL_ENABLED or self.REVERSE_PROXY in HTTPS_REVERSE_PROXIES else "http"
         self.API_URL = f"{self.PROTOCOL}://{self.HOST}"
 
     def apply_checks(self):

@@ -28,7 +28,7 @@ def check_service(service, service_data):
     if service_data.get("image") or service_data.get("build"):
         assert service_data.keys() >= {"restart", "image"}
         assert service in THIRD_PARTY_IMAGES or "bitcartcc" in service_data["image"]
-        assert service_data["restart"] == "unless-stopped"
+        assert service_data["restart"] == "unless-stopped" if service != "cloudflared" else "on-failure"
         # Pin versions
         assert ":" in service_data["image"]
     check_additional_keys(service, service_data)
