@@ -168,14 +168,18 @@ check_docker_compose() {
 install_docker_compose() {
     OS=$(uname -s)
     ARCH=$(uname -m)
-    if [[ "$OS" == "Darwin" ]] && [[ "$ARCH" == "arm64" ]]; then
-        ARCH="aarch64"
+    INSTALL_PATH=/usr/local/lib/docker/cli-plugins
+    if [[ "$OS" == "Darwin" ]]; then
+        INSTALL_PATH=~/.docker/cli-plugins
+        if [[ "$ARCH" == "arm64" ]]; then
+            ARCH="aarch64"
+        fi
     fi
     DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
     echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
-    sudo mkdir -p /usr/local/lib/docker/cli-plugins
-    sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o /usr/local/lib/docker/cli-plugins/docker-compose
-    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    sudo mkdir -p $INSTALL_PATH
+    sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o $INSTALL_PATH/docker-compose
+    sudo chmod +x $INSTALL_PATH/docker-compose
     # remove old docker-compose
     sudo rm /usr/local/bin/docker-compose || true
 }

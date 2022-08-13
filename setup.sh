@@ -298,10 +298,10 @@ if ! [[ -x "$(command -v docker)" ]]; then
                 # Launch UI and wait for user to finish installation
                 nohup open /Applications/Docker.app >/dev/null 2>&1 &
                 echo "Please finish Docker installation from it's UI"
-                timeout 5m bash -c 'while ! docker ps > /dev/null 2>&1; do
-  sleep 5
-  echo "Waiting for docker to come up"
-done'
+                while ! docker ps >/dev/null 2>&1; do
+                    sleep 5
+                    echo "Waiting for docker to come up"
+                done
             fi
         else
             # Not Mac OS
