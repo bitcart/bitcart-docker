@@ -185,6 +185,6 @@ install_docker_compose() {
 }
 
 install_tooling() {
-    try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli
-    try sudo chmod +x /etc/bash_completion.d/bitcart-cli
+    try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli.sh
+    try sudo chmod +x /etc/bash_completion.d/bitcart-cli.sh
 }
