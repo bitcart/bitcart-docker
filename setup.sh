@@ -417,6 +417,8 @@ end script" >/etc/init/start_containers.conf
     fi
 fi
 
+install_tooling
+
 if $START; then
     ./start.sh
 elif $HAS_DOCKER; then

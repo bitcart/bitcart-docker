@@ -181,5 +181,10 @@ install_docker_compose() {
     sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o $INSTALL_PATH/docker-compose
     sudo chmod +x $INSTALL_PATH/docker-compose
     # remove old docker-compose
-    sudo rm /usr/local/bin/docker-compose || true
+    try sudo rm /usr/local/bin/docker-compose
+}
+
+install_tooling() {
+    try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli
+    try sudo chmod +x /etc/bash_completion.d/bitcart-cli
 }
