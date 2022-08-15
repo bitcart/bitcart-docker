@@ -28,6 +28,7 @@ fi
 
 . helpers.sh
 check_docker_compose
+install_tooling
 bitcart_update_docker_env
 bitcart_pull
 bitcart_start
