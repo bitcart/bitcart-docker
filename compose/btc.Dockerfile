@@ -10,7 +10,7 @@ FROM base AS compile-image
 
 COPY bitcart $ELECTRUM_HOME/site
 
-RUN apk add --virtual .build-deps --no-cache python3-dev musl-dev libffi-dev && \
+RUN apk add --no-cache --virtual .build-deps python3-dev build-base libffi-dev && \
     cd $ELECTRUM_HOME/site && \
     pip3 install --no-warn-script-location --user -r requirements/deterministic/base.txt && \
     pip3 install --no-warn-script-location --user -r requirements/deterministic/daemons/btc.txt && \
