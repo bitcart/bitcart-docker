@@ -23,6 +23,7 @@ services:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
       BNB_NETWORK: ${BNB_NETWORK:-mainnet}
       SBCH_NETWORK: ${SBCH_NETWORK:-mainnet}
+      MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
       XRG_NETWORK: ${XRG_NETWORK:-mainnet}
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
       LTC_LIGHTNING: ${LTC_LIGHTNING:-false}

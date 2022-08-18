@@ -1,0 +1,20 @@
+services:
+  polygon:
+    restart: unless-stopped
+    image: bitcartcc/bitcart-matic:stable
+    environment:
+      MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
+      MATIC_SERVER: ${MATIC_SERVER:-https://polygon-rpc.com}
+    expose:
+      - "5008"
+    volumes:
+      - "polygon_datadir:/data"
+
+  backend:
+    depends_on:
+      - polygon
+    links:
+      - polygon
+
+volumes:
+  polygon_datadir:
