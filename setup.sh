@@ -71,7 +71,7 @@ STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
 NAME_INPUT=false
 PREVIEW_SETTINGS=false
-NAME=compose
+NAME=
 SCRIPTS_POSTFIX=
 while (("$#")); do
     case "$1" in

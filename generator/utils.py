@@ -4,8 +4,8 @@ from .constants import CRYPTO_COMPONENTS, ENV_PREFIX, HOST_COMPONENTS
 from .exceptions import ConfigError
 
 
-def env(name, default=None, prefix=None):
-    value = os.getenv(f"{prefix if prefix is not None else ENV_PREFIX}{name}", default)
+def env(name, default=None):
+    value = os.getenv(f"{ENV_PREFIX}{name}", default)
     if not value:  # additional checks for empty values
         value = default
     return value
