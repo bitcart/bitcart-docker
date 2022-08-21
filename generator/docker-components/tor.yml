@@ -38,7 +38,6 @@ services:
   tor:
     restart: unless-stopped
     image: bitcartcc/tor:0.4.7.8
-    container_name: tor
     environment:
       TOR_PASSWORD: bitcartcc
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
@@ -56,7 +55,6 @@ services:
   tor-gen:
     restart: unless-stopped
     image: bitcartcc/docker-gen:0.9.0
-    container_name: tor-gen
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"

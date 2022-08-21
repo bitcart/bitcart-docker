@@ -1,8 +1,7 @@
 services:
-  letsencrypt-nginx-proxy-companion:
+  nginx-https:
     restart: unless-stopped
     image: nginxproxy/acme-companion:2.1
-    container_name: letsencrypt-nginx-proxy-companion
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "nginx_conf:/etc/nginx/conf.d"

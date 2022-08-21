@@ -6,7 +6,7 @@ import yaml
 
 from generator.generator import add_components, load_component, save
 
-THIRD_PARTY_IMAGES = ["database", "geth", "letsencrypt-nginx-proxy-companion", "nginx", "redis"]
+THIRD_PARTY_IMAGES = ["database", "geth", "nginx-https", "nginx", "redis"]
 
 
 def test_basic_structure(config):
@@ -62,7 +62,7 @@ def check_additional_keys(service, service_data):
         "backend",
         "bitcoin",
         "database",
-        "letsencrypt-nginx-proxy-companion",
+        "nginx-https",
         "nginx",
         "nginx-gen",
         "redis",

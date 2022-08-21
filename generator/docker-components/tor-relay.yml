@@ -2,7 +2,6 @@ services:
   tor-relay-gen:
     restart: unless-stopped
     image: bitcartcc/docker-gen:0.9.0
-    container_name: tor-relay-gen
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc-relay.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
@@ -17,7 +16,6 @@ services:
   tor-relay:
     restart: unless-stopped
     image: bitcartcc/tor:0.4.7.8
-    container_name: tor-relay
     environment:
       TOR_PASSWORD: bitcartcc
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2

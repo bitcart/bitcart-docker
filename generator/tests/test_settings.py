@@ -42,9 +42,9 @@ def test_frontend_pack():
 @pytest.mark.parametrize(
     "proxy, expected",
     [
-        ("nginx-https", ["nginx", "letsencrypt-nginx-proxy-companion"]),
+        ("nginx-https", ["nginx", "nginx-https"]),
         ("nginx", ["nginx"]),
-        ("none", ["nginx", "letsencrypt-nginx-proxy-companion"]),
+        ("none", ["nginx", "nginx-https"]),
     ],
     ids=["nginx-https", "nginx", "none"],
 )
