@@ -51,6 +51,8 @@ services:
       - "tor_datadir:/home/tor/.tor"
       - "tor_torrcdir:/usr/local/etc/tor"
       - "tor_servicesdir:/var/lib/tor/hidden_services"
+    labels:
+      - org.bitcartcc.tor
 
   tor-gen:
     restart: unless-stopped
@@ -59,7 +61,7 @@ services:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
       - "tor_torrcdir:/usr/local/etc/tor"
-    entrypoint: /usr/local/bin/docker-gen -notify-sighup tor -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
+    entrypoint: /usr/local/bin/docker-gen -notify-sighup label=org.bitcartcc.tor -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
     links:
       - tor
 

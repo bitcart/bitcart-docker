@@ -11,7 +11,7 @@ services:
       - "nginx_html:/usr/share/nginx/html"
       - "nginx_certs:/etc/nginx/certs:ro"
     labels:
-      - org.bitcartcc.nginx=true
+      - org.bitcartcc.nginx
 
   nginx-gen:
     restart: unless-stopped
