@@ -15,11 +15,12 @@ def apply_build_time_env(line):
     def load_env_var(match):
         nonlocal to_delete
         env_name = match.group(1)
-        if env_name.startswith(ENV_PREFIX):
-            env_name = env_name[len(ENV_PREFIX) :]
-        value = env(env_name, "")
+        # if env_name.startswith(ENV_PREFIX):
+        #    env_name = env_name[len(ENV_PREFIX) :]
+        value = env(env_name, "", prefix="")
         if not value:
             to_delete = True
+        print(env_name, value, to_delete)
         return value
 
     line = re.sub(BUILD_TIME_ENV_REGEX, load_env_var, line)
