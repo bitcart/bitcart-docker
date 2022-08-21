@@ -152,7 +152,7 @@ def test_tor_rule():
             assert f"{env_name.upper()}_PROXY_URL" in services[service["component"]]["environment"]
     for service in services:
         if service in HOST_COMPONENTS:
-            assert services[service]["environment"]["HIDDENSERVICE_REVERSEPROXY"] == "nginx"
+            assert services[service]["environment"]["HIDDENSERVICE_REVERSEPROXY"] == "compose-nginx-1"
     set_env("REVERSEPROXY", "none")
     services = generate_config()["services"]
     for service in services:
