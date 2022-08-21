@@ -177,7 +177,7 @@ upstream {{ $upstream_name }} {
 }
 
 {{ $hiddenReverseProxy := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_REVERSEPROXY")) "") }}
-{{ if (eq $hiddenReverseProxy "nginx")}}
+{{ if ne $hiddenReverseProxy "" }}
 	{{ $hiddenHostName := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_NAME")) "") }}
 	{{ $onionHost := read (printf "/var/lib/tor/hidden_services/%s/hostname" $hiddenHostName) }}
 	{{ if ne $onionHost "" }}
