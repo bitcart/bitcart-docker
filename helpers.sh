@@ -1,4 +1,12 @@
-[[ -f ".deploy" ]] && . .deploy
+read_from_env_file() {
+    if cat "$1" &>/dev/null; then
+        while IFS= read -r line; do
+            ! [[ "$line" == "#"* ]] && [[ "$line" == *"="* ]] && export "$line" || true
+        done <"$1"
+    fi
+}
+
+read_from_env_file .deploy
 
 bitcart_update_docker_env() {
     touch $BITCART_ENV_FILE
