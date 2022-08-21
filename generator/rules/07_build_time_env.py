@@ -1,3 +1,4 @@
+import os
 import re
 
 from ..constants import ENV_PREFIX
@@ -15,6 +16,8 @@ def apply_build_time_env(line):
     def load_env_var(match):
         nonlocal to_delete
         env_name = match.group(1)
+        if env_name == "DEPLOYENT_NAME":
+            return os.getenv("NAME", "compose")
         if env_name.startswith(ENV_PREFIX):
             env_name = env_name[len(ENV_PREFIX) :]
         value = env(env_name, "")

@@ -11,16 +11,10 @@ services:
       - "nginx_certs:/etc/nginx/certs:rw"
     environment:
       ACME_CA_URI: ${ACME_CA_URI:-https://acme-v02.api.letsencrypt.org/directory}
+      NGINX_DOCKER_GEN_CONTAINER: "$<DEPLOYENT_NAME>?-nginx-gen-1"
+      NGINX_PROXY_CONTAINER: "$<DEPLOYENT_NAME>?-nginx-1"
     links:
       - nginx-gen
-
-  nginx:
-    labels:
-      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
-
-  nginx-gen:
-    labels:
-      - com.github.jrcs.letsencrypt_nginx_proxy_companion.docker_gen
 
 volumes:
   acme:

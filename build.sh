@@ -13,4 +13,5 @@ fi
 
 docker run -v "$PWD/compose:/app/compose" \
     --env-file <(env | grep BITCART_) \
+    --env NAME=$NAME \
     --rm $BITCARTGEN_DOCKER_IMAGE

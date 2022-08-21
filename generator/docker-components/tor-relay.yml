@@ -6,7 +6,7 @@ services:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc-relay.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
       - "tor_relay_torrcdir:/usr/local/etc/tor"
-    entrypoint: /usr/local/bin/docker-gen -notify-sighup label=org.bitcartcc.tor-relay -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
+    entrypoint: /usr/local/bin/docker-gen -notify-sighup $<DEPLOYENT_NAME>?-tor-relay-1 -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
     links:
       - tor-relay
     environment:
@@ -25,8 +25,6 @@ services:
     ports:
       - "9001:9001"
       - "9030:9030"
-    labels:
-      - org.bitcartcc.tor-relay
 volumes:
   tor_relay_datadir:
   tor_relay_torrcdir:
