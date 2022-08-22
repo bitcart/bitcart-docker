@@ -30,8 +30,8 @@
 				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
 				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
                     {{ $backendUsed = "true" }}
-					location /api/ {
-						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
+					location /api {
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
 					}
 				{{ end }}
 				{{ if (and (eq $adminUsed "false") (eq $serviceName "admin")) }}
@@ -49,8 +49,8 @@
 				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
 				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
                     {{ $backendUsed = "true" }}
-					location /api/ {
-						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
+					location /api {
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
 					}
 				{{ end }}
 			{{ end }}
