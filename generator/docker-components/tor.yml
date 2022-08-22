@@ -59,7 +59,7 @@ services:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
       - "tor_torrcdir:/usr/local/etc/tor"
-    entrypoint: /usr/local/bin/docker-gen -notify-sighup $<DEPLOYENT_NAME>?-tor-1 -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
+    entrypoint: /usr/local/bin/docker-gen -filter-network $<DEPLOYENT_NAME>?_default -notify-sighup $<DEPLOYENT_NAME>?-tor-1 -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
     links:
       - tor
 
