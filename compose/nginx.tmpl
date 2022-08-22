@@ -31,13 +31,13 @@
 				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
                     {{ $backendUsed = "true" }}
 					location /api/ {
-						proxy_pass http://backend:8000/;
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
 					}
 				{{ end }}
 				{{ if (and (eq $adminUsed "false") (eq $serviceName "admin")) }}
                     {{ $adminUsed = "true" }}
 					location /admin {
-						proxy_pass http://admin:4000;
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
 					}
 				{{ end }}
 			{{ end }}
@@ -50,7 +50,7 @@
 				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
                     {{ $backendUsed = "true" }}
 					location /api/ {
-						proxy_pass http://backend:8000/;
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
 					}
 				{{ end }}
 			{{ end }}
