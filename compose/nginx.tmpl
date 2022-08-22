@@ -29,13 +29,13 @@
 			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
 				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
 				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
-                    {{ $backendUsed := "true" }}
+                    {{ $backendUsed = "true" }}
 					location /api/ {
 						proxy_pass http://backend:8000/;
 					}
 				{{ end }}
 				{{ if (and (eq $adminUsed "false") (eq $serviceName "admin")) }}
-                    {{ $adminUsed := "true" }}
+                    {{ $adminUsed = "true" }}
 					location /admin {
 						proxy_pass http://admin:4000;
 					}
@@ -48,7 +48,7 @@
 			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
 				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
 				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
-                    {{ $backendUsed := "true" }}
+                    {{ $backendUsed = "true" }}
 					location /api/ {
 						proxy_pass http://backend:8000/;
 					}
