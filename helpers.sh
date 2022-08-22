@@ -42,6 +42,7 @@ CLOUDFLARE_TUNNEL_TOKEN=$CLOUDFLARE_TUNNEL_TOKEN
 BITCART_HTTPS_ENABLED=$BITCART_HTTPS_ENABLED
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
+$(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_SCALE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_ROOTPATH")
 EOF
 }

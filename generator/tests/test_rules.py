@@ -165,3 +165,17 @@ def test_tor_rule():
     # Cleanup
     delete_env("ADDITIONAL_COMPONENTS")
     delete_env("REVERSEPROXY")
+
+
+# Rule 8
+def test_scale():
+    services = generate_config()["services"]
+    assert "scale" not in services["backend"]
+    set_env("BACKEND_SCALE", "2")
+    services = generate_config()["services"]
+    assert services["backend"]["scale"] == 2
+    set_env("BACKEND_SCALE", "test")
+    services = generate_config()["services"]
+    assert "scale" not in services["backend"]
+    # Cleanup
+    delete_env("BACKEND_SCALE")
