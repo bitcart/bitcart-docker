@@ -1,4 +1,4 @@
-from ..utils import env
+from ..utils import env, modify_key
 
 
 def rule(services, settings):
@@ -8,4 +8,5 @@ def rule(services, settings):
         except ValueError:
             continue
         if scale != 1:
-            services[i]["scale"] = scale
+            with modify_key(services, i, "deploy") as deploy:
+                deploy["replicas"] = scale
