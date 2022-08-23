@@ -251,6 +251,7 @@ server {
 	location / {
 		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
 	}
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
 {{ if $is_https }}
