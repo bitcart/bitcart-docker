@@ -1,26 +1,26 @@
-#
-# NOTE: THIS DOCKERFILE IS GENERATED VIA "generate-templates.sh"
-#
-# PLEASE DO NOT EDIT IT DIRECTLY.
-#
-
 FROM python:3.9-alpine AS base
 
 ENV ELECTRUM_USER electrum
 ENV ELECTRUM_HOME /home/$ELECTRUM_USER
-ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.electrum
+ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.{{ env.name }}{{ if env.custom == "false" and env.coin != "btc" then "-"+env.coin else "" end }}
 ENV IN_DOCKER=1
-ENV BTC_HOST 0.0.0.0
-LABEL org.bitcartcc.image=btc-daemon
+ENV {{ env.coin | ascii_upcase }}_HOST 0.0.0.0
+LABEL org.bitcartcc.image={{ env.coin }}-daemon
 
 FROM base AS compile-image
 
 COPY bitcart $ELECTRUM_HOME/site
 
+{{ if env.bases == "btc" then ( -}}
 RUN apk add python3-dev build-base libffi-dev && \
+{{ ) elif env.bases == "bch" then ( -}}
+RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev openssl-dev rust cargo && \
+{{ ) else ( -}}
+RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make && \
+{{ ) end -}}
     cd $ELECTRUM_HOME/site && \
     pip3 install --no-warn-script-location --user -r requirements/deterministic/base.txt && \
-    pip3 install --no-warn-script-location --user -r requirements/deterministic/daemons/btc.txt
+    pip3 install --no-warn-script-location --user -r requirements/deterministic/daemons/{{ env.coin }}.txt
 
 FROM base AS build-image
 
@@ -38,4 +38,4 @@ COPY --from=compile-image --chown=electrum $ELECTRUM_HOME/site $ELECTRUM_HOME/si
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
 
-CMD ["python","daemons/btc.py"]
+CMD ["python","daemons/{{ env.coin }}.py"]
