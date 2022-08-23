@@ -152,7 +152,7 @@ def test_tor_rule():
             assert f"{env_name.upper()}_PROXY_URL" in services[service["component"]]["environment"]
     for service in services:
         if service in HOST_COMPONENTS:
-            assert services[service]["environment"]["HIDDENSERVICE_REVERSEPROXY"] == "nginx"
+            assert services[service]["environment"]["HIDDENSERVICE_REVERSEPROXY"] == "compose-nginx-1"
     set_env("REVERSEPROXY", "none")
     services = generate_config()["services"]
     for service in services:
@@ -165,3 +165,17 @@ def test_tor_rule():
     # Cleanup
     delete_env("ADDITIONAL_COMPONENTS")
     delete_env("REVERSEPROXY")
+
+
+# Rule 8
+def test_scale():
+    services = generate_config()["services"]
+    assert "deploy" not in services["backend"]
+    set_env("BACKEND_SCALE", "2")
+    services = generate_config()["services"]
+    assert services["backend"]["deploy"]["replicas"] == 2
+    set_env("BACKEND_SCALE", "test")
+    services = generate_config()["services"]
+    assert "deploy" not in services["backend"]
+    # Cleanup
+    delete_env("BACKEND_SCALE")

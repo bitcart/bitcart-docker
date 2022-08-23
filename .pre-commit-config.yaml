@@ -58,3 +58,11 @@ repos:
         entry: mvdan/shfmt:latest -d -i 4
         language: docker_image
         types: [shell]
+  - repo: local
+    hooks:
+      - id: generate-images
+        name: Generate docker images
+        entry: compose/scripts/generate-templates.sh
+        language: system
+        files: >-
+          ^compose/Dockerfile-coin.template$

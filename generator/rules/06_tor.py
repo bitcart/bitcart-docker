@@ -10,7 +10,7 @@ def rule(services, settings):
             if services.get(i):
                 with modify_key(services, i, "environment") as environment:
                     if has_nginx:
-                        environment["HIDDENSERVICE_REVERSEPROXY"] = "nginx"
+                        environment["HIDDENSERVICE_REVERSEPROXY"] = "$<DEPLOYENT_NAME>?-nginx-1"
                     else:
                         environment["HIDDENSERVICE_IP"] = "172.17.0.1"
                         environment["HIDDENSERVICE_VIRTUAL_PORT"] = int(environment.get("VIRTUAL_PORT", "80"))

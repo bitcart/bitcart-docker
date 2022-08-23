@@ -22,18 +22,22 @@
 
 {{ end }}
 {{ define "redirects" }}
+    {{ $backendUsed := "false" }}
+    {{ $adminUsed := "false" }}
 	{{ if eq $.HostName "bitcart-store" }}
 		{{ range $container := $.Containers }}
 			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
 				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
-				{{ if (eq $serviceName "backend") }}
+				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
+                    {{ $backendUsed = "true" }}
 					location /api/ {
-						proxy_pass http://backend:8000/;
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
 					}
 				{{ end }}
-				{{ if (eq $serviceName "admin") }}
+				{{ if (and (eq $adminUsed "false") (eq $serviceName "admin")) }}
+                    {{ $adminUsed = "true" }}
 					location /admin {
-						proxy_pass http://admin:4000;
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
 					}
 				{{ end }}
 			{{ end }}
@@ -43,9 +47,10 @@
 		{{ range $container := $.Containers }}
 			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
 				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
-				{{ if (eq $serviceName "backend") }}
+				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
+                    {{ $backendUsed = "true" }}
 					location /api/ {
-						proxy_pass http://backend:8000/;
+						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
 					}
 				{{ end }}
 			{{ end }}
@@ -177,7 +182,7 @@ upstream {{ $upstream_name }} {
 }
 
 {{ $hiddenReverseProxy := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_REVERSEPROXY")) "") }}
-{{ if (eq $hiddenReverseProxy "nginx")}}
+{{ if ne $hiddenReverseProxy "" }}
 	{{ $hiddenHostName := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_NAME")) "") }}
 	{{ $onionHost := read (printf "/var/lib/tor/hidden_services/%s/hostname" $hiddenHostName) }}
 	{{ if ne $onionHost "" }}
@@ -246,6 +251,7 @@ server {
 	location / {
 		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
 	}
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
 {{ if $is_https }}

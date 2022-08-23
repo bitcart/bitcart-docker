@@ -1,13 +1,12 @@
 services:
   tor-relay-gen:
     restart: unless-stopped
-    image: bitcartcc/docker-gen:0.9.0
-    container_name: tor-relay-gen
+    image: bitcartcc/docker-gen:0.9.1
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc-relay.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
       - "tor_relay_torrcdir:/usr/local/etc/tor"
-    entrypoint: /usr/local/bin/docker-gen -notify-sighup tor-relay -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
+    entrypoint: /usr/local/bin/docker-gen -filter-network $<DEPLOYENT_NAME>?_default -notify-sighup $<DEPLOYENT_NAME>?-tor-relay-1 -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
     links:
       - tor-relay
     environment:
@@ -17,7 +16,6 @@ services:
   tor-relay:
     restart: unless-stopped
     image: bitcartcc/tor:0.4.7.8
-    container_name: tor-relay
     environment:
       TOR_PASSWORD: bitcartcc
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2

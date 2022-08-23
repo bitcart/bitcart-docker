@@ -1,4 +1,12 @@
-[[ -f ".deploy" ]] && . .deploy
+read_from_env_file() {
+    if cat "$1" &>/dev/null; then
+        while IFS= read -r line; do
+            ! [[ "$line" == "#"* ]] && [[ "$line" == *"="* ]] && export "$line" || true
+        done <"$1"
+    fi
+}
+
+read_from_env_file .deploy
 
 bitcart_update_docker_env() {
     touch $BITCART_ENV_FILE
@@ -34,6 +42,7 @@ CLOUDFLARE_TUNNEL_TOKEN=$CLOUDFLARE_TUNNEL_TOKEN
 BITCART_HTTPS_ENABLED=$BITCART_HTTPS_ENABLED
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
+$(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_SCALE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_ROOTPATH")
 EOF
 }
@@ -182,7 +191,7 @@ install_docker_compose() {
     sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o $INSTALL_PATH/docker-compose
     sudo chmod +x $INSTALL_PATH/docker-compose
     # remove old docker-compose
-    try sudo rm /usr/local/bin/docker-compose
+    try sudo rm /usr/local/bin/docker-compose &>/dev/null
 }
 
 install_tooling() {
