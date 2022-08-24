@@ -3,7 +3,7 @@ import re
 from ..constants import ENV_PREFIX
 from ..utils import apply_recursive, env
 
-BUILD_TIME_ENV_REGEX = re.compile(r"\$<(.*?)>\?")
+BUILD_TIME_ENV_REGEX = re.compile(r"\$<(.*?)>:?(.*?)\?")
 
 
 def apply_build_time_env(line):
@@ -15,11 +15,12 @@ def apply_build_time_env(line):
     def load_env_var(match):
         nonlocal to_delete
         env_name = match.group(1)
+        default = match.group(2)
         if env_name == "DEPLOYENT_NAME":
             return env("NAME", "compose", prefix="")
         if env_name.startswith(ENV_PREFIX):
             env_name = env_name[len(ENV_PREFIX) :]
-        value = env(env_name, "")
+        value = env(env_name, default or "")
         if not value:
             to_delete = True
         return value

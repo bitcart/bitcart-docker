@@ -37,6 +37,7 @@ Environment variables:
     REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
     BITCART_ENABLE_SSH: Gives BitcartCC SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
+    BITCART_SSH_PORT: Port where ssh server runs on host machine. Default: 22
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
     BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
@@ -143,6 +144,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${REVERSEPROXY_HTTP_PORT:=80}"
 : "${REVERSEPROXY_HTTPS_PORT:=443}"
 : "${BITCART_ENABLE_SSH:=true}"
+: "${BITCART_SSH_PORT:=22}"
 : "${CLOUDFLARE_TUNNEL_TOKEN:=}"
 
 # Crypto default settings (adjust to add a new coin)
@@ -196,6 +198,7 @@ REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
 REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
 BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
+BITCART_SSH_PORT=$BITCART_SSH_PORT
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 BITCART_STORE_HOST=$BITCART_STORE_HOST
 BITCART_STORE_API_URL=$BITCART_STORE_API_URL
@@ -255,6 +258,7 @@ export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
 export BITCART_EXCLUDE_COMPONENTS="$BITCART_EXCLUDE_COMPONENTS"
 export BITCART_ENV_FILE="$BITCART_ENV_FILE"
 export BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
+export BITCART_SSH_PORT=$BITCART_SSH_PORT
 export BITCARTGEN_DOCKER_IMAGE="$BITCARTGEN_DOCKER_IMAGE"
 if cat "\$BITCART_ENV_FILE" &> /dev/null; then
   while IFS= read -r line; do
