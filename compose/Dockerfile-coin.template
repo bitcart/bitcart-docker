@@ -12,7 +12,7 @@ FROM base AS compile-image
 COPY bitcart $ELECTRUM_HOME/site
 
 {{ if env.bases == "btc" then ( -}}
-RUN apk add python3-dev build-base libffi-dev && \
+RUN apk add python3-dev build-base libffi-dev{{ if env.coin == "ltc" then " openssl-dev" else . end }} && \
 {{ ) elif env.bases == "bch" then ( -}}
 RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev openssl-dev rust cargo && \
 {{ ) else ( -}}
