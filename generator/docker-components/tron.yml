@@ -1,0 +1,20 @@
+services:
+  tron:
+    restart: unless-stopped
+    image: bitcartcc/bitcart-trx:stable
+    environment:
+      TRX_NETWORK: ${TRX_NETWORK:-mainnet}
+      TRX_SERVER: ${TRX_SERVER:-https://trx.getblock.io/mainnet}
+    expose:
+      - "5009"
+    volumes:
+      - "tron_datadir:/data"
+
+  backend:
+    depends_on:
+      - tron
+    links:
+      - tron
+
+volumes:
+  tron_datadir:

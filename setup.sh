@@ -51,6 +51,7 @@ Environment variables:
     BNB_NETWORK: The network to run binancecoin daemon on (eg. mainnet, testnet)
     SBCH_NETWORK: The network to run smartbch daemon on (eg. mainnet, testnet)
     MATIC_NETWORK: The network to run polygon daemon on (eg. mainnet, testnet)
+    TRX_NETWORK: The network to run tron daemon on (eg. mainnet, testnet)
     XRG_NETWORK: The network to run ergon daemon on (eg. mainnet)
     LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
     LTC_LIGHTNING: Whether to enable litecoin lightning network or not (eg. true, false)
@@ -155,6 +156,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BNB_NETWORK:=mainnet}"
 : "${SBCH_NETWORK:=mainnet}"
 : "${MATIC_NETWORK:=mainnet}"
+: "${TRX_NETWORK:=mainnet}"
 : "${XRG_NETWORK:=mainnet}"
 : "${LTC_NETWORK:=mainnet}"
 : "${LTC_LIGHTNING:=false}"
@@ -216,6 +218,7 @@ ETH_NETWORK=$ETH_NETWORK
 BNB_NETWORK=$BNB_NETWORK
 SBCH_NETWORK=$SBCH_NETWORK
 MATIC_NETWORK=$MATIC_NETWORK
+TRX_NETWORK=$TRX_NETWORK
 XRG_NETWORK=$XRG_NETWORK
 LTC_NETWORK=$LTC_NETWORK
 LTC_LIGHTNING=$LTC_LIGHTNING
