@@ -29,7 +29,7 @@ services:
     image: bitcartcc/bitcart-eth:stable
     environment:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
-      ETH_SERVER: http://geth:8545
+      ETH_SERVER: ${ETH_SERVER:-http://geth:8545}
     expose:
       - "5002"
     volumes:

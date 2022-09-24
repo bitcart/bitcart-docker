@@ -45,6 +45,7 @@ $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_SCALE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_ROOTPATH")
+$(env | awk -F "=" '{print "\n"$0}' | grep ".*_SERVER")
 EOF
 }
 
