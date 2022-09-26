@@ -1,0 +1,20 @@
+services:
+  groestlcoin:
+    restart: unless-stopped
+    image: bitcartcc/bitcart-grs:stable
+    environment:
+      GRS_NETWORK: ${GRS_NETWORK:-mainnet}
+      GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
+    expose:
+      - "5010"
+    volumes:
+      - "groestlcoin_datadir:/data"
+
+  backend:
+    depends_on:
+      - groestlcoin
+    links:
+      - groestlcoin
+
+volumes:
+  groestlcoin_datadir:
