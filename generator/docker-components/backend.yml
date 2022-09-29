@@ -30,6 +30,8 @@ services:
       LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
+      GRS_NETWORK: ${GRS_NETWORK:-mainnet}
+      GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
       UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
       BITCART_BACKEND_ROOTPATH: ${BITCART_BACKEND_ROOTPATH:-}
       SSH_CONNECTION: "root@host.docker.internal:$<BITCART_SSH_PORT>:22?"

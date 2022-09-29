@@ -129,11 +129,12 @@ export BITCART_STORE_API_URL=https://api.bitcartcc.com
 export BITCART_REVERSEPROXY=none
 # cryptocurrency settings
 # we enable all currencies we support on the demo to test that they work
-export BITCART_CRYPTOS=btc,bch,ltc,bsty,xrg,eth,bnb,sbch,matic,trx
+export BITCART_CRYPTOS=btc,bch,ltc,bsty,xrg,eth,bnb,sbch,matic,trx,grs
 # lightning network for supported coins
 export BTC_LIGHTNING=true
 export LTC_LIGHTNING=true
 export BSTY_LIGHTNING=true
+export GRS_LIGHTNING=true
 # tor support
 export BITCART_ADDITIONAL_COMPONENTS=tor
 ./setup.sh

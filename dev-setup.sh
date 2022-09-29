@@ -17,5 +17,6 @@ BNB_HOST=binancecoin
 SBCH_HOST=smartbch
 MATIC_HOST=polygon
 TRX_HOST=tron
+GRS_HOST=groestlcoin
 EOF
 cd ../..
