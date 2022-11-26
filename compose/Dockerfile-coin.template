@@ -16,7 +16,7 @@ RUN apk add python3-dev build-base libffi-dev{{ if env.coin == "ltc" then " open
 {{ ) elif env.bases == "bch" then ( -}}
 RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev openssl-dev rust cargo && \
 {{ ) else ( -}}
-RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make && \
+RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev && \
 {{ ) end -}}
     cd $ELECTRUM_HOME/site && \
     pip3 install --no-warn-script-location --user -r requirements/deterministic/base.txt && \

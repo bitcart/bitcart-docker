@@ -17,7 +17,7 @@ FROM base AS compile-image
 
 COPY bitcart $ELECTRUM_HOME/site
 
-RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make && \
+RUN apk add gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev && \
     cd $ELECTRUM_HOME/site && \
     pip3 install --no-warn-script-location --user -r requirements/deterministic/base.txt && \
     pip3 install --no-warn-script-location --user -r requirements/deterministic/daemons/matic.txt
