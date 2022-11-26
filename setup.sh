@@ -59,6 +59,7 @@ Environment variables:
     BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     GRS_NETWORK: The network to run groestlcoin daemon on (eg. mainnet, testnet)
     GRS_LIGHTNING: Whether to enable groestlcoin lightning network or not (eg. true, false)
+    XMR_NETWORK: The network to run monero daemon on (eg. mainnet, testnet)
     BITCART_ADDITIONAL_COMPONENTS: A list of additional components to add
     BITCART_EXCLUDE_COMPONENTS: A list of components to exclude from the result set
     BITCART_HTTPS_ENABLED: a special flag to rewrite bitcart API URLs to https. It does not enable https setup automatically and is required for custom cases such as cloudflare tunnel.
@@ -166,6 +167,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BSTY_LIGHTNING:=false}"
 : "${GRS_NETWORK:=mainnet}"
 : "${GRS_LIGHTNING:=false}"
+: "${XMR_NETWORK:=mainnet}"
 
 BITCART_BASE_DIRECTORY="$(pwd)"
 BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
@@ -230,6 +232,7 @@ BSTY_NETWORK=$BSTY_NETWORK
 BSTY_LIGHTNING=$BSTY_LIGHTNING
 GRS_NETWORK=$GRS_NETWORK
 GRS_LIGHTNING=$GRS_LIGHTNING
+XMR_NETWORK=$XMR_NETWORK
 ----------------------
 Additional exported variables:
 BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
