@@ -1,0 +1,20 @@
+services:
+  monero:
+    restart: unless-stopped
+    image: bitcartcc/bitcart-xmr:stable
+    environment:
+      XMR_NETWORK: ${XMR_NETWORK:-mainnet}
+      XMR_SERVER: ${XMR_SERVER:-http://node.sethforprivacy.com:18089}
+    expose:
+      - "5011"
+    volumes:
+      - "monero_datadir:/data"
+
+  backend:
+    depends_on:
+      - monero
+    links:
+      - monero
+
+volumes:
+  monero_datadir:
