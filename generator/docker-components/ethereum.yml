@@ -29,7 +29,7 @@ services:
     image: bitcartcc/bitcart-eth:stable
     environment:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
-      ETH_SERVER: ${ETH_SERVER:-https://eth.public-rpc.com}
+      ETH_SERVER: ${ETH_SERVER:-https://rpc.ankr.com/eth}
     expose:
       - "5002"
     volumes:

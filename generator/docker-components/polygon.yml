@@ -4,7 +4,7 @@ services:
     image: bitcartcc/bitcart-matic:stable
     environment:
       MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
-      MATIC_SERVER: ${MATIC_SERVER:-https://polygon-rpc.com}
+      MATIC_SERVER: ${MATIC_SERVER:-https://rpc.ankr.com/polygon}
     expose:
       - "5008"
     volumes:
