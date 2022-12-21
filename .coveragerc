@@ -2,7 +2,7 @@
 source = .
 omit =
     *__main__.py,
-    *tests/*,
-    venv/*,
-    env/*,
+    tests/**,
+    venv/**,
+    env/**,
     *__init__.py
