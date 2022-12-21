@@ -16,7 +16,6 @@ This script must be run as root, except on Mac OS
     startup config files. Allows multiple deployments on one server.
     Empty by default
     --install-only: Run install only
-    --docker-unavailable: Same as --install-only, but will also skip install steps requiring docker
     --no-startup-register: Do not register BitcartCC to start via systemctl or upstart
     --no-systemd-reload: Do not reload systemd configuration
 This script will:
@@ -71,7 +70,6 @@ END
 }
 
 START=true
-HAS_DOCKER=true
 STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
 NAME_INPUT=false
@@ -94,11 +92,6 @@ while (("$#")); do
         ;;
     --install-only)
         START=false
-        shift 1
-        ;;
-    --docker-unavailable)
-        START=false
-        HAS_DOCKER=false
         shift 1
         ;;
     --no-startup-register)
@@ -172,6 +165,11 @@ get_profile_file "$SCRIPTS_POSTFIX"
 BITCART_BASE_DIRECTORY="$(pwd)"
 BITCART_ENV_FILE="$BITCART_BASE_DIRECTORY/.env"
 BITCART_DEPLOYMENT_CONFIG="$BITCART_BASE_DIRECTORY/.deploy"
+
+first_setup=false
+if ! [ -f "$BITCART_DEPLOYMENT_CONFIG" ]; then
+    first_setup=true
+fi
 
 # SSH settings
 BITCART_SSH_KEY_FILE=""
@@ -251,11 +249,7 @@ fi
 apply_local_modifications
 
 # Configure deployment config to determine which deployment name to use
-cat >${BITCART_DEPLOYMENT_CONFIG} <<EOF
-#!/bin/bash
-NAME=$NAME
-SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
-EOF
+save_deploy_config
 
 # Init the variables when a user log interactively
 touch "$BASH_PROFILE_SCRIPT"
@@ -280,7 +274,6 @@ fi
 EOF
 
 chmod +x ${BASH_PROFILE_SCRIPT}
-chmod +x ${BITCART_DEPLOYMENT_CONFIG}
 
 echo -e "BitcartCC environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
 echo -e "BitcartCC deployment config saved in $BITCART_DEPLOYMENT_CONFIG\n"
@@ -349,24 +342,20 @@ fi
 
 check_docker_compose
 
-if $HAS_DOCKER; then
-    if ! [[ -x "$(command -v docker)" ]]; then
-        echo "Failed to install 'docker'. Please install docker manually, then retry."
-        exit 1
-    fi
+if ! [[ -x "$(command -v docker)" ]]; then
+    echo "Failed to install 'docker'. Please install docker manually, then retry."
+    exit 1
+fi
 
-    if ! [[ $(docker compose version 2>/dev/null) ]]; then
-        echo "Failed to install 'docker compose'. Please install docker compose manually, then retry."
-        exit 1
-    fi
+if ! [[ $(docker compose version 2>/dev/null) ]]; then
+    echo "Failed to install 'docker compose'. Please install docker compose manually, then retry."
+    exit 1
 fi
 
 # Generate the docker compose
-if $HAS_DOCKER; then
-    if ! ./build.sh; then
-        echo "Failed to generate the docker-compose"
-        exit 1
-    fi
+if ! ./build.sh; then
+    echo "Failed to generate the docker-compose"
+    exit 1
 fi
 
 # Schedule for reboot
@@ -437,11 +426,12 @@ end script" >/etc/init/start_containers.conf
 fi
 
 install_tooling
+if [[ "$first_setup" = true ]]; then
+    bitcart_pull
+fi
 
 if $START; then
     ./start.sh
-elif $HAS_DOCKER; then
-    bitcart_pull
 fi
 
 echo "Setup done."

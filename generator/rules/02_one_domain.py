@@ -1,6 +1,6 @@
-from ..constants import HOST_COMPONENTS
-from ..utils import modify_key
-from ..utils import preferred_service as get_pref
+from generator.constants import HOST_COMPONENTS
+from generator.utils import modify_key
+from generator.utils import preferred_service as get_pref
 
 
 def rule(services, settings):

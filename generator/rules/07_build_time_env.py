@@ -1,7 +1,7 @@
 import re
 
-from ..constants import ENV_PREFIX
-from ..utils import apply_recursive, env
+from generator.constants import ENV_PREFIX
+from generator.utils import apply_recursive, env
 
 BUILD_TIME_ENV_REGEX = re.compile(r"\$<(.*?)>:?(.*?)\?")
 

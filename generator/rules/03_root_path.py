@@ -1,6 +1,6 @@
 from os.path import join as urljoin
 
-from ..utils import modify_key
+from generator.utils import modify_key
 
 
 def rule(services, settings):

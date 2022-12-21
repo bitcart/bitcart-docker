@@ -12,3 +12,5 @@ compose/generated.yml
 coverage.xml
 htmlcov/
 venv/
+compose/plugins/*
+!compose/plugins/.gitkeep

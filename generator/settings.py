@@ -1,7 +1,7 @@
 from shlex import shlex
 
-from .constants import ALL_REVERSE_PROXIES, AVAILABLE_SETTINGS, HTTPS_REVERSE_PROXIES
-from .utils import config_error, env
+from generator.constants import ALL_REVERSE_PROXIES, AVAILABLE_SETTINGS, HTTPS_REVERSE_PROXIES
+from generator.utils import config_error, env
 
 
 class Settings:

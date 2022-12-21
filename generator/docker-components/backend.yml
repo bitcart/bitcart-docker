@@ -7,7 +7,7 @@ services:
       LOG_FILE: bitcart.log
       BITCART_DATADIR: /datadir
       BITCART_BACKUPS_DIR: /backups
-      BITCART_VOLUMES: /datadir /backups
+      BITCART_VOLUMES: /datadir /backups /plugins
       DB_PORT: 5432
       DB_HOST: database
       VIRTUAL_NETWORK: nginx-proxy
@@ -39,6 +39,10 @@ services:
       SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
       SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}
       BASH_PROFILE_SCRIPT: ${BASH_PROFILE_SCRIPT}
+      BITCART_BACKEND_PLUGINS_DIR: /plugins/backend
+      BITCART_ADMIN_PLUGINS_DIR: /plugins/admin
+      BITCART_STORE_PLUGINS_DIR: /plugins/store
+      BITCART_DOCKER_PLUGINS_DIR: /plugins/docker
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:
@@ -46,6 +50,10 @@ services:
     volumes:
       - "bitcart_datadir:/datadir"
       - "backup_datadir:/backups"
+      - "./plugins/backend:/plugins/backend"
+      - "./plugins/admin:/plugins/admin"
+      - "./plugins/store:/plugins/store"
+      - "./plugins/docker:/plugins/docker"
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
   worker:

@@ -1,7 +1,7 @@
 import os
 
-from .constants import CRYPTO_COMPONENTS, ENV_PREFIX, HOST_COMPONENTS
-from .exceptions import ConfigError
+from generator.constants import CRYPTO_COMPONENTS, ENV_PREFIX, HOST_COMPONENTS
+from generator.exceptions import ConfigError
 
 
 def env(name, default=None, prefix=None):

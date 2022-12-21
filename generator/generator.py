@@ -1,5 +1,7 @@
 import glob
 import importlib
+import importlib.util
+import os
 import sys
 from collections import UserDict
 from os.path import basename, exists, isfile
@@ -8,19 +10,20 @@ from typing import Union
 
 import oyaml as yaml
 
-from .constants import (
+from generator.constants import (
     BACKEND_COMPONENTS,
     COMPONENTS_DIR,
     CRYPTO_COMPONENTS,
     CRYPTOS,
     FRONTEND_COMPONENTS,
     GENERATED_PATH,
+    PLUGINS_DIR,
     RULES_DIR,
     RULES_PYTHON_DIR,
     RULES_PYTHON_PKG,
 )
-from .settings import Settings
-from .utils import ConfigError
+from generator.settings import Settings
+from generator.utils import ConfigError
 
 
 class OrderedSet(UserDict):
@@ -42,6 +45,20 @@ class OrderedSet(UserDict):
 
     def __repr__(self):
         return f"{{{', '.join(map(repr, self.data.keys()))}}}"
+
+
+def get_plugin_components():  # pragma: no cover
+    components = OrderedSet()
+    if not os.path.exists(PLUGINS_DIR):
+        return components
+    for plugin in os.listdir(PLUGINS_DIR):
+        components_dir = path_join(PLUGINS_DIR, plugin, "components")
+        if not os.path.exists(components_dir):
+            continue
+        for component in os.listdir(components_dir):
+            if component.endswith(".yml"):
+                components.add(path_join(components_dir, component))
+    return components
 
 
 def add_components(settings: Settings) -> OrderedSet:
@@ -75,11 +92,15 @@ def add_components(settings: Settings) -> OrderedSet:
             break
     if not HAS_CRYPTO:
         components.add(CRYPTOS["btc"]["component"])
+    components.update(get_plugin_components())
     return components
 
 
 def load_component(component: str):
-    path = path_join(COMPONENTS_DIR, component + ".yml")
+    if os.path.isabs(component):  # pragma: no cover
+        path = component
+    else:
+        path = path_join(COMPONENTS_DIR, component + ".yml")
     if not exists(path):
         return {}
     with open(path) as f:
@@ -117,11 +138,35 @@ def merge(services):
     return d
 
 
+def load_module_by_path(plugin, rule, path):  # pragma: no cover
+    module_name = f"plugins.{plugin}.{rule}"
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def get_plugin_rules():  # pragma: no cover
+    rules = []
+    if not os.path.exists(PLUGINS_DIR):
+        return rules
+    for plugin in os.listdir(PLUGINS_DIR):
+        rules_dir = path_join(PLUGINS_DIR, plugin, "rules")
+        if not os.path.exists(rules_dir):
+            continue
+        for path in sorted(glob.glob(path_join(rules_dir, "*.py"))):
+            if isfile(path):
+                rules.append(load_module_by_path(plugin, path, path))
+    return rules
+
+
 def load_rules():
     modules = sorted(glob.glob(path_join(RULES_DIR, "*.py")))
     loaded = [
         importlib.import_module(f"{RULES_PYTHON_DIR}." + basename(f)[:-3], RULES_PYTHON_PKG) for f in modules if isfile(f)
     ]
+    loaded.extend(get_plugin_rules())
     for i in loaded.copy():
         if not getattr(i, "rule", None) or not callable(i.rule):
             loaded.remove(i)

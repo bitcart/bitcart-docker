@@ -1,4 +1,4 @@
-from ..utils import env, modify_key
+from generator.utils import env, modify_key
 
 
 def rule(services, settings):

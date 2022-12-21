@@ -54,6 +54,7 @@ EOF
 
 bitcart_start() {
     create_backup_volume
+    install_plugins
     docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
 }
 
@@ -202,4 +203,61 @@ install_docker_compose() {
 install_tooling() {
     try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli.sh
     try sudo chmod +x /etc/bash_completion.d/bitcart-cli.sh
+}
+
+save_deploy_config() {
+    BITCART_DEPLOYMENT_CONFIG="$BITCART_BASE_DIRECTORY/.deploy"
+    cat >${BITCART_DEPLOYMENT_CONFIG} <<EOF
+#!/bin/bash
+NAME=$NAME
+SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
+ADMIN_PLUGINS_HASH=$(get_plugins_hash admin)
+STORE_PLUGINS_HASH=$(get_plugins_hash store)
+BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
+DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
+EOF
+    chmod +x ${BITCART_DEPLOYMENT_CONFIG}
+    read_from_env_file $BITCART_DEPLOYMENT_CONFIG
+}
+
+get_plugins_hash() {
+    LC_ALL=C find compose/plugins/$1 -type f -print0 2>/dev/null | sort -z | xargs -0 sha1sum | sha1sum | awk '{print $1}'
+}
+
+make_backup_image() {
+    if [ "$(docker inspect --format '{{ index .Config.Labels "org.bitcartcc.plugins"}}' $1:stable)" = true ]; then
+        :
+    else
+        docker tag $1:stable $1:original
+    fi
+}
+
+install_plugins() {
+    failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
+    error=false
+    rm -f $failed_file
+    make_backup_image bitcartcc/bitcart
+    make_backup_image bitcartcc/bitcart-admin
+    make_backup_image bitcartcc/bitcart-store
+    if [[ "$DOCKER_PLUGINS_HASH" != "$(get_plugins_hash docker)" ]]; then
+        ./build.sh || touch $failed_file
+        docker compose -f compose/generated.yml config || touch $failed_file
+    fi
+    if [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
+        docker build -t bitcartcc/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
+    fi
+    if [[ "$error" = false ]] && [[ "$ADMIN_PLUGINS_HASH" != "$(get_plugins_hash admin)" ]]; then
+        docker build -t bitcartcc/bitcart-admin:stable -f compose/admin-plugins.Dockerfile compose || error=true
+    fi
+    if [[ "$error" = false ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
+        docker build -t bitcartcc/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
+    fi
+    if [[ "$error" = true ]]; then
+        echo "Plugins installation failed, restoring original images"
+        docker tag bitcartcc/bitcart:original bitcartcc/bitcart:stable
+        docker tag bitcartcc/bitcart-admin:original bitcartcc/bitcart-admin:stable
+        docker tag bitcartcc/bitcart-store:original bitcartcc/bitcart-store:stable
+        touch $failed_file
+    fi
+    save_deploy_config
 }

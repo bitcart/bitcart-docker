@@ -4,6 +4,7 @@ from os.path import join as path_join
 # Essential files lookup
 CURRENT_DIR = os.path.dirname(__file__)
 COMPOSE_DIR = path_join(CURRENT_DIR, "..", "compose")
+PLUGINS_DIR = path_join(COMPOSE_DIR, "plugins", "docker")
 COMPONENTS_DIR = path_join(CURRENT_DIR, "docker-components")
 RULES_DIR = path_join(CURRENT_DIR, "rules")
 RULES_PYTHON_PKG = "generator"
