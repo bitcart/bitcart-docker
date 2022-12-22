@@ -31,11 +31,7 @@ check_docker_compose
 install_tooling
 bitcart_update_docker_env
 bitcart_pull
-
-set +e
-docker image prune -af --filter "label=org.bitcartcc.image" --filter "label!=org.bitcartcc.image=docker-compose-generator"
-set -e
-
 bitcart_start
 
 set +e
+docker image prune -f --filter "label=org.bitcartcc.image" --filter "label!=org.bitcartcc.image=docker-compose-generator"
