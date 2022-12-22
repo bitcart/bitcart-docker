@@ -64,6 +64,10 @@ bitcart_stop() {
 
 bitcart_pull() {
     docker compose -f compose/generated.yml pull
+    export ADMIN_PLUGINS_HASH=
+    export STORE_PLUGINS_HASH=
+    export BACKEND_PLUGINS_HASH=
+    export DOCKER_PLUGINS_HASH=
 }
 
 bitcart_restart() {
