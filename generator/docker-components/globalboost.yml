@@ -5,6 +5,7 @@ services:
     environment:
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
+      BSTY_DEBUG: ${BSTY_DEBUG:-false}
     expose:
       - "5003"
     volumes:

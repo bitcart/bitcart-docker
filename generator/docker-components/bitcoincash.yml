@@ -4,6 +4,7 @@ services:
     image: bitcartcc/bitcart-bch:stable
     environment:
       BCH_NETWORK: ${BCH_NETWORK:-mainnet}
+      BCH_DEBUG: ${BCH_DEBUG:-false}
     expose:
       - "5004"
     volumes:

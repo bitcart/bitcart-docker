@@ -5,6 +5,7 @@ services:
     environment:
       MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
       MATIC_SERVER: ${MATIC_SERVER:-https://rpc.ankr.com/polygon}
+      MATIC_DEBUG: ${MATIC_DEBUG:-false}
     expose:
       - "5008"
     volumes:

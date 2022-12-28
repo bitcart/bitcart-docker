@@ -5,6 +5,7 @@ services:
     environment:
       BNB_NETWORK: ${BNB_NETWORK:-mainnet}
       BNB_SERVER: ${BNB_SERVER:-https://rpc.ankr.com/bsc}
+      BNB_DEBUG: ${BNB_DEBUG:-false}
     expose:
       - "5006"
     volumes:

@@ -5,6 +5,7 @@ services:
     environment:
       GRS_NETWORK: ${GRS_NETWORK:-mainnet}
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
+      GRS_DEBUG: ${GRS_DEBUG:-false}
     expose:
       - "5010"
     volumes:

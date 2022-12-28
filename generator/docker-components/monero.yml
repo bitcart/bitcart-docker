@@ -5,6 +5,7 @@ services:
     environment:
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
       XMR_SERVER: ${XMR_SERVER:-http://node.community.rino.io:18081}
+      XMR_DEBUG: ${XMR_DEBUG:-false}
     expose:
       - "5011"
     volumes:

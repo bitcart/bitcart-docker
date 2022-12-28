@@ -5,6 +5,7 @@ services:
     environment:
       BTC_NETWORK: ${BTC_NETWORK:-mainnet}
       BTC_LIGHTNING: ${BTC_LIGHTNING:-false}
+      BTC_DEBUG: ${BTC_DEBUG:-false}
     expose:
       - "5000"
     volumes:

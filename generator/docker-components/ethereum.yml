@@ -30,6 +30,7 @@ services:
     environment:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
       ETH_SERVER: ${ETH_SERVER:-https://rpc.ankr.com/eth}
+      ETH_DEBUG: ${ETH_DEBUG:-false}
     expose:
       - "5002"
     volumes:

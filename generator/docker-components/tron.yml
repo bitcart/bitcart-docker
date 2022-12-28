@@ -5,6 +5,7 @@ services:
     environment:
       TRX_NETWORK: ${TRX_NETWORK:-mainnet}
       TRX_SERVER: ${TRX_SERVER:-https://rpc.ankr.com/http/tron}
+      TRX_DEBUG: ${TRX_DEBUG:-false}
     expose:
       - "5009"
     volumes:

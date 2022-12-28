@@ -5,6 +5,7 @@ services:
     environment:
       SBCH_NETWORK: ${SBCH_NETWORK:-mainnet}
       SBCH_SERVER: ${SBCH_SERVER:-https://smartbch.fountainhead.cash/mainnet}
+      SBCH_DEBUG: ${SBCH_DEBUG:-false}
     expose:
       - "5007"
     volumes:
