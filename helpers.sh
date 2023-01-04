@@ -174,7 +174,7 @@ bitcart_dump_db() {
 bitcart_restore_db() {
     bitcart_start database
     # wait for db to be up
-    until docker exec -i $(container_name "database-1") psql -c '\l'; do
+    until docker exec -i $(container_name "database-1") psql -U postgres -c '\l'; do
         echo >&2 "Postgres is unavailable - sleeping"
         sleep 1
     done
