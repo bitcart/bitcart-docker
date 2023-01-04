@@ -143,6 +143,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BITCART_ENABLE_SSH:=true}"
 : "${BITCART_SSH_PORT:=22}"
 : "${CLOUDFLARE_TUNNEL_TOKEN:=}"
+: "${PIHOLE_SERVERIP:=}"
 
 # Crypto default settings (adjust to add a new coin)
 : "${BTC_NETWORK:=mainnet}"
@@ -266,6 +267,7 @@ export BITCART_ENV_FILE="$BITCART_ENV_FILE"
 export BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 export BITCART_SSH_PORT=$BITCART_SSH_PORT
 export BITCARTGEN_DOCKER_IMAGE="$BITCARTGEN_DOCKER_IMAGE"
+export PIHOLE_SERVERIP="$PIHOLE_SERVERIP"
 if cat "\$BITCART_ENV_FILE" &> /dev/null; then
   while IFS= read -r line; do
     ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line" || true

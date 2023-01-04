@@ -6,7 +6,7 @@ import yaml
 
 from generator.generator import add_components, load_component, save
 
-THIRD_PARTY_IMAGES = ["database", "geth", "nginx-https", "nginx", "redis"]
+THIRD_PARTY_IMAGES = ["database", "geth", "nginx-https", "nginx", "redis", "pihole"]
 
 
 def test_basic_structure(config):
