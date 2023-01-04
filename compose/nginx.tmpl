@@ -187,6 +187,7 @@ upstream {{ $upstream_name }} {
 	{{ $onionHost := read (printf "/var/lib/tor/hidden_services/%s/hostname" $hiddenHostName) }}
 	{{ if ne $onionHost "" }}
 server {
+    client_max_body_size 100M;
 	server_name {{ trim $onionHost }};
 	listen 80 ;
 	access_log /var/log/nginx/access.log vhost;
@@ -369,6 +370,7 @@ server {
 {{ if or (not $is_https) (eq $https_method "noredirect") }}
 
 server {
+    client_max_body_size 100M;
 	server_name {{ $host }};
 	listen 80 {{ $default_server }};
 	{{ if $enable_ipv6 }}
