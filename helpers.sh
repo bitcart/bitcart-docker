@@ -207,7 +207,7 @@ install_docker_compose() {
     sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o $INSTALL_PATH/docker-compose
     sudo chmod +x $INSTALL_PATH/docker-compose
     # remove old docker-compose
-    try sudo rm /usr/local/bin/docker-compose &>/dev/null
+    try sudo rm "$(command -v docker-compose)" &>/dev/null
 }
 
 install_tooling() {
