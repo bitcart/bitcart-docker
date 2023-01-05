@@ -188,16 +188,6 @@ if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
     BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
 fi
 
-# Validate some settings
-if [[ "$BITCART_REVERSEPROXY" == "nginx" ]] || [[ "$BITCART_REVERSEPROXY" == "nginx-https" ]] && [[ "$BITCART_HOST" ]]; then
-    DOMAIN_NAME="$(echo "$BITCART_HOST" | grep -E '^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$')"
-    if [[ ! "$DOMAIN_NAME" ]]; then
-        echo "BITCART_REVERSEPROXY is set to $BITCART_REVERSEPROXY, so BITCART_HOST must be a domain name which point to this server, but the current value of BITCART_HOST ('$BITCART_HOST') is not a valid domain name."
-        return
-    fi
-    BITCART_HOST="$DOMAIN_NAME"
-fi
-
 echo "-------SETUP-----------
 Parameters passed:
 BITCART_HOST=$BITCART_HOST
