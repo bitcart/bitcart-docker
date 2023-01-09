@@ -179,3 +179,15 @@ def test_scale():
     assert "deploy" not in services["backend"]
     # Cleanup
     delete_env("BACKEND_SCALE")
+
+
+# Rule 9: allow using older versions
+def test_bitcart_version():
+    services = generate_config()["services"]
+    for service in ("backend", "admin", "store", "bitcoin", "worker"):
+        assert services[service]["image"].endswith(":stable")
+    set_env("VERSION", "test")
+    services = generate_config()["services"]
+    for service in ("backend", "admin", "store", "bitcoin", "worker"):
+        assert services[service]["image"].endswith(":test")
+    delete_env("VERSION")
