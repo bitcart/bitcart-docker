@@ -215,8 +215,16 @@ def generate_config():
     return generate(add_components(settings), settings)
 
 
+def get_components_list():
+    settings = Settings()
+    return list(add_components(settings))
+
+
 def main():  # pragma: no cover
     try:
+        if len(sys.argv) == 2 and sys.argv[1] == "--components-only":
+            print(" ".join(get_components_list()))
+            return
         save(generate_config())
     except ConfigError as e:
         sys.exit(str(e))

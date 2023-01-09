@@ -4,9 +4,21 @@ import tempfile
 import pytest
 import yaml
 
-from generator.generator import add_components, load_component, save
+from generator.generator import add_components, get_components_list, load_component, save
 
 THIRD_PARTY_IMAGES = ["database", "geth", "nginx-https", "nginx", "redis", "pihole"]
+DEFAULT_SERVICES = [
+    "admin",
+    "backend",
+    "bitcoin",
+    "database",
+    "nginx-https",
+    "nginx",
+    "nginx-gen",
+    "redis",
+    "store",
+    "worker",
+]
 
 
 def test_basic_structure(config):
@@ -55,25 +67,17 @@ def check_additional_keys(service, service_data):
             assert isinstance(key, str) and value is None or isinstance(value, (str, int))
 
 
-@pytest.mark.parametrize(
-    "service",
-    [
-        "admin",
-        "backend",
-        "bitcoin",
-        "database",
-        "nginx-https",
-        "nginx",
-        "nginx-gen",
-        "redis",
-        "store",
-        "worker",
-    ],
-)
+@pytest.mark.parametrize("service", DEFAULT_SERVICES)
 def test_default_services(config, service):
     services = config["services"]
     assert service in services
     check_service(service, services[service])
+
+
+def test_default_components_list():
+    default_components = sorted(get_components_list())
+    for component in ("admin", "store", "backend", "bitcoin"):
+        assert component in default_components
 
 
 def test_all_components(all_components):
