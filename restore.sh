@@ -68,6 +68,7 @@ echo "Restoring database …"
 bitcart_restore_db $TEMP_DIR/database.sql
 echo "Restoring docker volumes…"
 cp -r $TEMP_DIR/volumes/ /var/lib/docker
+cp -r $TEMP_DIR/plugins compose/plugins
 
 echo "Restarting BitcartCC…"
 bitcart_start
