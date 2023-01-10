@@ -5,6 +5,8 @@ load_env
 
 cd "$BITCART_BASE_DIRECTORY"
 
+# Create a backup
+./backup.sh
 # First, update to latest stable release, then we can apply staging changes
 ./update.sh
 
