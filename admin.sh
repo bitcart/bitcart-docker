@@ -27,6 +27,9 @@ sqlquery() {
 }
 
 case "$1" in
+disable-multifactor)
+    sqlquery "UPDATE users SET tfa_enabled=false, fido2_devices={} WHERE email='$2';"
+    ;;
 disable-captcha)
     policiesupdate "{\"enable_captcha\": False}"
     ;;
@@ -41,6 +44,7 @@ reset-server-policy)
     echo
     echo "Commands:"
     echo "         disable-captcha"
+    echo "         disable-multifactor <email>"
     echo "         set-user-admin <email>"
     echo "         reset-server-policy"
     ;;
