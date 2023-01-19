@@ -28,7 +28,7 @@ sqlquery() {
 
 case "$1" in
 disable-multifactor)
-    sqlquery "UPDATE users SET tfa_enabled=false, fido2_devices={} WHERE email='$2';"
+    sqlquery "UPDATE users SET tfa_enabled=false, fido2_devices='{}' WHERE email='$2';"
     ;;
 disable-captcha)
     policiesupdate "{\"enable_captcha\": False}"
