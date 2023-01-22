@@ -191,3 +191,13 @@ def test_bitcart_version():
     for service in ("backend", "admin", "store", "bitcoin", "worker"):
         assert services[service]["image"].endswith(":test")
     delete_env("VERSION")
+
+
+# Rule 10: local domains
+def test_local_deploy():
+    services = generate_config()["services"]
+    assert "extra_hosts" not in services["store"]
+    set_env("HOST", "bitcart.local")
+    services = generate_config()["services"]
+    assert services["store"]["extra_hosts"] == ["bitcart.local:172.17.0.1"]
+    delete_env("HOST")
