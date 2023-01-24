@@ -54,7 +54,7 @@ services:
 
   tor-gen:
     restart: unless-stopped
-    image: bitcartcc/docker-gen:0.9.1
+    image: bitcartcc/docker-gen:0.9.2
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
