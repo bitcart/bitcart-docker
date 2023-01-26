@@ -5,6 +5,7 @@ services:
     environment:
       GRS_NETWORK: ${GRS_NETWORK:-mainnet}
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
+      GRS_LIGHTNING_GOSSIP: ${GRS_LIGHTNING_GOSSIP:-true}
       GRS_DEBUG: ${GRS_DEBUG:-false}
     expose:
       - "5010"

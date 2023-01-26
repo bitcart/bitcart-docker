@@ -5,6 +5,7 @@ services:
     environment:
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
       LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
+      LTC_LIGHTNING_GOSSIP: ${LTC_LIGHTNING_GOSSIP:-true}
       LTC_DEBUG: ${LTC_DEBUG:-false}
     expose:
       - "5001"
