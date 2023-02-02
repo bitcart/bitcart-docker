@@ -1,12 +1,6 @@
 FROM golang:1.18-alpine AS go-builder
 
-COPY bitcart/cli /app
-
-RUN cd /app && \
-    apk add --no-cache make && \
-    CGO_ENABLED=0 make build ARGS="-ldflags '-X main.Version=docker -X main.envFile=/app/conf/.env'" && \
-    chmod +x bitcart-cli
-
+RUN CGO_ENABLED=0 go install -ldflags '-X main.Version=docker' github.com/bitcartcc/bitcart-cli@master
 
 FROM python:3.9-slim-bullseye
 
@@ -17,7 +11,7 @@ LABEL org.bitcartcc.image=backend
 
 COPY bitcart /app
 COPY scripts/docker-entrypoint.sh /usr/local/bin/
-COPY --from=go-builder /app/bitcart-cli /usr/local/bin/
+COPY --from=go-builder /go/bin/bitcart-cli /usr/local/bin/
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openssh-client build-essential python3-dev libffi-dev ca-certificates wget && \
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" && \
