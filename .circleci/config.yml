@@ -60,7 +60,6 @@ workflows:
       - bitcartcc/lint:
           name: lint
           executor: bitcartcc/build-ubuntu
-          pre-commit-pip: false
       - test:
           requires:
             - lint
