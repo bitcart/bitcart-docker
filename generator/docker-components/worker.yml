@@ -25,7 +25,7 @@ services:
       GRS_NETWORK: ${GRS_NETWORK:-mainnet}
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
-      UPDATE_URL: https://api.github.com/repos/bitcartcc/bitcart/releases/latest
+      UPDATE_URL: ${BITCART_UPDATE_URL:-https://api.bitcartcc.com/updates/latest}
       SSH_CONNECTION: "root@host.docker.internal:$<BITCART_SSH_PORT>:22?"
       SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
       SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}
@@ -34,6 +34,7 @@ services:
       BITCART_ADMIN_PLUGINS_DIR: /plugins/admin
       BITCART_STORE_PLUGINS_DIR: /plugins/store
       BITCART_DOCKER_PLUGINS_DIR: /plugins/docker
+      BITCART_HOST: ${BITCART_HOST}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:

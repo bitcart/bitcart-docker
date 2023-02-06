@@ -45,6 +45,7 @@ TOR_RELAY_EMAIL=$TOR_RELAY_EMAIL
 CLOUDFLARE_TUNNEL_TOKEN=$CLOUDFLARE_TUNNEL_TOKEN
 BITCART_HTTPS_ENABLED=$BITCART_HTTPS_ENABLED
 BITCART_VERSION=$BITCART_VERSION
+BITCART_UPDATE_URL=$BITCART_UPDATE_URL
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_SCALE")
@@ -133,6 +134,9 @@ add_host() {
 }
 
 modify_host() {
+    if [ -z "$2" ]; then
+        return
+    fi
     remove_host $2
     add_host $1 $2
 }
