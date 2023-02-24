@@ -101,7 +101,7 @@ else
         fi
     done
     # put all volumes to volumes directory and remove timestamps
-    tar -cvzf $backup_path -C $volumes_dir --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
+    tar -cvzf $backup_path -C $volumes_dir --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa.pub" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
         -C "$(dirname $dbdump_path)" --transform "s|$timestamp-||" --transform "s|$timestamp||" $dumpname \
         -C "$BITCART_BASE_DIRECTORY/compose" plugins
 
