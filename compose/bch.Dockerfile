@@ -30,11 +30,13 @@ RUN adduser -D $ELECTRUM_USER && \
     chown ${ELECTRUM_USER} $ELECTRUM_DIRECTORY && \
     mkdir -p $ELECTRUM_HOME/site && \
     chown ${ELECTRUM_USER} $ELECTRUM_HOME/site && \
-    apk add --no-cache libsecp256k1-dev
+    apk add --no-cache libsecp256k1-dev && \
+    apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main jemalloc
 
 COPY --from=compile-image --chown=electrum /root/.local $ELECTRUM_HOME/.local
 COPY --from=compile-image --chown=electrum $ELECTRUM_HOME/site $ELECTRUM_HOME/site
 
+ENV PYTHONUNBUFFERED=1 PYTHONMALLOC=malloc LD_PRELOAD=libjemalloc.so.2 MALLOC_CONF=background_thread:true,max_background_threads:1,metadata_thp:auto,dirty_decay_ms:80000,muzzy_decay_ms:80000
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
 
