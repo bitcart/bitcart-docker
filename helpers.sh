@@ -249,30 +249,43 @@ make_backup_image() {
 }
 
 install_plugins() {
+    COMPONENTS=$(./build.sh --components-only | tail -1)
     failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
     error=false
     rm -f $failed_file
-    make_backup_image bitcartcc/bitcart
-    make_backup_image bitcartcc/bitcart-admin
-    make_backup_image bitcartcc/bitcart-store
+    if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
+        make_backup_image bitcartcc/bitcart
+    fi
+    if [[ " ${COMPONENTS[*]} " =~ " admin " ]]; then
+        make_backup_image bitcartcc/bitcart-admin
+    fi
+    if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
+        make_backup_image bitcartcc/bitcart-store
+    fi
     if [[ "$DOCKER_PLUGINS_HASH" != "$(get_plugins_hash docker)" ]]; then
         ./build.sh || touch $failed_file
         docker compose -f compose/generated.yml config || touch $failed_file
     fi
-    if [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
+    if [[ " ${COMPONENTS[*]} " =~ " backend " ]] && [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
         docker build -t bitcartcc/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
     fi
-    if [[ "$error" = false ]] && [[ "$ADMIN_PLUGINS_HASH" != "$(get_plugins_hash admin)" ]]; then
+    if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " admin " ]] && [[ "$ADMIN_PLUGINS_HASH" != "$(get_plugins_hash admin)" ]]; then
         docker build -t bitcartcc/bitcart-admin:stable -f compose/admin-plugins.Dockerfile compose || error=true
     fi
-    if [[ "$error" = false ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
+    if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " store " ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
         docker build -t bitcartcc/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
     fi
     if [[ "$error" = true ]]; then
         echo "Plugins installation failed, restoring original images"
-        docker tag bitcartcc/bitcart:original bitcartcc/bitcart:stable
-        docker tag bitcartcc/bitcart-admin:original bitcartcc/bitcart-admin:stable
-        docker tag bitcartcc/bitcart-store:original bitcartcc/bitcart-store:stable
+        if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
+            docker tag bitcartcc/bitcart:original bitcartcc/bitcart:stable
+        fi
+        if [[ " ${COMPONENTS[*]} " =~ " admin " ]]; then
+            docker tag bitcartcc/bitcart-admin:original bitcartcc/bitcart-admin:stable
+        fi
+        if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
+            docker tag bitcartcc/bitcart-store:original bitcartcc/bitcart-store:stable
+        fi
         touch $failed_file
     fi
     save_deploy_config
