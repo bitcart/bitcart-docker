@@ -22,7 +22,9 @@ jobs:
           name: run tests
           command: |
             make ci
-            codecov
+
+      - bitcartcc/codecov:
+          args: ""
 
   cansetup:
     executor: bitcartcc/build-ubuntu
