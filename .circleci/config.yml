@@ -47,13 +47,15 @@ jobs:
 
     steps:
       - checkout
-      - bitcartcc/login-to-dockerhub
+      - bitcartcc/login-to-registries
       - bitcartcc/enable-buildx
       - run:
           name: build docker image
           command: |
             cd generator
-            docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest .
+            docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest \
+            --tag ghcr.io/bitcartcc/docker-compose-generator:latest \
+            --tag harbor.nirvati.org/bitcartcc/docker-compose-generator:latest .
 
 workflows:
   version: 2

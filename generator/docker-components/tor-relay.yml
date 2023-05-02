@@ -15,7 +15,7 @@ services:
 
   tor-relay:
     restart: unless-stopped
-    image: bitcartcc/tor:0.4.7.8
+    image: bitcartcc/tor:0.4.7.13
     environment:
       TOR_PASSWORD: bitcartcc
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
