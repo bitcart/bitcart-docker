@@ -6,7 +6,7 @@ set -Eeuo pipefail
 images="compose/scripts/.images.json"
 
 if [ ! -f "$images" ] || [ ! "$#" -eq 0 ]; then
-    wget -qO "$images" 'https://raw.githubusercontent.com/bitcartcc/bitcart/master/.circleci/images.json'
+    wget -qO "$images" 'https://raw.githubusercontent.com/bitcart/bitcart/master/.circleci/images.json'
 fi
 
 generated_warning() {

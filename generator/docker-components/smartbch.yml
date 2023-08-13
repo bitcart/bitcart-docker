@@ -1,7 +1,7 @@
 services:
   smartbch:
     restart: unless-stopped
-    image: bitcartcc/bitcart-sbch:stable
+    image: bitcart/bitcart-sbch:stable
     environment:
       SBCH_NETWORK: ${SBCH_NETWORK:-mainnet}
       SBCH_SERVER: ${SBCH_SERVER:-https://smartbch.fountainhead.cash/mainnet}

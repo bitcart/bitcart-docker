@@ -1,7 +1,7 @@
 services:
   ergon:
     restart: unless-stopped
-    image: bitcartcc/bitcart-xrg:stable
+    image: bitcart/bitcart-xrg:stable
     environment:
       XRG_NETWORK: ${XRG_NETWORK:-mainnet}
       XRG_DEBUG: ${XRG_DEBUG:-false}

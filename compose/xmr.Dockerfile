@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.bitcart-xmr
 ENV IN_DOCKER=1
 ENV XMR_HOST 0.0.0.0
-LABEL org.bitcartcc.image=xmr-daemon
+LABEL org.bitcart.image=xmr-daemon
 
 FROM base AS compile-image
 

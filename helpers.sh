@@ -90,7 +90,7 @@ get_profile_file() {
             exit 1
         fi
 
-        BASH_PROFILE_SCRIPT="$HOME/bitcartcc-env$1.sh"
+        BASH_PROFILE_SCRIPT="$HOME/bitcart-env$1.sh"
 
         # Mac OS doesn't use /etc/profile.d/xxx.sh. Instead we create a new file and load that from ~/.bash_profile
         if [[ ! -f "$HOME/.bash_profile" ]]; then
@@ -102,7 +102,7 @@ get_profile_file() {
         fi
 
     else
-        BASH_PROFILE_SCRIPT="/etc/profile.d/bitcartcc-env$1.sh"
+        BASH_PROFILE_SCRIPT="/etc/profile.d/bitcart-env$1.sh"
 
         if $CHECK_ROOT && [[ $EUID -ne 0 ]]; then
             echo "This script must be run as root after running \"sudo su -\""
@@ -241,7 +241,7 @@ get_plugins_hash() {
 }
 
 make_backup_image() {
-    if [ "$(docker inspect --format '{{ index .Config.Labels "org.bitcartcc.plugins"}}' $1:stable)" = true ]; then
+    if [ "$(docker inspect --format '{{ index .Config.Labels "org.bitcart.plugins"}}' $1:stable)" = true ]; then
         :
     else
         docker tag $1:stable $1:original
@@ -254,37 +254,37 @@ install_plugins() {
     error=false
     rm -f $failed_file
     if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
-        make_backup_image bitcartcc/bitcart
+        make_backup_image bitcart/bitcart
     fi
     if [[ " ${COMPONENTS[*]} " =~ " admin " ]]; then
-        make_backup_image bitcartcc/bitcart-admin
+        make_backup_image bitcart/bitcart-admin
     fi
     if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
-        make_backup_image bitcartcc/bitcart-store
+        make_backup_image bitcart/bitcart-store
     fi
     if [[ "$DOCKER_PLUGINS_HASH" != "$(get_plugins_hash docker)" ]]; then
         ./build.sh || touch $failed_file
         docker compose -f compose/generated.yml config || touch $failed_file
     fi
     if [[ " ${COMPONENTS[*]} " =~ " backend " ]] && [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
-        docker build -t bitcartcc/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
+        docker build -t bitcart/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
     fi
     if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " admin " ]] && [[ "$ADMIN_PLUGINS_HASH" != "$(get_plugins_hash admin)" ]]; then
-        docker build -t bitcartcc/bitcart-admin:stable -f compose/admin-plugins.Dockerfile compose || error=true
+        docker build -t bitcart/bitcart-admin:stable -f compose/admin-plugins.Dockerfile compose || error=true
     fi
     if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " store " ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
-        docker build -t bitcartcc/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
+        docker build -t bitcart/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
     fi
     if [[ "$error" = true ]]; then
         echo "Plugins installation failed, restoring original images"
         if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
-            docker tag bitcartcc/bitcart:original bitcartcc/bitcart:stable
+            docker tag bitcart/bitcart:original bitcart/bitcart:stable
         fi
         if [[ " ${COMPONENTS[*]} " =~ " admin " ]]; then
-            docker tag bitcartcc/bitcart-admin:original bitcartcc/bitcart-admin:stable
+            docker tag bitcart/bitcart-admin:original bitcart/bitcart-admin:stable
         fi
         if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
-            docker tag bitcartcc/bitcart-store:original bitcartcc/bitcart-store:stable
+            docker tag bitcart/bitcart-store:original bitcart/bitcart-store:stable
         fi
         touch $failed_file
     fi

@@ -1,7 +1,7 @@
 services:
   ethereum:
     restart: unless-stopped
-    image: bitcartcc/bitcart-eth:stable
+    image: bitcart/bitcart-eth:stable
     environment:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
       ETH_SERVER: ${ETH_SERVER:-https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161}

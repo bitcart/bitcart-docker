@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.bitcart-matic
 ENV IN_DOCKER=1
 ENV MATIC_HOST 0.0.0.0
-LABEL org.bitcartcc.image=matic-daemon
+LABEL org.bitcart.image=matic-daemon
 
 FROM base AS compile-image
 

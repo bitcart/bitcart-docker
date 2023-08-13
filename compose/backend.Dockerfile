@@ -1,13 +1,13 @@
 FROM golang:1.18-alpine AS go-builder
 
-RUN CGO_ENABLED=0 go install -ldflags '-X main.Version=docker -X main.envFile=/app/conf/.env' github.com/bitcartcc/bitcart-cli@master
+RUN CGO_ENABLED=0 go install -ldflags '-X main.Version=docker -X main.envFile=/app/conf/.env' github.com/bitcart/bitcart-cli@master
 
 FROM python:3.9-slim-bullseye
 
 ARG TARGETPLATFORM
 ENV IN_DOCKER=1
 ENV GOSU_VERSION 1.16
-LABEL org.bitcartcc.image=backend
+LABEL org.bitcart.image=backend
 
 COPY bitcart /app
 COPY scripts/docker-entrypoint.sh /usr/local/bin/

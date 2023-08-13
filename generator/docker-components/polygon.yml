@@ -1,7 +1,7 @@
 services:
   polygon:
     restart: unless-stopped
-    image: bitcartcc/bitcart-matic:stable
+    image: bitcart/bitcart-matic:stable
     environment:
       MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
       MATIC_SERVER: ${MATIC_SERVER:-https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161}

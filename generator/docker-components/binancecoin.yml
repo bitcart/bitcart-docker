@@ -1,7 +1,7 @@
 services:
   binancecoin:
     restart: unless-stopped
-    image: bitcartcc/bitcart-bnb:stable
+    image: bitcart/bitcart-bnb:stable
     environment:
       BNB_NETWORK: ${BNB_NETWORK:-mainnet}
       BNB_SERVER: ${BNB_SERVER:-https://rpc.ankr.com/bsc}

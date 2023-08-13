@@ -1,7 +1,7 @@
 services:
   worker:
     restart: unless-stopped
-    image: bitcartcc/bitcart:stable
+    image: bitcart/bitcart:stable
     command: python3 worker.py
     environment:
       LOG_FILE: bitcart.log
@@ -25,7 +25,7 @@ services:
       GRS_NETWORK: ${GRS_NETWORK:-mainnet}
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
-      UPDATE_URL: ${BITCART_UPDATE_URL:-https://api.bitcartcc.com/updates/latest}
+      UPDATE_URL: ${BITCART_UPDATE_URL:-https://api.bitcart.ai/updates/latest}
       SSH_CONNECTION: "root@host.docker.internal:$<BITCART_SSH_PORT>:22?"
       SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
       SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}

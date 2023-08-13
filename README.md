@@ -1,16 +1,16 @@
-# BitcartCC Docker Deployment
+# Bitcart Docker Deployment
 
-[![CircleCI](https://circleci.com/gh/bitcartcc/bitcart-docker.svg?style=svg)](https://circleci.com/gh/bitcartcc/bitcart-docker)
-![Codecov](https://img.shields.io/codecov/c/github/bitcartcc/bitcart-docker?style=flat-square)
+[![CircleCI](https://circleci.com/gh/bitcart/bitcart-docker.svg?style=svg)](https://circleci.com/gh/bitcart/bitcart-docker)
+![Codecov](https://img.shields.io/codecov/c/github/bitcart/bitcart-docker?style=flat-square)
 
 ## Using provided scripts (easy)
 
-To install BitcartCC, if you're on linux system(these scripts for windows will be added soon),
-to download, set up, and run your BitcartCC instance, it is a matter of few commands:
+To install Bitcart, if you're on linux system(these scripts for windows will be added soon),
+to download, set up, and run your Bitcart instance, it is a matter of few commands:
 
 ```bash
 sudo su -
-git clone https://github.com/bitcartcc/bitcart-docker
+git clone https://github.com/bitcart/bitcart-docker
 cd bitcart-docker
 # set needed environment variables, see below
 ./setup.sh
@@ -22,33 +22,33 @@ To configure your installation you can set different environment variables.
 There are two types of environment variables: generator and app.
 To understand how generator works, see [Architecture](#architecture).
 
-Here is an example of the setup you will use in 90% cases. Replace `yourdomain.tld` with your actual domain (for bitcartcc demo, it was `bitcartcc.com`):
+Here is an example of the setup you will use in 90% cases. Replace `yourdomain.tld` with your actual domain (for bitcart demo, it was `bitcart.ai`):
 
 ```bash
 sudo su -
-git clone https://github.com/bitcartcc/bitcart-docker
+git clone https://github.com/bitcart/bitcart-docker
 cd bitcart-docker
 export BITCART_HOST=yourdomain.tld
 ./setup.sh
 ```
 
-This setup utilizes the [one domain mode](https://docs.bitcartcc.com/guides/one-domain-mode). We recommend you to read about that.
+This setup utilizes the [one domain mode](https://docs.bitcart.ai/guides/one-domain-mode). We recommend you to read about that.
 
-**Important: for everything to work, you will need to first set up DNS A records for** `BITCART_HOST`**,** `BITCART_ADMIN_HOST` **(if set) and** `BITCART_STORE_HOST` **(if set) to point to the server where you are deploying BitcartCC.**
+**Important: for everything to work, you will need to first set up DNS A records for** `BITCART_HOST`**,** `BITCART_ADMIN_HOST` **(if set) and** `BITCART_STORE_HOST` **(if set) to point to the server where you are deploying Bitcart.**
 
-![DNS A records for bitcartcc demo](https://raw.githubusercontent.com/bitcartcc/bitcart-docs/master/.gitbook/assets/namecheap_dns_records.png)
+![DNS A records for bitcart demo](https://raw.githubusercontent.com/bitcart/bitcart-docs/master/.gitbook/assets/namecheap_dns_records.png)
 
-_**Tip:**_ All the `_HOST` environment variables determine on which host (domain, without protocol) to run a service. All the `_URL` environment variables are to specify the URL (with protocol, http:// or https://) of the BitcartCC Merchants API to use.
+_**Tip:**_ All the `_HOST` environment variables determine on which host (domain, without protocol) to run a service. All the `_URL` environment variables are to specify the URL (with protocol, http:// or https://) of the Bitcart Merchants API to use.
 
-_**Tip:**_ if you want to try out BitcartCC locally on your PC without a server, you can either enable [Tor support](https://docs.bitcartcc.com/guides/tor) or use local deployment mode.
+_**Tip:**_ if you want to try out Bitcart locally on your PC without a server, you can either enable [Tor support](https://docs.bitcart.ai/guides/tor) or use local deployment mode.
 
 For that, replace `yourdomain.tld` with `bitcart.local` (or any domain ending in `.local`), and it will modify `/etc/hosts` for you, for it to work like a regular domain. If using local deployment mode, of course your instance will only be accessible from your PC.
 
-If not using the [one domain mode](https://docs.bitcartcc.com/guides/one-domain-mode), then you would probably run:
+If not using the [one domain mode](https://docs.bitcart.ai/guides/one-domain-mode), then you would probably run:
 
 ```bash
 sudo su -
-git clone https://github.com/bitcartcc/bitcart-docker
+git clone https://github.com/bitcart/bitcart-docker
 cd bitcart-docker
 export BITCART_HOST=api.yourdomain.tld
 export BITCART_ADMIN_HOST=admin.yourdomain.tld
@@ -81,10 +81,10 @@ Here is a complete list of configuration settings:
 
 | Name                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Default     | Type      |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------- |
-| BITCART_HOST                  | Host where to run BitcartCC Merchants API. Is used when merchants API (backend component) is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | :x:         | App       |
-| BITCART_STORE_HOST            | Host where to run BitcartCC Ready Store. Is used when store component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | :x:         | App       |
-| BITCART_ADMIN_HOST            | Host where to run BitcartCC Admin Panel. Is used when admin component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | :x:         | App       |
-| BITCART_STORE_API_URL         | URL of BitcartCC Merchants API instance. It can be your instance hosted together with store or a completely separate instance. In case of default setup (store+admin+API at once), you need to set it to https://$BITCART_HOST or (http if nginx-https component is not enabled).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | :x:         | App       |
+| BITCART_HOST                  | Host where to run Bitcart Merchants API. Is used when merchants API (backend component) is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | :x:         | App       |
+| BITCART_STORE_HOST            | Host where to run Bitcart Ready Store. Is used when store component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | :x:         | App       |
+| BITCART_ADMIN_HOST            | Host where to run Bitcart Admin Panel. Is used when admin component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | :x:         | App       |
+| BITCART_STORE_API_URL         | URL of Bitcart Merchants API instance. It can be your instance hosted together with store or a completely separate instance. In case of default setup (store+admin+API at once), you need to set it to https://$BITCART_HOST or (http if nginx-https component is not enabled).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | :x:         | App       |
 | BITCART_ADMIN_API_URL         | Same as BITCART_STORE_API_URL, but for configuring your admin panel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | :x:         | App       |
 | BITCART_LETSENCRYPT_EMAIL     | Email used for notifying you about your https certificates. Usually no action is needed to renew your certificates, but otherwise you'll get an email. Is used when nginx-https component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | :x:         | App       |
 | COINNAME_NETWORK              | Used for configuring network of COINNAME daemon. Daemon can be run in only one network at once. Possible values are mainnet, testnet, and sometimes regtest and simnet. This setting affects only daemon of COINNAME, you need to set this value for each coin daemon you want to customize.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | mainnet     | App       |
@@ -103,9 +103,9 @@ Here is a complete list of configuration settings:
 
 We have live demo available at:
 
-- [https://admin.bitcartcc.com](https://admin.bitcartcc.com/) BitcartCC Admin Panel
-- [https://store.bitcartcc.com](https://store.bitcartcc.com/) BitcartCC Ready Store POS
-- [https://api.bitcartcc.com](https://api.bitcartcc.com/) BitcartCC Merchants API
+- [https://admin.bitcart.ai](https://admin.bitcart.ai/) Bitcart Admin Panel
+- [https://store.bitcart.ai](https://store.bitcart.ai/) Bitcart Ready Store POS
+- [https://api.bitcart.ai](https://api.bitcart.ai/) Bitcart Merchants API
 
 Note that it isn't designed for your production use, it is for testing and learning.
 
@@ -113,18 +113,18 @@ Note that it isn't designed for your production use, it is for testing and learn
 
 Basically via deployment steps above (:
 
-Here are the commands used on our demo, as of July 2022, BitcartCC Version 0.6.7.8:
+Here are the commands used on our demo, as of July 2022, Bitcart Version 0.6.7.8:
 
 ```bash
 sudo su -
-git clone https://github.com/bitcartcc/bitcart-docker
+git clone https://github.com/bitcart/bitcart-docker
 cd bitcart-docker
 # host settings
-export BITCART_HOST=api.bitcartcc.com
-export BITCART_ADMIN_HOST=admin.bitcartcc.com
-export BITCART_STORE_HOST=store.bitcartcc.com
-export BITCART_ADMIN_API_URL=https://api.bitcartcc.com
-export BITCART_STORE_API_URL=https://api.bitcartcc.com
+export BITCART_HOST=api.bitcart.ai
+export BITCART_ADMIN_HOST=admin.bitcart.ai
+export BITCART_STORE_HOST=store.bitcart.ai
+export BITCART_ADMIN_API_URL=https://api.bitcart.ai
+export BITCART_STORE_API_URL=https://api.bitcart.ai
 # reverse proxy settings, we use none because we configure nginx manually
 export BITCART_REVERSEPROXY=none
 # cryptocurrency settings
@@ -142,7 +142,7 @@ export BITCART_ADDITIONAL_COMPONENTS=tor
 
 ## Development builds
 
-Currently the testing of individual pieces of BitcartCC is done via local development installation, see [Manual Deployment](https://docs.bitcartcc.com/deployment/manual) about how it is done.
+Currently the testing of individual pieces of Bitcart is done via local development installation, see [Manual Deployment](https://docs.bitcart.ai/deployment/manual) about how it is done.
 
 When doing some changes in generator, it is usually tested via local python installation, like so:
 
@@ -155,7 +155,7 @@ cat compose/generated.yml # see the generated output
 If it is needed to test generator in docker, then run those commands:
 
 ```bash
-export BITCARTGEN_DOCKER_IMAGE=bitcartcc/docker-compose-generator:local
+export BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local
 ./build.sh # now uses local image
 ```
 
@@ -193,8 +193,8 @@ Each python file (.py) must define `rule` function, accepting two parameters - `
 
 If such function exists, it will be called with current services dictionary.
 Rules can modify that based on different settings.
-There are a few default settings bundled with BitcartCC (for example, to expose ports to outside when no reverse proxy is enabled).
+There are a few default settings bundled with Bitcart (for example, to expose ports to outside when no reverse proxy is enabled).
 You can create your own rules to add completely custom settings for your deployment.
-Your BitcartCC deployment is not only BitcartCC itself, but also a powerful and highly customizable docker-compose stack generator.
+Your Bitcart deployment is not only Bitcart itself, but also a powerful and highly customizable docker-compose stack generator.
 
 After applying rules, the resulting data is written to compose/generated.yml file, which is final docker-compose.yml file used by startup scripts.

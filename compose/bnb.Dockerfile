@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.bitcart-bnb
 ENV IN_DOCKER=1
 ENV BNB_HOST 0.0.0.0
-LABEL org.bitcartcc.image=bnb-daemon
+LABEL org.bitcart.image=bnb-daemon
 
 FROM base AS compile-image
 
