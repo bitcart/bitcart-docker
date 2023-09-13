@@ -1,7 +1,7 @@
 services:
   groestlcoin:
     restart: unless-stopped
-    image: bitcartcc/bitcart-grs:stable
+    image: bitcart/bitcart-grs:stable
     environment:
       GRS_NETWORK: ${GRS_NETWORK:-mainnet}
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}

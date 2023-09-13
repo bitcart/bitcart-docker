@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.oregano
 ENV IN_DOCKER=1
 ENV XRG_HOST 0.0.0.0
-LABEL org.bitcartcc.image=xrg-daemon
+LABEL org.bitcart.image=xrg-daemon
 
 FROM base AS compile-image
 

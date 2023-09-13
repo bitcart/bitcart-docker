@@ -8,7 +8,7 @@ function display_help() {
     cat <<-END
 Usage:
 ------
-Install BitcartCC on this server
+Install Bitcart on this server
 This script must be run as root, except on Mac OS
     -h, --help: Show help
     -p: print settings and exit
@@ -16,15 +16,15 @@ This script must be run as root, except on Mac OS
     startup config files. Allows multiple deployments on one server.
     Empty by default
     --install-only: Run install only
-    --no-startup-register: Do not register BitcartCC to start via systemctl or upstart
+    --no-startup-register: Do not register Bitcart to start via systemctl or upstart
     --no-systemd-reload: Do not reload systemd configuration
 This script will:
 * Install Docker
 * Install Docker-Compose
-* Setup BitcartCC settings
+* Setup Bitcart settings
 * Make sure it starts at reboot via upstart or systemd
-* Add BitcartCC utilities in /usr/bin
-* Start BitcartCC
+* Add Bitcart utilities in /usr/bin
+* Start Bitcart
 You can run again this script if you desire to change your configuration.
 Make sure you own a domain with DNS record pointing to your website.
 Passing domain ending with .local will automatically edit /etc/hosts to make it work.
@@ -35,7 +35,7 @@ Environment variables:
     REVERSEPROXY_HTTP_PORT: The port the reverse proxy binds to for public HTTP requests. Default: 80
     REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
-    BITCART_ENABLE_SSH: Gives BitcartCC SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
+    BITCART_ENABLE_SSH: Gives Bitcart SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
     BITCART_SSH_PORT: Port where ssh server runs on host machine. Default: 22
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
@@ -188,6 +188,10 @@ if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
     BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
 fi
 
+if [ "$BITCARTGEN_DOCKER_IMAGE" == "bitcartcc/docker-compose-generator:local" ]; then
+    export BITCARTGEN_DOCKER_IMAGE="bitcart/docker-compose-generator:local"
+fi
+
 echo "-------SETUP-----------
 Parameters passed:
 BITCART_HOST=$BITCART_HOST
@@ -267,12 +271,12 @@ EOF
 
 chmod +x ${BASH_PROFILE_SCRIPT}
 
-echo -e "BitcartCC environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
-echo -e "BitcartCC deployment config saved in $BITCART_DEPLOYMENT_CONFIG\n"
+echo -e "Bitcart environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
+echo -e "Bitcart deployment config saved in $BITCART_DEPLOYMENT_CONFIG\n"
 
 bitcart_update_docker_env
 
-echo -e "BitcartCC docker-compose parameters saved in $BITCART_ENV_FILE\n"
+echo -e "Bitcart docker-compose parameters saved in $BITCART_ENV_FILE\n"
 
 . "$BASH_PROFILE_SCRIPT"
 
@@ -358,10 +362,10 @@ if $STARTUP_REGISTER && [[ -x "$(command -v systemctl)" ]]; then
         rm "/etc/init/start_containers.conf"
         initctl reload-configuration
     fi
-    echo "Adding bitcartcc$SCRIPTS_POSTFIX.service to systemd"
+    echo "Adding bitcart$SCRIPTS_POSTFIX.service to systemd"
     echo "
 [Unit]
-Description=BitcartCC service
+Description=Bitcart service
 After=docker.service network-online.target
 Requires=docker.service network-online.target
 [Service]
@@ -371,7 +375,7 @@ ExecStart=/bin/bash -c  '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECT
 ExecStop=/bin/bash -c   '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh'
 ExecReload=/bin/bash -c '. \"$BASH_PROFILE_SCRIPT\" && cd \"$BITCART_BASE_DIRECTORY\" && ./stop.sh && ./start.sh'
 [Install]
-WantedBy=multi-user.target" >"/etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.service"
+WantedBy=multi-user.target" >"/etc/systemd/system/bitcart$SCRIPTS_POSTFIX.service"
 
     if ! [[ -f "/etc/docker/daemon.json" ]] && [ -w "/etc/docker" ]; then
         echo "{
@@ -382,17 +386,17 @@ WantedBy=multi-user.target" >"/etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.serv
         $SYSTEMD_RELOAD && $START && systemctl restart docker
     fi
 
-    echo -e "BitcartCC systemd configured in /etc/systemd/system/bitcartcc$SCRIPTS_POSTFIX.service\n"
+    echo -e "Bitcart systemd configured in /etc/systemd/system/bitcart$SCRIPTS_POSTFIX.service\n"
     if $SYSTEMD_RELOAD; then
         systemctl daemon-reload
-        systemctl enable "bitcartcc$SCRIPTS_POSTFIX"
+        systemctl enable "bitcart$SCRIPTS_POSTFIX"
         if $START; then
-            echo "BitcartCC starting... this can take 5 to 10 minutes..."
-            systemctl start "bitcartcc$SCRIPTS_POSTFIX"
-            echo "BitcartCC started"
+            echo "Bitcart starting... this can take 5 to 10 minutes..."
+            systemctl start "bitcart$SCRIPTS_POSTFIX"
+            echo "Bitcart started"
         fi
     else
-        systemctl --no-reload enable "bitcartcc$SCRIPTS_POSTFIX"
+        systemctl --no-reload enable "bitcart$SCRIPTS_POSTFIX"
     fi
 elif $STARTUP_REGISTER && [[ -x "$(command -v initctl)" ]]; then
     # Use upstart
@@ -410,7 +414,7 @@ script
     cd \"$BITCART_BASE_DIRECTORY\"
     ./start.sh
 end script" >/etc/init/start_containers.conf
-    echo -e "BitcartCC upstart configured in /etc/init/start_containers.conf\n"
+    echo -e "Bitcart upstart configured in /etc/init/start_containers.conf\n"
 
     if $START; then
         initctl reload-configuration

@@ -4,7 +4,7 @@ function display_help() {
     cat <<-END
 Usage:
 ------
-Restore BitcartCC files
+Restore Bitcart files
 This script must be run as root
     -h, --help: Show help
     --delete-backup: Delete backup file after restoring. Default: false
@@ -61,7 +61,7 @@ TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 
 tar -C $TEMP_DIR -xvf "$BACKUP_FILE"
 
-echo "Stopping BitcartCC…"
+echo "Stopping Bitcart…"
 bitcart_stop
 
 echo "Restoring database …"
@@ -70,7 +70,7 @@ echo "Restoring docker volumes…"
 cp -r $TEMP_DIR/volumes/ /var/lib/docker
 cp -r $TEMP_DIR/plugins compose
 
-echo "Restarting BitcartCC…"
+echo "Restarting Bitcart…"
 bitcart_start
 
 rm -rf $TEMP_DIR

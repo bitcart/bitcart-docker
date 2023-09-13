@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.electrum
 ENV IN_DOCKER=1
 ENV BTC_HOST 0.0.0.0
-LABEL org.bitcartcc.image=btc-daemon
+LABEL org.bitcart.image=btc-daemon
 
 FROM base AS compile-image
 

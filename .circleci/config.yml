@@ -1,11 +1,11 @@
 version: 2.1
 
 orbs:
-  bitcartcc: bitcartcc/bitcartcc-shared@1
+  bitcart: bitcart/bitcart-shared@2
 
 jobs:
   test:
-    executor: bitcartcc/docker-python
+    executor: bitcart/docker-python
 
     working_directory: ~/repo
 
@@ -23,11 +23,11 @@ jobs:
           command: |
             make ci
 
-      - bitcartcc/codecov:
+      - bitcart/codecov:
           args: ""
 
   cansetup:
-    executor: bitcartcc/build-ubuntu
+    executor: bitcart/build-ubuntu
     working_directory: ~/repo
     steps:
       - checkout
@@ -38,7 +38,7 @@ jobs:
             sudo ./test-install.sh
 
   deploy:
-    executor: bitcartcc/build-ubuntu
+    executor: bitcart/build-ubuntu
 
     environment:
       BUILD_PLATFORMS: linux/amd64,linux/arm64/v8
@@ -47,23 +47,23 @@ jobs:
 
     steps:
       - checkout
-      - bitcartcc/login-to-registries
-      - bitcartcc/enable-buildx
+      - bitcart/login-to-registries
+      - bitcart/enable-buildx
       - run:
           name: build docker image
           command: |
             cd generator
-            docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcartcc/docker-compose-generator:latest \
-            --tag ghcr.io/bitcartcc/docker-compose-generator:latest \
-            --tag harbor.nirvati.org/bitcartcc/docker-compose-generator:latest .
+            docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcart/docker-compose-generator:latest \
+            --tag ghcr.io/bitcart/docker-compose-generator:latest \
+            --tag harbor.nirvati.org/bitcart/docker-compose-generator:latest .
 
 workflows:
   version: 2
   build:
     jobs:
-      - bitcartcc/lint:
+      - bitcart/lint:
           name: lint
-          executor: bitcartcc/build-ubuntu
+          executor: bitcart/build-ubuntu
       - test:
           requires:
             - lint

@@ -34,4 +34,4 @@ bitcart_pull
 bitcart_start
 
 set +e
-docker image prune -f --filter "label=org.bitcartcc.image" --filter "label!=org.bitcartcc.image=docker-compose-generator"
+docker image prune -f --filter "label=org.bitcart.image" --filter "label!=org.bitcart.image=docker-compose-generator"

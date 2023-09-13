@@ -1,7 +1,7 @@
 services:
   admin:
     restart: unless-stopped
-    image: bitcartcc/bitcart-admin:stable
+    image: bitcart/bitcart-admin:stable
     expose:
       - "4000"
     command: yarn start

@@ -1,7 +1,7 @@
 services:
   globalboost:
     restart: unless-stopped
-    image: bitcartcc/bitcart-bsty:stable
+    image: bitcart/bitcart-bsty:stable
     environment:
       BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
       BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}

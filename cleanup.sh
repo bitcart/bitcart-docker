@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker image prune -af --filter "label=org.bitcartcc.image" --filter "label!=org.bitcartcc.image=docker-compose-generator"
+docker image prune -af --filter "label=org.bitcart.image" --filter "label!=org.bitcart.image=docker-compose-generator"

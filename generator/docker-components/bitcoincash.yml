@@ -1,7 +1,7 @@
 services:
   bitcoincash:
     restart: unless-stopped
-    image: bitcartcc/bitcart-bch:stable
+    image: bitcart/bitcart-bch:stable
     environment:
       BCH_NETWORK: ${BCH_NETWORK:-mainnet}
       BCH_DEBUG: ${BCH_DEBUG:-false}

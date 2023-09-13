@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.bitcart-eth
 ENV IN_DOCKER=1
 ENV ETH_HOST 0.0.0.0
-LABEL org.bitcartcc.image=eth-daemon
+LABEL org.bitcart.image=eth-daemon
 
 FROM base AS compile-image
 

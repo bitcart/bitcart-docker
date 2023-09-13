@@ -9,11 +9,11 @@ function display_help() {
     cat <<-END
 Usage:
 ------
-Backup BitcartCC files
+Backup Bitcart files
 This script must be run as root
     -h, --help: Show help
     --only-db: Backup database only. Default: false
-    --restart: Restart BitcartCC (to avoid data corruption if needed). Default: false
+    --restart: Restart Bitcart (to avoid data corruption if needed). Default: false
 This script will backup the database as SQL script, essential volumes and put it to tar.gz archive
 It may optionally upload the backup to a remote server
 Environment variables:
@@ -88,7 +88,7 @@ if $ONLY_DB; then
     tar -cvzf $backup_path $dbdump_path
 else
     if $RESTART_SERVICES; then
-        echo "Stopping BitcartCC…"
+        echo "Stopping Bitcart…"
         bitcart_stop
     fi
 
@@ -106,7 +106,7 @@ else
         -C "$BITCART_BASE_DIRECTORY/compose" plugins
 
     if $RESTART_SERVICES; then
-        echo "Restarting BitcartCC…"
+        echo "Restarting Bitcart…"
         bitcart_start
     fi
 fi

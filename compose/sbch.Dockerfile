@@ -11,7 +11,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.bitcart-sbch
 ENV IN_DOCKER=1
 ENV SBCH_HOST 0.0.0.0
-LABEL org.bitcartcc.image=sbch-daemon
+LABEL org.bitcart.image=sbch-daemon
 
 FROM base AS compile-image
 

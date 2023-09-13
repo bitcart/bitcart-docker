@@ -1,7 +1,7 @@
 services:
   monero:
     restart: unless-stopped
-    image: bitcartcc/bitcart-xmr:stable
+    image: bitcart/bitcart-xmr:stable
     environment:
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
       XMR_SERVER: ${XMR_SERVER:-http://node.community.rino.io:18081}

@@ -5,7 +5,7 @@ ENV ELECTRUM_HOME /home/$ELECTRUM_USER
 ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.{{ env.name }}{{ if env.custom == "false" and env.coin != "btc" then "-"+env.coin else "" end }}
 ENV IN_DOCKER=1
 ENV {{ env.coin | ascii_upcase }}_HOST 0.0.0.0
-LABEL org.bitcartcc.image={{ env.coin }}-daemon
+LABEL org.bitcart.image={{ env.coin }}-daemon
 
 FROM base AS compile-image
 

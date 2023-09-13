@@ -1,7 +1,7 @@
 services:
   tron:
     restart: unless-stopped
-    image: bitcartcc/bitcart-trx:stable
+    image: bitcart/bitcart-trx:stable
     environment:
       TRX_NETWORK: ${TRX_NETWORK:-mainnet}
       TRX_SERVER: ${TRX_SERVER:-https://rpc.ankr.com/http/tron}
