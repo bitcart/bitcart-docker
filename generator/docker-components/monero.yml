@@ -4,7 +4,7 @@ services:
     image: bitcart/bitcart-xmr:stable
     environment:
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
-      XMR_SERVER: ${XMR_SERVER:-http://node.community.rino.io:18081}
+      XMR_SERVER: ${XMR_SERVER:-https://node.sethforprivacy.com}
       XMR_DEBUG: ${XMR_DEBUG:-false}
     expose:
       - "5011"

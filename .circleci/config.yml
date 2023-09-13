@@ -54,8 +54,7 @@ jobs:
           command: |
             cd generator
             docker buildx build --progress plain --push --platform ${BUILD_PLATFORMS} --tag bitcart/docker-compose-generator:latest \
-            --tag ghcr.io/bitcart/docker-compose-generator:latest \
-            --tag harbor.nirvati.org/bitcart/docker-compose-generator:latest .
+            --tag ghcr.io/bitcart/docker-compose-generator:latest .
 
 workflows:
   version: 2
