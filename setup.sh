@@ -188,6 +188,10 @@ if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
     BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
 fi
 
+if [ "$BITCARTGEN_DOCKER_IMAGE" == "bitcartcc/docker-compose-generator:local" ]; then
+    export BITCARTGEN_DOCKER_IMAGE="bitcart/docker-compose-generator:local"
+fi
+
 echo "-------SETUP-----------
 Parameters passed:
 BITCART_HOST=$BITCART_HOST
