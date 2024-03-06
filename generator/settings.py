@@ -34,7 +34,10 @@ class Settings:
             and not self.STORE_API_URL
         )
         self.PROTOCOL = "https" if self.HTTPS_ENABLED or self.REVERSE_PROXY in HTTPS_REVERSE_PROXIES else "http"
-        self.API_URL = f"{self.PROTOCOL}://{self.HOST}"
+        self.DEFAULT_API_PORT = "443" if self.PROTOCOL == "https" else "80"
+        self.API_PORT = env(f"REVERSEPROXY_{self.PROTOCOL.upper()}_PORT", self.DEFAULT_API_PORT, prefix="")
+        port_suffix = f":{self.API_PORT}" if self.API_PORT != self.DEFAULT_API_PORT else ""
+        self.API_URL = f"{self.PROTOCOL}://{self.HOST}{port_suffix}"
 
     def apply_checks(self):
         if self.ONE_DOMAIN_MODE and self.INSTALLATION_PACK == "frontend":

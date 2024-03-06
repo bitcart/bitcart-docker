@@ -1,12 +1,12 @@
 import os
 
 
-def set_env(name, value):
-    os.environ[f"BITCART_{name}"] = value
+def set_env(name, value, prefix="BITCART_"):
+    os.environ[f"{prefix}{name}"] = value
 
 
-def delete_env(name):
-    del os.environ[f"BITCART_{name}"]
+def delete_env(name, prefix="BITCART_"):
+    del os.environ[f"{prefix}{name}"]
 
 
 def check_service_list(config, expected, is_none=False):

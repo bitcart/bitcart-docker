@@ -49,6 +49,17 @@ def test_one_domain_rule():
     check_one_domain_setting("STORE_HOST")
     check_one_domain_setting("ADMIN_API_URL")
     check_one_domain_setting("STORE_API_URL")
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None/api"
+    set_env("REVERSEPROXY_HTTPS_PORT", "445", prefix="")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None:445/api"
+    delete_env("REVERSEPROXY_HTTPS_PORT", prefix="")
+    set_env("REVERSEPROXY_HTTP_PORT", "445", prefix="")
+    set_env("REVERSEPROXY", "nginx")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None:445/api"
+    delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
+    delete_env("REVERSEPROXY")
     # Check preferred service setting
     # Store preferred
     check_preferred(services, "store")
