@@ -14,4 +14,6 @@ fi
 docker run -v "$PWD/compose:/app/compose" \
     --env-file <(env | grep BITCART_) \
     --env NAME=$NAME \
+    --env REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT \
+    --env REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT \
     --rm $BITCARTGEN_DOCKER_IMAGE $@
