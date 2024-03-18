@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 sudo apt install -y git
 branch=${1:-master}
 rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcart/bitcart -b $branch compose/bitcart
