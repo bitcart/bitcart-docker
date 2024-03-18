@@ -18,6 +18,7 @@ def rule(services, settings):
             with modify_key(services, "admin", "environment") as environment:
                 environment["BITCART_ADMIN_ROOTPATH"] = environment["BITCART_ADMIN_ROOTPATH"].replace("/", "/admin")
                 environment["BITCART_ADMIN_API_URL"] = API_URL
+                environment["BITCART_STORE_HOST"] = settings.HOST or ""
             with modify_key(services, "store", "environment") as environment:
                 environment["BITCART_ADMIN_HOST"] = urljoin(settings.HOST or "", "admin")
                 environment["BITCART_ADMIN_ROOTPATH"] = environment["BITCART_ADMIN_ROOTPATH"].replace("/", "/admin")
