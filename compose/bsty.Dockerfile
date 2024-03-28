@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM python:3.9-alpine AS base
+FROM python:3.11-alpine AS base
 
 ENV ELECTRUM_USER electrum
 ENV ELECTRUM_HOME /home/$ELECTRUM_USER
