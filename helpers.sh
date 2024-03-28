@@ -66,12 +66,16 @@ bitcart_stop() {
     docker compose -p "$NAME" -f compose/generated.yml down
 }
 
+bitcart_reset_plugins() {
+    export ADMIN_PLUGINS_HASH=
+    export STORE_PLUGINS_HASH=
+    export BACKEND_PLUGINS_HASH=
+    export DOCKER_PLUGINS_HASH=
+}
+
 bitcart_pull() {
     docker compose -f compose/generated.yml pull
-    export ADMIN_PLUGINS_HASH=5cd337198ead0768975610a135e26257153198c7
-    export STORE_PLUGINS_HASH=5cd337198ead0768975610a135e26257153198c7
-    export BACKEND_PLUGINS_HASH=5cd337198ead0768975610a135e26257153198c7
-    export DOCKER_PLUGINS_HASH=5cd337198ead0768975610a135e26257153198c7
+    bitcart_reset_plugins
 }
 
 bitcart_restart() {

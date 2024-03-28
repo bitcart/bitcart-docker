@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 . helpers.sh
 load_env
 
@@ -43,4 +45,5 @@ build_additional_image() {
 
 build_additional_image admin
 build_additional_image store
+bitcart_reset_plugins
 bitcart_start
