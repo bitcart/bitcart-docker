@@ -44,6 +44,10 @@ services:
       BITCART_STORE_PLUGINS_DIR: /plugins/store
       BITCART_DOCKER_PLUGINS_DIR: /plugins/docker
       BITCART_HOST: ${BITCART_HOST}
+      BITCART_ADMIN_HOST: ${BITCART_ADMIN_HOST}
+      BITCART_ADMIN_ROOTPATH: ${BITCART_ADMIN_ROOTPATH:-/}
+      BITCART_REVERSEPROXY: ${BITCART_REVERSEPROXY:-nginx-https}
+      BITCART_HTTPS_ENABLED: ${BITCART_HTTPS_ENABLED}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:
