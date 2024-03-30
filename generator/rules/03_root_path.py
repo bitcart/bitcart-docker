@@ -28,3 +28,10 @@ def rule(services, settings):
     if BACKEND_AVAILABLE and (ADMIN_AVAILABLE or STORE_AVAILABLE):
         with modify_key(services, "backend", "environment") as environment:
             environment["BITCART_BACKEND_ROOTPATH"] = environment["BITCART_BACKEND_ROOTPATH"].replace("-}", "-/api}")
+    if BACKEND_AVAILABLE and ADMIN_AVAILABLE:
+        with modify_key(services, "backend", "environment") as environment:
+            if STORE_AVAILABLE:
+                environment["BITCART_ADMIN_HOST"] = urljoin(settings.HOST or "", "admin")
+                environment["BITCART_ADMIN_ROOTPATH"] = environment["BITCART_ADMIN_ROOTPATH"].replace("/", "/admin")
+            else:
+                environment["BITCART_ADMIN_HOST"] = settings.HOST or ""
