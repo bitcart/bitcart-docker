@@ -5,6 +5,7 @@ services:
     environment:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
       ETH_SERVER: ${ETH_SERVER:-https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161}
+      ETH_ARCHIVE_SERVER: ${ETH_ARCHIVE_SERVER:-}
       ETH_DEBUG: ${ETH_DEBUG:-false}
     expose:
       - "5002"
