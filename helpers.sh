@@ -70,6 +70,7 @@ bitcart_reset_plugins() {
     export ADMIN_PLUGINS_HASH=
     export STORE_PLUGINS_HASH=
     export BACKEND_PLUGINS_HASH=
+    export DAEMONS_PLUGINS_HASH=
     export DOCKER_PLUGINS_HASH=
 }
 
@@ -234,6 +235,7 @@ SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
 ADMIN_PLUGINS_HASH=$(get_plugins_hash admin)
 STORE_PLUGINS_HASH=$(get_plugins_hash store)
 BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
+DAEMONS_PLUGINS_HASH=$(get_plugins_hash daemons)
 DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
 EOF
     chmod +x ${BITCART_DEPLOYMENT_CONFIG}
@@ -254,6 +256,7 @@ make_backup_image() {
 
 install_plugins() {
     COMPONENTS=$(./build.sh --components-only | tail -1)
+    COIN_COMPONENTS=$(./build.sh --cryptos-only | tail -1)
     failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
     error=false
     rm -f $failed_file
@@ -266,6 +269,9 @@ install_plugins() {
     if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
         make_backup_image bitcart/bitcart-store
     fi
+    for coin in $COIN_COMPONENTS; do
+        make_backup_image bitcart/bitcart-$coin
+    done
     if [[ "$DOCKER_PLUGINS_HASH" != "$(get_plugins_hash docker)" ]]; then
         ./build.sh || touch $failed_file
         docker compose -f compose/generated.yml config || touch $failed_file
@@ -279,6 +285,11 @@ install_plugins() {
     if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " store " ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
         docker build -t bitcart/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
     fi
+    if [[ "$error" = false ]] && [[ "$DAEMONS_PLUGINS_HASH" != "$(get_plugins_hash daemons)" ]]; then
+        for coin in $COIN_COMPONENTS; do
+            docker build -t bitcart/bitcart-$coin:stable -f compose/coin-plugins.Dockerfile compose --build-arg COIN=$coin || error=true
+        done
+    fi
     if [[ "$error" = true ]]; then
         echo "Plugins installation failed, restoring original images"
         if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
@@ -290,6 +301,9 @@ install_plugins() {
         if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
             docker tag bitcart/bitcart-store:original bitcart/bitcart-store:stable
         fi
+        for coin in $COIN_COMPONENTS; do
+            docker tag bitcart/bitcart-$coin:original bitcart/bitcart-$coin:stable
+        done
         touch $failed_file
     fi
     save_deploy_config

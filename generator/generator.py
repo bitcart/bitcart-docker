@@ -228,10 +228,23 @@ def get_components_list():
     return list(add_components(settings))
 
 
+def get_cryptos_list():  # pragma: no cover
+    def get_crypto(crypto):
+        for coin in CRYPTOS:
+            if CRYPTOS[coin]["component"] == crypto:
+                return coin.lower()
+        return False
+
+    return [coin for component in get_components_list() if (coin := get_crypto(component))]
+
+
 def main():  # pragma: no cover
     try:
         if len(sys.argv) == 2 and sys.argv[1] == "--components-only":
             print(" ".join(get_components_list()))
+            return
+        if len(sys.argv) == 2 and sys.argv[1] == "--cryptos-only":
+            print(" ".join(get_cryptos_list()))
             return
         save(generate_config())
     except ConfigError as e:
