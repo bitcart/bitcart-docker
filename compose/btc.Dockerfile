@@ -30,7 +30,7 @@ RUN adduser -D $ELECTRUM_USER && \
     chown ${ELECTRUM_USER} $ELECTRUM_DIRECTORY && \
     mkdir -p $ELECTRUM_HOME/site && \
     chown ${ELECTRUM_USER} $ELECTRUM_HOME/site && \
-    apk add --no-cache libsecp256k1-dev && \
+    apk add --no-cache libsecp256k1-dev git && \
     apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main jemalloc
 
 COPY --from=compile-image --chown=electrum /root/.local $ELECTRUM_HOME/.local
