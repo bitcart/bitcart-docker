@@ -33,7 +33,7 @@ services:
       BITCART_BACKEND_PLUGINS_DIR: /plugins/backend
       BITCART_ADMIN_PLUGINS_DIR: /plugins/admin
       BITCART_STORE_PLUGINS_DIR: /plugins/store
-      BITCART_DAEMONS_PLUGINS_DIR: /plugins/daemons
+      BITCART_DAEMON_PLUGINS_DIR: /plugins/daemon
       BITCART_DOCKER_PLUGINS_DIR: /plugins/docker
       BITCART_HOST: ${BITCART_HOST}
       BITCART_ADMIN_HOST: ${BITCART_ADMIN_HOST}
