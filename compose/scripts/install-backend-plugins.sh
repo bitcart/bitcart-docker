@@ -7,6 +7,14 @@ for org in modules/*; do
                 if [ -f "$plugin/requirements.txt" ]; then
                     pip install -r "$plugin/requirements.txt"
                 fi
+                # apply all patches from patches dir
+                if [[ -d "$plugin/patches" ]]; then
+                    for patch in "$plugin/patches"/*; do
+                        if [ -f "$patch" ]; then
+                            git apply "$patch"
+                        fi
+                    done
+                fi
             fi
         done
     fi
