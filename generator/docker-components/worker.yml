@@ -50,6 +50,7 @@ services:
       - "./plugins/backend:/plugins/backend"
       - "./plugins/admin:/plugins/admin"
       - "./plugins/store:/plugins/store"
+      - "./plugins/daemon:/plugins/daemon"
       - "./plugins/docker:/plugins/docker"
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
