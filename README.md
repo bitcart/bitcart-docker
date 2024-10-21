@@ -113,7 +113,7 @@ Note that it isn't designed for your production use, it is for testing and learn
 
 Basically via deployment steps above (:
 
-Here are the commands used on our demo, as of July 2022, Bitcart Version 0.6.7.8:
+Here are the commands used on our demo, as of October 2024, Bitcart Version 0.8.0.0:
 
 ```bash
 sudo su -
@@ -129,11 +129,10 @@ export BITCART_STORE_API_URL=https://api.bitcart.ai
 export BITCART_REVERSEPROXY=none
 # cryptocurrency settings
 # we enable all currencies we support on the demo to test that they work
-export BITCART_CRYPTOS=btc,bch,ltc,bsty,xrg,eth,bnb,sbch,matic,trx,grs,xmr
+export BITCART_CRYPTOS=btc,bch,ltc,xrg,eth,bnb,matic,trx,grs,xmr
 # lightning network for supported coins
 export BTC_LIGHTNING=true
 export LTC_LIGHTNING=true
-export BSTY_LIGHTNING=true
 export GRS_LIGHTNING=true
 # tor support
 export BITCART_ADDITIONAL_COMPONENTS=tor
