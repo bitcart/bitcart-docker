@@ -23,8 +23,7 @@ DEFAULT_SERVICES = [
 
 def test_basic_structure(config):
     assert isinstance(config, dict)
-    assert config.keys() == {"version", "services", "networks", "volumes"}
-    assert config["version"] == "3"
+    assert config.keys() == {"services", "networks", "volumes"}
     assert isinstance(config["services"], dict)
     assert isinstance(config["networks"], dict)
     assert isinstance(config["volumes"], dict)
