@@ -4,6 +4,7 @@ services:
     image: pgautoupgrade/pgautoupgrade:17-alpine
     command: ["-c", "random_page_cost=1.0"]
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_DB: bitcart
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
