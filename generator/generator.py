@@ -6,7 +6,6 @@ import sys
 from collections import UserDict
 from os.path import basename, exists, isfile
 from os.path import join as path_join
-from typing import Union
 
 import oyaml as yaml
 
@@ -186,9 +185,9 @@ def execute_rules(rules, services, settings):
 
 def generate(components: OrderedSet, settings: Settings):
     # generated yaml
-    services: Union[dict, list] = []
-    networks: Union[dict, list] = []
-    volumes: Union[dict, list] = []
+    services: dict | list = []
+    networks: dict | list = []
+    volumes: dict | list = []
     for i in components:
         doc = load_component(i)
         if doc.get("services"):
