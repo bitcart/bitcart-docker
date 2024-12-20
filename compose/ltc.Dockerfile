@@ -6,11 +6,11 @@
 
 FROM python:3.11-alpine AS base
 
-ENV ELECTRUM_USER electrum
-ENV ELECTRUM_HOME /home/$ELECTRUM_USER
-ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.electrum-ltc
+ENV ELECTRUM_USER=electrum
+ENV ELECTRUM_HOME=/home/$ELECTRUM_USER
+ENV ELECTRUM_DIRECTORY=${ELECTRUM_HOME}/.electrum-ltc
 ENV IN_DOCKER=1
-ENV LTC_HOST 0.0.0.0
+ENV LTC_HOST=0.0.0.0
 LABEL org.bitcart.image=ltc-daemon
 
 FROM base AS compile-image

@@ -1,10 +1,10 @@
 FROM python:3.11-alpine AS base
 
-ENV ELECTRUM_USER electrum
-ENV ELECTRUM_HOME /home/$ELECTRUM_USER
-ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.{{ env.name }}{{ if env.custom == "false" and env.coin != "btc" then "-"+env.coin else "" end }}
+ENV ELECTRUM_USER=electrum
+ENV ELECTRUM_HOME=/home/$ELECTRUM_USER
+ENV ELECTRUM_DIRECTORY=${ELECTRUM_HOME}/.{{ env.name }}{{ if env.custom == "false" and env.coin != "btc" then "-"+env.coin else "" end }}
 ENV IN_DOCKER=1
-ENV {{ env.coin | ascii_upcase }}_HOST 0.0.0.0
+ENV {{ env.coin | ascii_upcase }}_HOST=0.0.0.0
 LABEL org.bitcart.image={{ env.coin }}-daemon
 
 FROM base AS compile-image

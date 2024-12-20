@@ -6,11 +6,11 @@
 
 FROM python:3.11-alpine AS base
 
-ENV ELECTRUM_USER electrum
-ENV ELECTRUM_HOME /home/$ELECTRUM_USER
-ENV ELECTRUM_DIRECTORY ${ELECTRUM_HOME}/.electrum-bsty
+ENV ELECTRUM_USER=electrum
+ENV ELECTRUM_HOME=/home/$ELECTRUM_USER
+ENV ELECTRUM_DIRECTORY=${ELECTRUM_HOME}/.electrum-bsty
 ENV IN_DOCKER=1
-ENV BSTY_HOST 0.0.0.0
+ENV BSTY_HOST=0.0.0.0
 LABEL org.bitcart.image=bsty-daemon
 
 FROM base AS compile-image

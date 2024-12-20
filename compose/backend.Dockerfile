@@ -6,7 +6,7 @@ FROM python:3.11-slim-bullseye
 
 ARG TARGETPLATFORM
 ENV IN_DOCKER=1
-ENV GOSU_VERSION 1.16
+ENV GOSU_VERSION=1.16
 LABEL org.bitcart.image=backend
 
 COPY bitcart /app

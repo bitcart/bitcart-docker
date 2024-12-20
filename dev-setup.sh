@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
-sudo apt install -y git
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install git
+else
+    sudo apt install -y git
+fi
 branch=${1:-master}
 rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcart/bitcart -b $branch compose/bitcart
 cd compose/bitcart
