@@ -1,7 +1,7 @@
 services:
   database:
     restart: unless-stopped
-    image: postgres:12-alpine
+    image: pgautoupgrade/pgautoupgrade:17-alpine
     command: ["-c", "random_page_cost=1.0"]
     environment:
       POSTGRES_DB: bitcart
