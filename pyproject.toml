@@ -1,6 +1,26 @@
-[tool.black]
-line-length=127
+[tool.ruff]
+target-version = "py311"
+line-length = 127
 
-[tool.isort]
-profile = "black"
-line_length = 127
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "I",
+    "UP",
+    "YTT",
+    "B",
+    "T10",
+    "C",
+    "SIM",
+    "RUF100",
+    "RET",
+    "A",
+    "S",
+    "ASYNC",
+]
+ignore = ["RET502", "RET503", "S104", "S507", "ASYNC110"]
+mccabe = { max-complexity = 12 }
+
+[tool.ruff.lint.per-file-ignores]
+"generator/tests/*" = ["S"]

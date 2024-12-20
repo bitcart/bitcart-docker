@@ -48,7 +48,7 @@ def check_service(service, service_data):
 def check_key(service, service_data, key, key_type=list, value_type=str):
     if key in service_data:
         assert isinstance(service_data[key], key_type)
-        if key_type == list:
+        if key_type is list:
             assert all(isinstance(value, value_type) for value in service_data[key])
 
 
@@ -63,7 +63,7 @@ def check_additional_keys(service, service_data):
     if "environment" in service_data:
         assert isinstance(service_data["environment"], dict)
         for key, value in service_data["environment"].items():
-            assert isinstance(key, str) and value is None or isinstance(value, (str, int))
+            assert isinstance(key, str) and value is None or isinstance(value, str | int)
 
 
 @pytest.mark.parametrize("service", DEFAULT_SERVICES)

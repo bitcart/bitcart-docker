@@ -1,6 +1,4 @@
-black
-flake8
-isort>=5
 pre-commit
 pytest
 pytest-cov
+ruff

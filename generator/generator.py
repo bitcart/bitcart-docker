@@ -102,10 +102,7 @@ def add_components(settings: Settings) -> OrderedSet:
 
 
 def load_component(component: str):
-    if os.path.isabs(component):  # pragma: no cover
-        path = component
-    else:
-        path = path_join(COMPONENTS_DIR, component + ".yml")
+    path = component if os.path.isabs(component) else path_join(COMPONENTS_DIR, component + ".yml")
     if not exists(path):
         return {}
     with open(path) as f:
@@ -201,12 +198,11 @@ def generate(components: OrderedSet, settings: Settings):
     execute_rules(rules, services, settings)
     networks = {j: i[j] for i in networks for j in i}
     volumes = {j: i[j] for i in volumes for j in i}
-    data = {
+    return {
         "services": services,
         "networks": networks,
         "volumes": volumes,
     }
-    return data
 
 
 def save(data, out_path=GENERATED_PATH):

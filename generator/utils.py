@@ -27,7 +27,9 @@ def config_error(message):
 
 
 class ModifyKey:
-    def __init__(self, services, service, key, default={}, save_key=None):
+    def __init__(self, services, service, key, default=None, save_key=None):
+        if default is None:
+            default = {}
         self.services = services
         self.service = service
         self.key = key
@@ -57,12 +59,11 @@ def apply_recursive(data, func):
             if not to_delete:
                 new_data[key] = new
         return False, new_data
-    elif isinstance(data, list):
+    if isinstance(data, list):
         new_data = []
         for value in data:
             to_delete, new = apply_recursive(value, func)
             if not to_delete:
                 new_data.append(new)
         return False, new_data
-    else:
-        return func(data)
+    return func(data)
