@@ -21,9 +21,9 @@ _cli_bash_autocomplete() {
         fi
         words=("${words[@]:0:$cword}")
         if [[ "$cur" == "-"* ]]; then
-            requestComp="${words[*]} ${cur} --generate-bash-completion"
+            requestComp="${words[*]} ${cur} --generate-shell-completion"
         else
-            requestComp="${words[*]} --generate-bash-completion"
+            requestComp="${words[*]} --generate-shell-completion"
         fi
         opts=$(eval "${requestComp}" 2>/dev/null)
         COMPREPLY=($(compgen -W "${opts}" -- ${cur}))

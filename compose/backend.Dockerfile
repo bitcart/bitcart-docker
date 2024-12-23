@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine AS go-builder
+FROM golang:1.23-alpine AS go-builder
 
 RUN CGO_ENABLED=0 go install -ldflags '-X main.Version=docker -X main.envFile=/app/conf/.env' github.com/bitcart/bitcart-cli@master
 
