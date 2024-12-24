@@ -5,7 +5,7 @@ for org in modules/*; do
                 echo "Installing $plugin"
                 # check if file  exists first
                 if [ -f "$plugin/requirements.txt" ]; then
-                    pip install -r "$plugin/requirements.txt"
+                    uv pip install -r "$plugin/requirements.txt"
                 fi
                 # apply all patches from patches dir
                 if [[ -d "$plugin/patches" ]]; then

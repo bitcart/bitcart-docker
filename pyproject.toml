@@ -1,3 +1,13 @@
+[project]
+name = "bitcart-compose-generator"
+version = "1.0.0"
+description = "Generate docker compose files based on env variables"
+requires-python = ">=3.11"
+dependencies = ["oyaml"]
+
+[dependency-groups]
+dev = ["pre-commit", "pytest", "pytest-cov", "ruff"]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 127
@@ -24,3 +34,10 @@ mccabe = { max-complexity = 12 }
 
 [tool.ruff.lint.per-file-ignores]
 "generator/tests/*" = ["S"]
+
+[tool.pytest.ini_options]
+addopts = ["--cov=.", "--cov-report", "term-missing"]
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning",
+]
