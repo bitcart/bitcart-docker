@@ -1,10 +1,15 @@
 version = 1
 requires-python = ">=3.11"
 
+[manifest]
+members = [
+    "bitcart-compose-generator",
+]
+
 [[package]]
 name = "bitcart-compose-generator"
 version = "1.0.0"
-source = { virtual = "." }
+source = { virtual = "generator" }
 dependencies = [
     { name = "oyaml" },
 ]
