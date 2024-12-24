@@ -1,2 +1,12 @@
 [tool.uv.workspace]
 members = ["generator"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*__main__.py",
+    "generator/tests/**",
+    "venv/**",
+    "env/**",
+    "*__init__.py",
+]

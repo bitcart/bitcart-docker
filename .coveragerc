@@ -1,8 +1,0 @@
-[run]
-source = .
-omit =
-    *__main__.py,
-    generator/tests/**,
-    venv/**,
-    env/**,
-    *__init__.py
