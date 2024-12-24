@@ -17,6 +17,7 @@ jobs:
             cd generator
             curl -LsSf https://astral.sh/uv/install.sh | sh
             uv sync --frozen --compile-bytecode
+            echo ". ~/repo/.venv/bin/activate" >> $BASH_ENV
 
       - run:
           name: run tests
