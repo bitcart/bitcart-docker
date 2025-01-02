@@ -49,6 +49,7 @@ services:
       BITCART_ADMIN_ROOTPATH: ${BITCART_ADMIN_ROOTPATH:-/}
       BITCART_REVERSEPROXY: ${BITCART_REVERSEPROXY:-nginx-https}
       BITCART_HTTPS_ENABLED: ${BITCART_HTTPS_ENABLED:-false}
+      SENTRY_DSN: ${BITCART_SENTRY_DSN:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:

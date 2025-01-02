@@ -63,6 +63,7 @@ Environment variables:
     BITCART_EXCLUDE_COMPONENTS: A list of components to exclude from the result set
     BITCART_HTTPS_ENABLED: a special flag to rewrite bitcart API URLs to https. It does not enable https setup automatically and is required for custom cases such as cloudflare tunnel.
     BITCART_BEHIND_REVERSEPROXY: set this when running in one domain mode with custom nginx port, but when bitcart's nginx is behind your own reverse proxy
+    BITCART_SENTRY_DSN: Optional Sentry DSN for error tracking
 Add-on specific variables:
     TOR_RELAY_NICKNAME: If tor relay is activated, the relay nickname
     TOR_RELAY_EMAIL: If tor relay is activated, the email for Tor to contact you regarding your relay
