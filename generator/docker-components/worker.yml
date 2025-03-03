@@ -54,6 +54,7 @@ services:
       - "./plugins/daemon:/plugins/daemon"
       - "./plugins/docker:/plugins/docker"
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
+      - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id # for paid plugins
 
 volumes:
   bitcart_datadir:
