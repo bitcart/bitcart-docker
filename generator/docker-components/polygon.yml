@@ -4,7 +4,8 @@ services:
     image: bitcart/bitcart-matic:stable
     environment:
       MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
-      MATIC_SERVER: ${MATIC_SERVER:-https://polygon-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161}
+      MATIC_SERVER: ${MATIC_SERVER:-https://seed-server.bitcart.ai}
+      MATIC_SEED_SERVER: ${MATIC_SEED_SERVER:-https://seed-server.bitcart.ai}
       MATIC_ARCHIVE_SERVER: ${MATIC_ARCHIVE_SERVER:-}
       MATIC_DEBUG: ${MATIC_DEBUG:-false}
     expose:
