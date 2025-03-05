@@ -6,6 +6,7 @@ services:
       ETH_NETWORK: ${ETH_NETWORK:-mainnet}
       ETH_SERVER: ${ETH_SERVER:-https://seed-server.bitcart.ai}
       ETH_SEED_SERVER: ${ETH_SEED_SERVER:-https://seed-server.bitcart.ai}
+      ETH_SEED_SERVER_REFRESH_INTERVAL: ${ETH_SEED_SERVER_REFRESH_INTERVAL:-3600}
       ETH_ARCHIVE_SERVER: ${ETH_ARCHIVE_SERVER:-}
       ETH_DEBUG: ${ETH_DEBUG:-false}
     expose:

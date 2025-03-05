@@ -6,6 +6,7 @@ services:
       SBCH_NETWORK: ${SBCH_NETWORK:-mainnet}
       SBCH_SERVER: ${SBCH_SERVER:-https://seed-server.bitcart.ai}
       SBCH_SEED_SERVER: ${SBCH_SEED_SERVER:-https://seed-server.bitcart.ai}
+      SBCH_SEED_SERVER_REFRESH_INTERVAL: ${SBCH_SEED_SERVER_REFRESH_INTERVAL:-3600}
       SBCH_DEBUG: ${SBCH_DEBUG:-false}
     expose:
       - "5007"

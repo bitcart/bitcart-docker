@@ -6,6 +6,7 @@ services:
       TRX_NETWORK: ${TRX_NETWORK:-mainnet}
       TRX_SERVER: ${TRX_SERVER:-https://seed-server.bitcart.ai}
       TRX_SEED_SERVER: ${TRX_SEED_SERVER:-https://seed-server.bitcart.ai}
+      TRX_SEED_SERVER_REFRESH_INTERVAL: ${TRX_SEED_SERVER_REFRESH_INTERVAL:-3600}
       TRX_DEBUG: ${TRX_DEBUG:-false}
     expose:
       - "5009"

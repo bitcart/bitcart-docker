@@ -6,6 +6,7 @@ services:
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
       XMR_SERVER: ${XMR_SERVER:-https://seed-server.bitcart.ai}
       XMR_SEED_SERVER: ${XMR_SEED_SERVER:-https://seed-server.bitcart.ai}
+      XMR_SEED_SERVER_REFRESH_INTERVAL: ${XMR_SEED_SERVER_REFRESH_INTERVAL:-3600}
       XMR_DEBUG: ${XMR_DEBUG:-false}
     expose:
       - "5011"

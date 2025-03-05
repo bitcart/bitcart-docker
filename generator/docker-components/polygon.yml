@@ -6,6 +6,7 @@ services:
       MATIC_NETWORK: ${MATIC_NETWORK:-mainnet}
       MATIC_SERVER: ${MATIC_SERVER:-https://seed-server.bitcart.ai}
       MATIC_SEED_SERVER: ${MATIC_SEED_SERVER:-https://seed-server.bitcart.ai}
+      MATIC_SEED_SERVER_REFRESH_INTERVAL: ${MATIC_SEED_SERVER_REFRESH_INTERVAL:-3600}
       MATIC_ARCHIVE_SERVER: ${MATIC_ARCHIVE_SERVER:-}
       MATIC_DEBUG: ${MATIC_DEBUG:-false}
     expose:
