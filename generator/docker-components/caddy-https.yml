@@ -1,0 +1,8 @@
+services:
+  caddy:
+    ports:
+      - "${REVERSEPROXY_HTTP_PORT:-80}:80"
+      - "${REVERSEPROXY_HTTPS_PORT:-443}:443"
+    environment:
+      CADDY_GLOBAL: "auto_https on"
+      ACME_CA_URI: ${ACME_CA_URI:-https://acme-v02.api.letsencrypt.org/directory}

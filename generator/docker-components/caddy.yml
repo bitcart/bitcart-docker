@@ -1,0 +1,16 @@
+services:
+  caddy:
+    restart: unless-stopped
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    ports:
+      - "${REVERSEPROXY_HTTP_PORT:-80}:80"
+    environment:
+      CADDY_GLOBAL: "auto_https off"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "caddy_data:/data"
+    networks:
+      - default
+
+volumes:
+  caddy_data:

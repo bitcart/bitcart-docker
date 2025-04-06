@@ -35,8 +35,8 @@ BACKEND_COMPONENTS = ["backend", "worker", "postgres", "redis"]
 FRONTEND_COMPONENTS = ["store", "admin"]
 
 # One domain mode constants
-HTTPS_REVERSE_PROXIES = ["nginx-https"]
-ALL_REVERSE_PROXIES = ["nginx"] + HTTPS_REVERSE_PROXIES
+HTTPS_REVERSE_PROXIES = ["nginx-https", "caddy-https"]
+ALL_REVERSE_PROXIES = ["nginx", "caddy"] + HTTPS_REVERSE_PROXIES
 # Note: do not change the order, it's the order preferred (root) service is chosen
 HOST_COMPONENTS = ["store", "admin", "backend"]
 

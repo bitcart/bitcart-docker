@@ -16,3 +16,7 @@ services:
       BITCART_STORE_ROOTPATH: ${BITCART_STORE_ROOTPATH:-/}
       BITCART_ADMIN_HOST: ${BITCART_ADMIN_HOST}
       BITCART_ADMIN_ROOTPATH: ${BITCART_ADMIN_ROOTPATH:-/}
+    labels:
+      caddy: http://${BITCART_STORE_HOST}
+      caddy.handle: ${BITCART_STORE_ROOTPATH:-/}*
+      caddy.reverse_proxy: "{{upstreams 3000}}"

@@ -82,10 +82,14 @@ def add_components(settings: Settings) -> OrderedSet:
     elif settings.INSTALLATION_PACK == "frontend":
         components.update(FRONTEND_COMPONENTS)
     # reverse proxy
-    if settings.REVERSE_PROXY == "nginx-https":
-        components.update(["nginx", "nginx-https"])
-    elif settings.REVERSE_PROXY == "nginx":
-        components.update(["nginx"])
+    REVERSE_PROXY_COMPONENTS = {
+        "nginx-https": ["nginx", "nginx-https"],
+        "nginx": ["nginx"],
+        "caddy": ["caddy"],
+        "caddy-https": ["caddy", "caddy-https"],
+    }
+    if settings.REVERSE_PROXY in REVERSE_PROXY_COMPONENTS:
+        components.update(REVERSE_PROXY_COMPONENTS[settings.REVERSE_PROXY])
     # additional components
     components.update(settings.ADDITIONAL_COMPONENTS)
     components.remove(settings.EXCLUDE_COMPONENTS)

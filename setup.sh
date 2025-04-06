@@ -31,7 +31,7 @@ Passing domain ending with .local will automatically edit /etc/hosts to make it 
 Environment variables:
     BITCART_INSTALL: installation template to use (eg. all, backend, frontend)
     BITCART_CRYPTOS: comma-separated list of cryptocurrencies to enable (eg. btc)
-    BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, none)
+    BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, caddy, caddy-https, none)
     REVERSEPROXY_HTTP_PORT: The port the reverse proxy binds to for public HTTP requests. Default: 80
     REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.

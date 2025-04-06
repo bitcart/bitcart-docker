@@ -51,6 +51,10 @@ services:
       BITCART_HTTPS_ENABLED: ${BITCART_HTTPS_ENABLED:-false}
       SENTRY_DSN: ${BITCART_SENTRY_DSN:-}
       BITCART_API_WORKERS: ${BITCART_API_WORKERS}
+    labels:
+      caddy: http://${BITCART_HOST}
+      caddy.handle: ${BITCART_BACKEND_ROOTPATH:-/}*
+      caddy.reverse_proxy: "{{upstreams 8000}}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:
