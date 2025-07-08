@@ -11,11 +11,9 @@ def _modify_backend_env(services, service_name, settings, STORE_AVAILABLE, ADMIN
             environment["BITCART_BACKEND_ROOTPATH"] = environment["BITCART_BACKEND_ROOTPATH"].replace("-}", "-/api}")
     if ADMIN_AVAILABLE:
         with modify_key(services, service_name, "environment") as environment:
+            environment["BITCART_ADMIN_HOST"] = settings.HOST or ""
             if STORE_AVAILABLE:
-                environment["BITCART_ADMIN_HOST"] = urljoin(settings.HOST or "", "admin")
                 environment["BITCART_ADMIN_ROOTPATH"] = environment["BITCART_ADMIN_ROOTPATH"].replace("/", "/admin")
-            else:
-                environment["BITCART_ADMIN_HOST"] = settings.HOST or ""
 
 
 def rule(services, settings):
