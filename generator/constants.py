@@ -20,7 +20,6 @@ CRYPTOS = {
     "xrg": {"component": "ergon"},
     "eth": {"component": "ethereum"},
     "bnb": {"component": "binancecoin"},
-    "sbch": {"component": "smartbch"},
     "matic": {"component": "polygon"},
     "trx": {"component": "tron"},
     "grs": {"component": "groestlcoin"},
