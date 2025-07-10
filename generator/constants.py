@@ -16,7 +16,6 @@ GENERATED_PATH = path_join(COMPOSE_DIR, GENERATED_NAME)
 CRYPTOS = {
     "btc": {"component": "bitcoin"},
     "ltc": {"component": "litecoin"},
-    "bsty": {"component": "globalboost"},
     "bch": {"component": "bitcoincash"},
     "xrg": {"component": "ergon"},
     "eth": {"component": "ethereum"},
