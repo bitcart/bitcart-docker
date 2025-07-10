@@ -14,7 +14,6 @@ DB_HOST=database
 REDIS_HOST=redis://redis
 BTC_HOST=bitcoin
 LTC_HOST=litecoin
-BSTY_HOST=globalboost
 BCH_HOST=bitcoincash
 XRG_HOST=ergon
 ETH_HOST=ethereum

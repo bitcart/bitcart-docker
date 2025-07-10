@@ -54,8 +54,6 @@ Environment variables:
     XRG_NETWORK: The network to run ergon daemon on (eg. mainnet)
     LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
     LTC_LIGHTNING: Whether to enable litecoin lightning network or not (eg. true, false)
-    BSTY_NETWORK: The network to run globalboost daemon on (eg. mainnet, testnet)
-    BSTY_LIGHTNING: Whether to enable globalboost lightning network or not (eg. true, false)
     GRS_NETWORK: The network to run groestlcoin daemon on (eg. mainnet, testnet)
     GRS_LIGHTNING: Whether to enable groestlcoin lightning network or not (eg. true, false)
     XMR_NETWORK: The network to run monero daemon on (eg. mainnet, testnet)
@@ -160,8 +158,6 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${XRG_NETWORK:=mainnet}"
 : "${LTC_NETWORK:=mainnet}"
 : "${LTC_LIGHTNING:=false}"
-: "${BSTY_NETWORK:=mainnet}"
-: "${BSTY_LIGHTNING:=false}"
 : "${GRS_NETWORK:=mainnet}"
 : "${GRS_LIGHTNING:=false}"
 : "${XMR_NETWORK:=mainnet}"
@@ -224,8 +220,6 @@ TRX_NETWORK=$TRX_NETWORK
 XRG_NETWORK=$XRG_NETWORK
 LTC_NETWORK=$LTC_NETWORK
 LTC_LIGHTNING=$LTC_LIGHTNING
-BSTY_NETWORK=$BSTY_NETWORK
-BSTY_LIGHTNING=$BSTY_LIGHTNING
 GRS_NETWORK=$GRS_NETWORK
 GRS_LIGHTNING=$GRS_LIGHTNING
 XMR_NETWORK=$XMR_NETWORK

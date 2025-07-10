@@ -28,8 +28,6 @@ services:
       XRG_NETWORK: ${XRG_NETWORK:-mainnet}
       LTC_NETWORK: ${LTC_NETWORK:-mainnet}
       LTC_LIGHTNING: ${LTC_LIGHTNING:-false}
-      BSTY_NETWORK: ${BSTY_NETWORK:-mainnet}
-      BSTY_LIGHTNING: ${BSTY_LIGHTNING:-false}
       GRS_NETWORK: ${GRS_NETWORK:-mainnet}
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
