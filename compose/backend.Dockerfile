@@ -2,7 +2,7 @@ FROM golang:1.23-alpine AS go-builder
 
 RUN CGO_ENABLED=0 go install -ldflags '-X main.Version=docker -X main.envFile=/app/conf/.env' github.com/bitcart/bitcart-cli@master
 
-FROM python:3.11-slim-bullseye
+FROM python:3.12-slim-bullseye
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ARG TARGETPLATFORM

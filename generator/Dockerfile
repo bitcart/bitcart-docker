@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.12-alpine
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 LABEL org.bitcart.image=docker-compose-generator
 WORKDIR /app

@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM python:3.11-alpine AS base
+FROM python:3.12-alpine AS base
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV ELECTRUM_USER=electrum
