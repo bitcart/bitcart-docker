@@ -4,6 +4,7 @@ services:
     image: bitcart/bitcart:stable
     command: python3 worker.py
     environment:
+      BITCART_ENV: production
       LOG_FILE: bitcart.log
       BITCART_DATADIR: /datadir
       BITCART_BACKUPS_DIR: /backups

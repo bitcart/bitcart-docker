@@ -4,6 +4,7 @@ services:
     image: bitcart/bitcart:stable
     command: bash -c "alembic upgrade head && gunicorn -c gunicorn.conf.py \"main:configure_production_app()\""
     environment:
+      BITCART_ENV: production
       LOG_FILE: bitcart.log
       BITCART_DATADIR: /datadir
       BITCART_BACKUPS_DIR: /backups
