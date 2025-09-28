@@ -18,11 +18,10 @@ export BTC_LIGHTNING=true
 # Use current repo's generator
 export BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local
 
-# TODO: temporarily commented out until we make a release
-# ./setup.sh
+./setup.sh
 
-# timeout 1m bash .circleci/test-connectivity.sh
+timeout 1m bash .circleci/test-connectivity.sh
 
 # # Testing scripts are not crashing and installed
-# ./start.sh
-# ./stop.sh
+./start.sh
+./stop.sh
