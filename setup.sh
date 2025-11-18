@@ -62,6 +62,7 @@ Environment variables:
     BITCART_BEHIND_REVERSEPROXY: set this when running in one domain mode with custom nginx port, but when bitcart's nginx is behind your own reverse proxy
     BITCART_SENTRY_DSN: Optional Sentry DSN for error tracking
     BITCART_API_WORKERS: Number of API workers to run (default: 2*cores+1=$((2 * $(nproc) + 1)))
+    BITCART_PROMETHEUS_METRICS_ENABLED: Whether to enable prometheus metrics endpoint or not (eg. true, false)
 Add-on specific variables:
     TOR_RELAY_NICKNAME: If tor relay is activated, the relay nickname
     TOR_RELAY_EMAIL: If tor relay is activated, the email for Tor to contact you regarding your relay

@@ -39,6 +39,7 @@ services:
       BITCART_REVERSEPROXY: ${BITCART_REVERSEPROXY:-nginx-https}
       BITCART_HTTPS_ENABLED: ${BITCART_HTTPS_ENABLED:-false}
       SENTRY_DSN: ${BITCART_SENTRY_DSN:-}
+      BITCART_PROMETHEUS_METRICS_ENABLED: ${BITCART_PROMETHEUS_METRICS_ENABLED:-false}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     expose:
