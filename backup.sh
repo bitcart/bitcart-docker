@@ -18,6 +18,7 @@ This script will backup the database as SQL script, essential volumes and put it
 It may optionally upload the backup to a remote server
 Environment variables:
     BACKUP_PROVIDER: where to upload. Default empty (local). See list of supported providers below
+    BACKUP_ENCRYPTION: whether to encrypt backups with OpenSSL (AES-256-CBC). Default: false
     SCP_TARGET: where to upload the backup via scp
     S3_BUCKET: where to upload the backup via s3
     S3_PATH: path to the backup on the remote server
@@ -113,6 +114,23 @@ else
         echo "Restarting Bitcart…"
         bitcart_start
     fi
+fi
+
+if [ "$BACKUP_ENCRYPTION" = "true" ]; then
+    if [ -z "$BACKUP_ENCRYPTION_KEY" ]; then
+        echo "Error: BACKUP_ENCRYPTION is enabled but BACKUP_ENCRYPTION_KEY is not set"
+        echo "The encryption key should be automatically generated in .deploy file"
+        exit 1
+    fi
+    echo "Encrypting backup …"
+    openssl enc -aes-256-cbc -salt -pbkdf2 -in "$backup_path" -out "${backup_path}.enc" -pass pass:"$BACKUP_ENCRYPTION_KEY"
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to encrypt backup file"
+        exit 1
+    fi
+    rm "$backup_path"
+    backup_path="${backup_path}.enc"
+    filename="${filename}.enc"
 fi
 
 delete_backup() {

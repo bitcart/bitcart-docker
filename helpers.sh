@@ -229,6 +229,14 @@ install_tooling() {
 
 save_deploy_config() {
     BITCART_DEPLOYMENT_CONFIG="$BITCART_BASE_DIRECTORY/.deploy"
+    if [ -f "$BITCART_DEPLOYMENT_CONFIG" ]; then
+        existing_key=$(grep "^BACKUP_ENCRYPTION_KEY=" "$BITCART_DEPLOYMENT_CONFIG" 2>/dev/null | cut -d'=' -f2)
+    fi
+    if [ -z "$existing_key" ]; then
+        BACKUP_ENCRYPTION_KEY=$(openssl rand -base64 48 | tr -d '\n')
+    else
+        BACKUP_ENCRYPTION_KEY="$existing_key"
+    fi
     cat >${BITCART_DEPLOYMENT_CONFIG} <<EOF
 #!/bin/bash
 NAME=$NAME
@@ -238,6 +246,7 @@ STORE_PLUGINS_HASH=$(get_plugins_hash store)
 BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
 DAEMON_PLUGINS_HASH=$(get_plugins_hash daemon)
 DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
+BACKUP_ENCRYPTION_KEY=$BACKUP_ENCRYPTION_KEY
 EOF
     chmod +x ${BITCART_DEPLOYMENT_CONFIG}
     read_from_env_file $BITCART_DEPLOYMENT_CONFIG
