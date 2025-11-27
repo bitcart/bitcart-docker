@@ -21,6 +21,10 @@ Environment variables:
     SCP_TARGET: where to upload the backup via scp
     S3_BUCKET: where to upload the backup via s3
     S3_PATH: path to the backup on the remote server
+    S3_ACCESS_KEY_ID: AWS access key ID for S3 authentication
+    S3_SECRET_ACCESS_KEY: AWS secret access key for S3 authentication
+    S3_DEFAULT_REGION: AWS region for S3 (e.g., us-east-1)
+    S3_ENDPOINT_URL: (optional) Custom S3 endpoint URL for S3-compatible services
 Supported providers:
 * local: keeps backups in backup_datadir docker volume (default)
 * scp: uploads the backup to a remote server via scp
@@ -119,7 +123,12 @@ delete_backup() {
 case $BACKUP_PROVIDER in
 "s3")
     echo "Uploading to S3 …"
-    docker run --rm -v ~/.aws:/root/.aws -v $backup_path:/aws/$filename amazon/aws-cli s3 cp $filename s3://$S3_BUCKET/$S3_PATH
+    docker_cmd="docker run --rm -e AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$S3_DEFAULT_REGION"
+    if [ -n "$S3_ENDPOINT_URL" ]; then
+        docker_cmd="$docker_cmd -e AWS_ENDPOINT_URL=$S3_ENDPOINT_URL"
+    fi
+    docker_cmd="$docker_cmd -v $backup_path:/aws/$filename amazon/aws-cli s3 cp $filename s3://$S3_BUCKET/$S3_PATH/$filename"
+    eval $docker_cmd
     delete_backup
     ;;
 
