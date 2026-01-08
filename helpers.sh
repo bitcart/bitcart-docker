@@ -223,8 +223,24 @@ install_docker_compose() {
 }
 
 install_tooling() {
-    try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli.sh
-    try sudo chmod +x /etc/bash_completion.d/bitcart-cli.sh
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if [ -d "/opt/homebrew/etc/bash_completion.d" ]; then
+            COMPLETION_DIR="/opt/homebrew/etc/bash_completion.d"
+        elif [ -d "/usr/local/etc/bash_completion.d" ]; then
+            COMPLETION_DIR="/usr/local/etc/bash_completion.d"
+        else
+            COMPLETION_DIR="$HOME/.bash_completion.d"
+            mkdir -p "$COMPLETION_DIR"
+            if [[ -z $(grep "bash_completion.d/bitcart-cli.sh" "$HOME/.bash_profile" 2>/dev/null) ]]; then
+                echo ". \"$COMPLETION_DIR/bitcart-cli.sh\" 2>/dev/null" >>"$HOME/.bash_profile"
+            fi
+        fi
+        try cp compose/scripts/cli-autocomplete.sh "$COMPLETION_DIR/bitcart-cli.sh"
+        try chmod +x "$COMPLETION_DIR/bitcart-cli.sh"
+    else
+        try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli.sh
+        try sudo chmod +x /etc/bash_completion.d/bitcart-cli.sh
+    fi
 }
 
 save_deploy_config() {
