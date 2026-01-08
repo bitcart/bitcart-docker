@@ -7,7 +7,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ARG TARGETPLATFORM
 ENV IN_DOCKER=1
-ENV GOSU_VERSION=1.16
+ENV GOSU_VERSION=1.19
 LABEL org.bitcart.image=backend
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_NO_CACHE=1
