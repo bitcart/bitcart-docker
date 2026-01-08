@@ -37,7 +37,7 @@ services:
 
   tor:
     restart: unless-stopped
-    image: bitcart/tor:0.4.7.13
+    image: bitcart/tor:0.4.8.10
     environment:
       TOR_PASSWORD: bitcart
       TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2

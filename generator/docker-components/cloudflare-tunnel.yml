@@ -1,6 +1,6 @@
 services:
   cloudflared:
-    image: bitcart/cloudflared:2022.7.1
+    image: bitcart/cloudflared:2025.11.1
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     restart: on-failure
     depends_on:
