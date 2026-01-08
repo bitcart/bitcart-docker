@@ -3,6 +3,8 @@ services:
     image: bitcart/cloudflared:2025.11.1
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     restart: on-failure
+    environment:
+      REAL_IP_HEADER: Cf-Connecting-Ip
     depends_on:
       - nginx
     links:

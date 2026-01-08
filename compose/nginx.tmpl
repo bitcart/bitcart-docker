@@ -22,6 +22,16 @@
 
 {{ end }}
 {{ define "redirects" }}
+    {{ range $container := $.Containers }}
+        {{ if $container.Env.REAL_IP_HEADER }}
+            {{ range $containerNetwork := $container.Networks }}
+                set_real_ip_from {{ $containerNetwork.IP }};
+            {{ end }}
+            {{ if (ne $container.Env.REAL_IP_HEADER "X-Real-IP") }}
+                real_ip_header {{ $container.Env.REAL_IP_HEADER }};
+            {{ end }}
+        {{ end }}
+    {{ end }}
     {{ $backendUsed := "false" }}
     {{ $adminUsed := "false" }}
 	{{ if eq $.HostName "bitcart-store" }}
