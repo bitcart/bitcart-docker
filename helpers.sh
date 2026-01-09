@@ -98,13 +98,23 @@ get_profile_file() {
 
         BASH_PROFILE_SCRIPT="$HOME/bitcart-env$1.sh"
 
-        # Mac OS doesn't use /etc/profile.d/xxx.sh. Instead we create a new file and load that from ~/.bash_profile
-        if [[ ! -f "$HOME/.bash_profile" ]]; then
-            touch "$HOME/.bash_profile"
-        fi
-        if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile") ]]; then
-            # Line does not exist, add it
-            echo ". \"$BASH_PROFILE_SCRIPT\"" >>"$HOME/.bash_profile"
+        # Mac OS doesn't use /etc/profile.d/xxx.sh. Instead we create a new file and load that from ~/.bash_profile or ~/.zprofile
+        if [[ "$SHELL" == */zsh ]]; then
+            if [[ ! -f "$HOME/.zprofile" ]]; then
+                touch "$HOME/.zprofile"
+            fi
+            if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.zprofile") ]]; then
+                # Line does not exist, add it
+                echo ". \"$BASH_PROFILE_SCRIPT\"" >>"$HOME/.zprofile"
+            fi
+        else
+            if [[ ! -f "$HOME/.bash_profile" ]]; then
+                touch "$HOME/.bash_profile"
+            fi
+            if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile") ]]; then
+                # Line does not exist, add it
+                echo ". \"$BASH_PROFILE_SCRIPT\"" >>"$HOME/.bash_profile"
+            fi
         fi
 
     else
@@ -224,19 +234,43 @@ install_docker_compose() {
 
 install_tooling() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        if [ -d "/opt/homebrew/etc/bash_completion.d" ]; then
-            COMPLETION_DIR="/opt/homebrew/etc/bash_completion.d"
-        elif [ -d "/usr/local/etc/bash_completion.d" ]; then
-            COMPLETION_DIR="/usr/local/etc/bash_completion.d"
+        if [[ "$SHELL" == */zsh ]]; then
+            AUTOCOMPLETE_FILE="cli-zsh-autocomplete.sh"
+            if [ -d "/opt/homebrew/share/zsh/site-functions" ]; then
+                COMPLETION_DIR="/opt/homebrew/share/zsh/site-functions"
+            elif [ -d "/usr/local/share/zsh/site-functions" ]; then
+                COMPLETION_DIR="/usr/local/share/zsh/site-functions"
+            else
+                COMPLETION_DIR="$HOME/.zsh/completions"
+                mkdir -p "$COMPLETION_DIR"
+                if [[ -z $(grep "fpath.*\.zsh/completions" "$HOME/.zshrc" 2>/dev/null) ]]; then
+                    echo "fpath=($COMPLETION_DIR \$fpath)" >>"$HOME/.zshrc"
+                fi
+            fi
         else
-            COMPLETION_DIR="$HOME/.bash_completion.d"
-            mkdir -p "$COMPLETION_DIR"
-            if [[ -z $(grep "bash_completion.d/bitcart-cli.sh" "$HOME/.bash_profile" 2>/dev/null) ]]; then
-                echo ". \"$COMPLETION_DIR/bitcart-cli.sh\" 2>/dev/null" >>"$HOME/.bash_profile"
+            AUTOCOMPLETE_FILE="cli-autocomplete.sh"
+            if [ -d "/opt/homebrew/etc/bash_completion.d" ]; then
+                COMPLETION_DIR="/opt/homebrew/etc/bash_completion.d"
+            elif [ -d "/usr/local/etc/bash_completion.d" ]; then
+                COMPLETION_DIR="/usr/local/etc/bash_completion.d"
+            else
+                COMPLETION_DIR="$HOME/.bash_completion.d"
+                mkdir -p "$COMPLETION_DIR"
+                if [[ -z $(grep "bash_completion.d/bitcart-cli.sh" "$HOME/.bash_profile" 2>/dev/null) ]]; then
+                    echo ". \"$COMPLETION_DIR/bitcart-cli.sh\" 2>/dev/null" >>"$HOME/.bash_profile"
+                fi
             fi
         fi
-        try cp compose/scripts/cli-autocomplete.sh "$COMPLETION_DIR/bitcart-cli.sh"
-        try chmod +x "$COMPLETION_DIR/bitcart-cli.sh"
+        if [[ "$SHELL" == */zsh ]]; then
+            {
+                echo "#compdef bitcart-cli.sh"
+                cat compose/scripts/$AUTOCOMPLETE_FILE
+            } >"$COMPLETION_DIR/_bitcart-cli.sh"
+            try chmod +x "$COMPLETION_DIR/_bitcart-cli.sh"
+        else
+            try cp compose/scripts/$AUTOCOMPLETE_FILE "$COMPLETION_DIR/bitcart-cli.sh"
+            try chmod +x "$COMPLETION_DIR/bitcart-cli.sh"
+        fi
     else
         try sudo cp compose/scripts/cli-autocomplete.sh /etc/bash_completion.d/bitcart-cli.sh
         try sudo chmod +x /etc/bash_completion.d/bitcart-cli.sh

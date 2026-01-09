@@ -37,6 +37,7 @@ repos:
         entry: mvdan/shfmt:latest -d -i 4
         language: docker_image
         types: [shell]
+        exclude: compose/scripts/cli-zsh-autocomplete.sh
   - repo: local
     hooks:
       - id: generate-images
