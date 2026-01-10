@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openss
     chmod +x /usr/local/bin/gosu && \
     groupadd --gid 1000 electrum && \
     useradd --uid 1000 --gid electrum --shell /bin/bash --create-home electrum && \
-    uv sync --frozen --no-dev --group web --group production && \
+    uv sync --frozen --no-dev --group web --group production --group otel && \
+    uv run opentelemetry-bootstrap -a requirements | uv pip install --requirement - && \
     apt-get purge -y build-essential python3-dev libffi-dev wget && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
