@@ -2,7 +2,7 @@ services:
   backend:
     restart: unless-stopped
     image: bitcart/bitcart:stable
-    command: bash -c "alembic upgrade head && gunicorn -c gunicorn.conf.py \"main:configure_production_app()\""
+    command: bash -c "uv run task db_migrate && uv run task production"
     environment:
       BITCART_ENV: production
       LOG_FILE: bitcart.log
