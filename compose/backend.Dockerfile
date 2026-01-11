@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends iproute2 openss
     apt-get purge -y build-essential python3-dev libffi-dev wget && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
+ENV OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=asyncpg
 ENV PYTHONUNBUFFERED=1 PYTHONMALLOC=malloc LD_PRELOAD=libjemalloc.so.2 MALLOC_CONF=background_thread:true,max_background_threads:1,metadata_thp:auto,dirty_decay_ms:80000,muzzy_decay_ms:80000
 ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
