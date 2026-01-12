@@ -23,7 +23,8 @@ COPY bitcart $ELECTRUM_HOME/site
 
 RUN apk add git gcc python3-dev musl-dev automake autoconf libtool file git make libffi-dev openssl-dev rust cargo && \
     cd $ELECTRUM_HOME/site && \
-    uv sync --frozen --no-dev --group xrg
+    uv sync --frozen --no-dev --group xrg --group otel && \
+    uv run opentelemetry-bootstrap -a requirements | uv pip install --requirement -
 
 FROM base AS build-image
 
