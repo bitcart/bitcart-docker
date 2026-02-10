@@ -14,7 +14,7 @@ This script must be run as root
     -h, --help: Show help
     --only-db: Backup database only. Default: false
     --restart: Restart Bitcart (to avoid data corruption if needed). Default: false
-This script will backup the database as SQL script, essential volumes and put it to tar.gz archive
+This script will backup the database as SQL script, essential volumes and put it to tar.zst archive
 It may optionally upload the backup to a remote server
 Environment variables:
     BACKUP_PROVIDER: where to upload. Default empty (local). See list of supported providers below
@@ -80,7 +80,7 @@ deployment_name=$(volume_name)
 volumes_dir=/var/lib/docker/volumes
 backup_dir="$volumes_dir/backup_datadir"
 timestamp=$(date "+%Y%m%d-%H%M%S")
-filename="$timestamp-backup.tar.gz"
+filename="$timestamp-backup.tar.zst"
 dumpname="$timestamp-database.sql"
 
 backup_path="$backup_dir/_data/${filename}"
@@ -90,7 +90,9 @@ echo "Dumping database …"
 bitcart_dump_db $dumpname
 
 if $ONLY_DB; then
-    tar -cvzf $backup_path $dbdump_path
+    tar_path="${backup_path%.zst}"
+    tar -cvf $tar_path $dbdump_path
+    zstdmt -1 --rm $tar_path -o $backup_path
 else
     if $RESTART_SERVICES; then
         echo "Stopping Bitcart…"
@@ -106,9 +108,11 @@ else
         fi
     done
     # put all volumes to volumes directory and remove timestamps
-    tar -cvzf $backup_path -C $volumes_dir --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa.pub" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
+    tar_path="${backup_path%.zst}"
+    tar -cvf $tar_path -C $volumes_dir --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa.pub" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
         -C "$(dirname $dbdump_path)" --transform "s|$timestamp-||" --transform "s|$timestamp||" $dumpname \
         -C "$BITCART_BASE_DIRECTORY/compose" plugins
+    zstdmt -1 --rm $tar_path -o $backup_path
 
     if $RESTART_SERVICES; then
         echo "Restarting Bitcart…"
