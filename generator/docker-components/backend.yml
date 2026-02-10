@@ -40,7 +40,6 @@ services:
       BITCART_BACKEND_PLUGINS_DIR: /plugins/backend
       BITCART_ADMIN_PLUGINS_DIR: /plugins/admin
       BITCART_STORE_PLUGINS_DIR: /plugins/store
-      BITCART_DAEMON_PLUGINS_DIR: /plugins/daemon
       BITCART_DOCKER_PLUGINS_DIR: /plugins/docker
       BITCART_HOST: ${BITCART_HOST}
       BITCART_ADMIN_HOST: ${BITCART_ADMIN_HOST}
@@ -60,7 +59,6 @@ services:
       - "./plugins/backend:/plugins/backend"
       - "./plugins/admin:/plugins/admin"
       - "./plugins/store:/plugins/store"
-      - "./plugins/daemon:/plugins/daemon"
       - "./plugins/docker:/plugins/docker"
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 
