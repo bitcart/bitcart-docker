@@ -2,7 +2,7 @@ services:
   backend:
     restart: unless-stopped
     image: bitcart/bitcart:stable
-    command: bash -c "uv run task db_migrate && uv run task production"
+    command: just prod-api-up
     environment:
       BITCART_ENV: production
       LOG_FILE: bitcart.log

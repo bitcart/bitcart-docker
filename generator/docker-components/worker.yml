@@ -2,7 +2,7 @@ services:
   worker:
     restart: unless-stopped
     image: bitcart/bitcart:stable
-    command: python3 worker.py
+    command: just worker
     environment:
       BITCART_ENV: production
       LOG_FILE: bitcart.log
