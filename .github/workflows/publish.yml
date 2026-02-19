@@ -9,6 +9,13 @@ permissions:
   contents: read
 
 jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+      security-events: write
+
   publish:
     needs: ci
     uses: bitcart/bitcart-actions/.github/workflows/build-docker-image.yml@master
