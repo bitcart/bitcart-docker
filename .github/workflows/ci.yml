@@ -17,3 +17,5 @@ jobs:
     permissions:
       contents: read
       security-events: write
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
