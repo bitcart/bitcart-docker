@@ -33,5 +33,6 @@ jobs:
       tags: |
         type=raw,value=latest
       dockerhub-user: ${{ vars.DOCKERHUB_USER }}
+      distributed: true
     secrets:
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

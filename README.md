@@ -75,7 +75,9 @@ export BITCART_STORE_API_URL=http://$BITCART_HOST
 
 Configuration settings are set like so:
 
-    export VARIABLE_NAME=value
+```bash
+export VARIABLE_NAME=value
+```
 
 Here is a complete list of configuration settings:
 
