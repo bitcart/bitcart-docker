@@ -1,0 +1,28 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    needs: ci
+    uses: bitcart/bitcart-actions/.github/workflows/build-docker-image.yml@master
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    with:
+      dockerfile: generator/Dockerfile
+      image-name: bitcart/docker-compose-generator
+      tags: |
+        type=raw,value=latest
+      dockerhub-user: ${{ vars.DOCKERHUB_USER }}
+    secrets:
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
