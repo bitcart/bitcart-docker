@@ -71,5 +71,4 @@ jobs:
 
       - name: Test installation
         run: |
-          echo "Skipping for now"
-          # sudo .github/test-install.sh
+          sudo .github/test-install.sh
