@@ -4,9 +4,9 @@ repos:
     hooks:
       - id: check-merge-conflict
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: v0.15.1
     hooks:
-      - id: ruff
+      - id: ruff-check
       - id: ruff-format
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -14,7 +14,6 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: mixed-line-ending
-      - id: requirements-txt-fixer
       - id: check-case-conflict
       - id: check-shebang-scripts-are-executable
       - id: check-json
@@ -24,6 +23,10 @@ repos:
       - id: debug-statements
       - id: fix-byte-order-marker
       - id: detect-private-key
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.22.0
+    hooks:
+      - id: zizmor
   - repo: local
     hooks:
       - id: prettier
@@ -38,11 +41,13 @@ repos:
         language: docker_image
         types: [shell]
         exclude: compose/scripts/cli-zsh-autocomplete.sh
-  - repo: local
-    hooks:
       - id: generate-images
         name: Generate docker images
         entry: compose/scripts/generate-templates.sh
         language: system
         files: >-
           ^compose/Dockerfile-coin.template$
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.10.2
+    hooks:
+      - id: uv-lock

@@ -6,7 +6,13 @@ requires-python = ">=3.12"
 dependencies = ["oyaml"]
 
 [dependency-groups]
-dev = ["pre-commit", "pytest", "pytest-cov", "ruff"]
+lint = ["prek", "ruff"]
+test = ["pytest", "pytest-cov", "pytest-durations"]
+dev = [
+    "rust-just>=1.46.0",
+    { include-group = "lint" },
+    { include-group = "test" },
+]
 
 [tool.ruff]
 target-version = "py312"
@@ -36,6 +42,8 @@ mccabe = { max-complexity = 12 }
 "tests/*" = ["S"]
 
 [tool.pytest.ini_options]
+junit_duration_report = "call"
+junit_suite_name = "bitcart_generator_test_suite"
 addopts = ["--cov=.", "--cov-report", "term-missing"]
 filterwarnings = [
     "error::DeprecationWarning",

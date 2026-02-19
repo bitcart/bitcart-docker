@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow_ref }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    uses: bitcart/bitcart-actions/.github/workflows/lint.yml@master
+
+  zizmor:
+    name: zizmor
+    uses: bitcart/bitcart-actions/.github/workflows/zizmor-audit.yml@master
+    permissions:
+      contents: read
+      security-events: write
+
+  test:
+    name: test
+    needs: [lint, zizmor]
+    runs-on: ubuntu-latest
+
+    env:
+      TEST_ARGS: "-o junit_family=legacy --junitxml test-results/junit.xml --cov-report html:coverage"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: bitcart/bitcart-actions/actions/setup-python@master
+
+      - name: Install library
+        run: |
+          uv sync --frozen --compile-bytecode
+
+      - name: Run tests
+        run: |
+          just ci
+
+      - name: Upload coverage to Codecov
+        uses: bitcart/bitcart-actions/actions/codecov@master
+        if: ${{ !cancelled() }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: Tests - Python ${{ env.PYTHON }}
+          flags: tests
+          env_vars: PYTHON
+          upload_coverage: ${{ job.status == 'success' }}
+
+      - name: Upload test results
+        uses: bitcart/bitcart-actions/actions/upload-test-results@master
+        if: ${{ !cancelled() }}
+
+  cansetup:
+    name: cansetup
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Test installation
+        run: |
+          sudo .github/test-install.sh
