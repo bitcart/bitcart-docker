@@ -1,6 +1,6 @@
 # Bitcart Docker Deployment
 
-[![CircleCI](https://circleci.com/gh/bitcart/bitcart-docker.svg?style=svg)](https://circleci.com/gh/bitcart/bitcart-docker)
+[![CI](https://github.com/bitcart/bitcart-docker/actions/workflows/publish.yml/badge.svg)](https://github.com/bitcart/bitcart-docker/actions/workflows/publish.yml)
 ![Codecov](https://img.shields.io/codecov/c/github/bitcart/bitcart-docker?style=flat-square)
 
 ## Using provided scripts (easy)
