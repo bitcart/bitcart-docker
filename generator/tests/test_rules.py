@@ -218,9 +218,11 @@ def test_local_deploy():
 def test_proxyprotocol_rule():
     services = generate_config()["services"]
     nginx_ports = services["nginx"]["ports"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_PORT:-10082}:10082" not in nginx_ports
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
     set_env("REVERSEPROXY_PROXYPROTOCOL", "true", prefix="")
     services = generate_config()["services"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_PORT:-10082}:10082" in services["nginx"]["ports"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" in services["nginx"]["ports"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" in services["nginx"]["ports"]
     # Cleanup
     delete_env("REVERSEPROXY_PROXYPROTOCOL", prefix="")
