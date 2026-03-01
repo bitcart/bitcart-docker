@@ -34,6 +34,8 @@ Environment variables:
     BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, none)
     REVERSEPROXY_HTTP_PORT: The port the reverse proxy binds to for public HTTP requests. Default: 80
     REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
+    REVERSEPROXY_PROXYPROTOCOL_PORT: The port the reverse proxy binds to for proxyprotocol. Default: 10082
+    REVERSEPROXY_PROXYPROTOCOL: Whether to enable proxyprotocol support. Used in advanced deployments, e.g. behind sslh. Default: false.
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
     BITCART_ENABLE_SSH: Gives Bitcart SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
     BITCART_SSH_PORT: Port where ssh server runs on host machine. Default: 22
@@ -138,9 +140,11 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BITCART_INSTALL:=all}"
 : "${BITCART_CRYPTOS:=btc}"
 : "${BITCART_REVERSEPROXY:=nginx-https}"
-: "${REVERSEPROXY_DEFAULT_HOST:=none}"
 : "${REVERSEPROXY_HTTP_PORT:=80}"
 : "${REVERSEPROXY_HTTPS_PORT:=443}"
+: "${REVERSEPROXY_PROXYPROTOCOL_PORT:=10082}"
+: "${REVERSEPROXY_PROXYPROTOCOL:=false}"
+: "${REVERSEPROXY_DEFAULT_HOST:=none}"
 : "${BITCART_ENABLE_SSH:=true}"
 : "${BITCART_SSH_PORT:=22}"
 : "${CLOUDFLARE_TUNNEL_TOKEN:=}"
@@ -195,6 +199,8 @@ Parameters passed:
 BITCART_HOST=$BITCART_HOST
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
 REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
+REVERSEPROXY_PROXYPROTOCOL_PORT=$REVERSEPROXY_PROXYPROTOCOL_PORT
+REVERSEPROXY_PROXYPROTOCOL=$REVERSEPROXY_PROXYPROTOCOL
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
 BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 BITCART_SSH_PORT=$BITCART_SSH_PORT
