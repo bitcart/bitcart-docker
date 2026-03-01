@@ -19,7 +19,8 @@ def _modify_backend_env(services, service_name, settings, STORE_AVAILABLE, ADMIN
 def rule(services, settings):
     if not settings.ONE_DOMAIN_MODE:
         return
-    API_URL = urljoin(settings.API_URL, "api")
+    BACKEND_AVAILABLE = services.get("backend") and services.get("worker")
+    API_URL = "http://backend:8000/api" if BACKEND_AVAILABLE else urljoin(settings.API_URL, "api")
     STORE_AVAILABLE = services.get("store")
     ADMIN_AVAILABLE = services.get("admin")
     # replace defaults
