@@ -287,9 +287,9 @@ server {
 	{{ if $enable_ipv6 }}
 	listen [::]:443 ssl http2 {{ $default_server }};
 	{{ end }}
-    listen 10082 proxy_protocol {{ $default_server }};
+    listen 10082 ssl http2 proxy_protocol {{ $default_server }};
 	{{ if $enable_ipv6 }}
-	listen [::]:10082 proxy_protocol {{ $default_server }};
+	listen [::]:10082 ssl http2 proxy_protocol {{ $default_server }};
     {{ end }}
 	access_log /var/log/nginx/access.log vhost;
 
