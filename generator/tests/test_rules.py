@@ -212,3 +212,15 @@ def test_local_deploy():
     services = generate_config()["services"]
     assert services["store"]["extra_hosts"] == ["bitcart.local:172.17.0.1"]
     delete_env("HOST")
+
+
+# Rule 11: proxy protocol port
+def test_proxyprotocol_rule():
+    services = generate_config()["services"]
+    nginx_ports = services["nginx"]["ports"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_PORT:-10082}:10082" not in nginx_ports
+    set_env("REVERSEPROXY_PROXYPROTOCOL", "true", prefix="")
+    services = generate_config()["services"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_PORT:-10082}:10082" in services["nginx"]["ports"]
+    # Cleanup
+    delete_env("REVERSEPROXY_PROXYPROTOCOL", prefix="")

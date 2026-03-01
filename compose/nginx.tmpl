@@ -266,6 +266,20 @@ server {
     {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
+server {
+    client_max_body_size 100M;
+	server_name {{ $host }};
+	listen 10082 proxy_protocol {{ $default_server }};
+	{{ if $enable_ipv6 }}
+	listen [::]:10082 proxy_protocol {{ $default_server }};
+	{{ end }}
+	access_log /var/log/nginx/access.log vhost;
+	location / {
+		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+	}
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
+}
+
 {{ if $is_https }}
 
 {{ if eq $https_method "redirect" }}
