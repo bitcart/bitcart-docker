@@ -49,29 +49,35 @@ def test_one_domain_rule():
     check_one_domain_setting("STORE_HOST")
     check_one_domain_setting("ADMIN_API_URL")
     check_one_domain_setting("STORE_API_URL")
-    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://backend:8000/api"
-    set_env("REVERSEPROXY_HTTPS_PORT", "445", prefix="")
-    services = generate_config()["services"]
-    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://backend:8000/api"
-    delete_env("REVERSEPROXY_HTTPS_PORT", prefix="")
-    set_env("REVERSEPROXY_HTTP_PORT", "445", prefix="")
-    set_env("REVERSEPROXY", "nginx")
-    services = generate_config()["services"]
-    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://backend:8000/api"
-    delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
-    delete_env("REVERSEPROXY")
-    # Without backend+worker (frontend-only), falls back to external URL
-    set_env("EXCLUDE_COMPONENTS", "backend,worker")
-    services = generate_config()["services"]
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None/api"
+    assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
     set_env("REVERSEPROXY_HTTPS_PORT", "445", prefix="")
     services = generate_config()["services"]
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None:445/api"
+    assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
     delete_env("REVERSEPROXY_HTTPS_PORT", prefix="")
     set_env("REVERSEPROXY_HTTP_PORT", "445", prefix="")
     set_env("REVERSEPROXY", "nginx")
     services = generate_config()["services"]
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None:445/api"
+    assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
+    delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
+    delete_env("REVERSEPROXY")
+    # Without backend+worker (frontend-only), falls back to external URL only
+    set_env("EXCLUDE_COMPONENTS", "backend,worker")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None/api"
+    assert "BITCART_ADMIN_SERVER_API_URL" not in services["admin"]["environment"]
+    set_env("REVERSEPROXY_HTTPS_PORT", "445", prefix="")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None:445/api"
+    assert "BITCART_ADMIN_SERVER_API_URL" not in services["admin"]["environment"]
+    delete_env("REVERSEPROXY_HTTPS_PORT", prefix="")
+    set_env("REVERSEPROXY_HTTP_PORT", "445", prefix="")
+    set_env("REVERSEPROXY", "nginx")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None:445/api"
+    assert "BITCART_ADMIN_SERVER_API_URL" not in services["admin"]["environment"]
     delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
     delete_env("REVERSEPROXY")
     delete_env("EXCLUDE_COMPONENTS")

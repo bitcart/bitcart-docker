@@ -124,11 +124,13 @@ def test_https_hint():
     set_env("REVERSEPROXY", "nginx")
     config = generate_config()
     assert "letsencrypt-nginx-proxy-companion" not in config["services"]
-    assert config["services"]["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://backend:8000/api"
-    # Without backend+worker (frontend-only), falls back to external https URL
+    assert config["services"]["admin"]["environment"]["BITCART_ADMIN_API_URL"].startswith("https://")
+    assert config["services"]["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
+    # Without backend+worker (frontend-only), falls back to external https URL only
     set_env("EXCLUDE_COMPONENTS", "backend,worker")
     config = generate_config()
     assert config["services"]["admin"]["environment"]["BITCART_ADMIN_API_URL"].startswith("https://")
+    assert "BITCART_ADMIN_SERVER_API_URL" not in config["services"]["admin"]["environment"]
     delete_env("EXCLUDE_COMPONENTS")
     # Cleanup
     delete_env("HTTPS_ENABLED")
