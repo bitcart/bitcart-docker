@@ -49,6 +49,7 @@ jobs:
           mkdir -p site
           cp generator/demo/index.html site/
           cp generator/demo/bitcart_compose_generator-*.whl site/
+          echo "generator.bitcart.ai" > site/CNAME
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
