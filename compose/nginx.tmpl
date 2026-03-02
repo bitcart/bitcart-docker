@@ -93,22 +93,33 @@
 # If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
 # scheme used to connect to this server
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {
-  default $http_x_forwarded_proto;
-  ''      $scheme;
+    default $http_x_forwarded_proto;
+    '' $scheme;
+}
+
+map $http_x_forwarded_host $proxy_x_forwarded_host {
+    default $http_x_forwarded_host;
+    '' $host;
 }
 
 # If we receive X-Forwarded-Port, pass it through; otherwise, pass along the
 # server port the client connected to
 map $http_x_forwarded_port $proxy_x_forwarded_port {
-  default $http_x_forwarded_port;
-  ''      $server_port;
+    default $http_x_forwarded_port;
+    '' $server_port;
+
+# Include the port in the Host header sent to the container if it is non-standard
+map $server_port $host_port {
+    default :$server_port;
+    80 '';
+    443 '';
 }
 
 # If we receive Upgrade, set Connection to "upgrade"; otherwise, delete any
 # Connection header that may have been passed to this server
 map $http_upgrade $proxy_connection {
-  default upgrade;
-  '' close;
+    default upgrade;
+    '' close;
 }
 
 # Apply fix for very long server names
@@ -122,10 +133,10 @@ server_tokens off;
 ssl_dhparam /etc/nginx/dhparam/dhparam.pem;
 {{ end }}
 
-# Set appropriate X-Forwarded-Ssl header
-map $scheme $proxy_x_forwarded_ssl {
-  default off;
-  https on;
+# Set appropriate X-Forwarded-Ssl header based on $proxy_x_forwarded_proto
+map $proxy_x_forwarded_proto $proxy_x_forwarded_ssl {
+    default off;
+    https on;
 }
 
 gzip on;
@@ -138,6 +149,8 @@ log_format vhost '$host $remote_addr - $remote_user [$time_local] '
 
 access_log off;
 
+error_log /dev/stderr;
+
 {{ if $.Env.RESOLVERS }}
 resolver {{ $.Env.RESOLVERS }};
 {{ end }}
@@ -148,14 +161,16 @@ include /etc/nginx/proxy.conf;
 # HTTP 1.1 support
 proxy_http_version 1.1;
 proxy_buffering off;
-proxy_set_header Host $http_host;
+proxy_set_header Host $host$host_port;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection $proxy_connection;
 proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Host $proxy_x_forwarded_host;
 proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
 proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
 proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
+proxy_set_header X-Original-URI $request_uri;
 
 # Mitigate httpoxy attack (see README for details)
 proxy_set_header Proxy "";
@@ -174,7 +189,6 @@ server {
     access_log /var/log/nginx/access.log vhost;
     return 503;
 
-    ssl_session_tickets off;
     ssl_certificate /etc/nginx/certs/default.crt;
     ssl_certificate_key /etc/nginx/certs/default.key;
 }
@@ -339,12 +353,6 @@ server {
 
     {{ if (exists (printf "/etc/nginx/certs/%s.dhparam.pem" $cert)) }}
     ssl_dhparam {{ printf "/etc/nginx/certs/%s.dhparam.pem" $cert }};
-    {{ end }}
-
-    {{ if (exists (printf "/etc/nginx/certs/%s.chain.pem" $cert)) }}
-    ssl_stapling on;
-    ssl_stapling_verify on;
-    ssl_trusted_certificate {{ printf "/etc/nginx/certs/%s.chain.pem" $cert }};
     {{ end }}
 
     {{ if (and (ne $https_method "noredirect") (ne $hsts "off")) }}
