@@ -10,7 +10,7 @@ members = [
 [[package]]
 name = "bitcart-compose-generator"
 version = "1.0.0"
-source = { virtual = "generator" }
+source = { editable = "generator" }
 dependencies = [
     { name = "oyaml" },
 ]

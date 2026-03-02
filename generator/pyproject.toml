@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 exclude = ["demo", "tests"]
+dev-mode-dirs = ["."]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
