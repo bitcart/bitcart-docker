@@ -16,6 +16,7 @@ services:
     image: bitcart/docker-gen:0.9.2
     environment:
       DEFAULT_HOST: ${REVERSEPROXY_DEFAULT_HOST:-none}
+      PROXY_PROTOCOL: ${REVERSEPROXY_PROXYPROTOCOL:-false}
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"

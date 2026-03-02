@@ -1,92 +1,126 @@
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
 {{ define "upstream" }}
-	{{ if .Address }}
-		{{/* If we got the containers from swarm and this container's port is published to host, use host IP:PORT */}}
-		{{ if and .Container.Node.ID .Address.HostPort }}
-			# {{ .Container.Node.Name }}/{{ .Container.Name }}
-			server {{ .Container.Node.Address.IP }}:{{ .Address.HostPort }};
-		{{/* If there is no swarm node or the port is not published on host, use container's IP:PORT */}}
-		{{ else if .Network }}
-			# {{ .Container.Name }}
-			server {{ .Network.IP }}:{{ .Address.Port }};
-		{{ end }}
-	{{ else if .Network }}
-		# {{ .Container.Name }}
-		{{ if .Network.IP }}
-			server {{ .Network.IP }} down;
-		{{ else }}
-			server 127.0.0.1 down;
-		{{ end }}
-	{{ end }}
+    {{ if .Address }}
+        {{/* If we got the containers from swarm and this container's port is published to host, use host IP:PORT */}}
+        {{ if and .Container.Node.ID .Address.HostPort }}
+    # {{ .Container.Node.Name }}/{{ .Container.Name }}
+    server {{ .Container.Node.Address.IP }}:{{ .Address.HostPort }};
+        {{/* If there is no swarm node or the port is not published on host, use container's IP:PORT */}}
+        {{ else if .Network }}
+    # {{ .Container.Name }}
+    server {{ .Network.IP }}:{{ .Address.Port }};
+        {{ end }}
+    {{ else if .Network }}
+    # {{ .Container.Name }}
+        {{ if .Network.IP }}
+    server {{ .Network.IP }} down;
+        {{ else }}
+    server 127.0.0.1 down;
+        {{ end }}
+    {{ end }}
 
 {{ end }}
 {{ define "redirects" }}
     {{ range $container := $.Containers }}
         {{ if $container.Env.REAL_IP_HEADER }}
             {{ range $containerNetwork := $container.Networks }}
-                set_real_ip_from {{ $containerNetwork.IP }};
+    set_real_ip_from {{ $containerNetwork.IP }};
             {{ end }}
             {{ if (ne $container.Env.REAL_IP_HEADER "X-Real-IP") }}
-                real_ip_header {{ $container.Env.REAL_IP_HEADER }};
+    real_ip_header {{ $container.Env.REAL_IP_HEADER }};
             {{ end }}
         {{ end }}
     {{ end }}
     {{ $backendUsed := "false" }}
     {{ $adminUsed := "false" }}
-	{{ if eq $.HostName "bitcart-store" }}
-		{{ range $container := $.Containers }}
-			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
-				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
-				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
+    {{ if eq $.HostName "bitcart-store" }}
+        {{ range $container := $.Containers }}
+            {{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
+                {{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+                {{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
                     {{ $backendUsed = "true" }}
-					location /api/ {
-						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
-					}
-				{{ end }}
-				{{ if (and (eq $adminUsed "false") (eq $serviceName "admin")) }}
+    location /api/ {
+        proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
+    }
+                {{ end }}
+                {{ if (and (eq $adminUsed "false") (eq $serviceName "admin")) }}
                     {{ $adminUsed = "true" }}
-					location /admin {
-						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
-					}
-				{{ end }}
-			{{ end }}
-		{{ end }}
-	{{ end }}
-	{{ if eq $.HostName "bitcart-admin" }}
-		{{ range $container := $.Containers }}
-			{{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
-				{{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
-				{{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
+    location /admin {
+        proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }};
+    }
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    {{ end }}
+    {{ if eq $.HostName "bitcart-admin" }}
+        {{ range $container := $.Containers }}
+            {{ if (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") }}
+                {{ $serviceName := (index $container.Labels "com.docker.compose.service") }}
+                {{ if (and (eq $backendUsed "false") (eq $serviceName "backend")) }}
                     {{ $backendUsed = "true" }}
-					location /api/ {
-						proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
-					}
-				{{ end }}
-			{{ end }}
-		{{ end }}
-	{{ end }}
+    location /api/ {
+        proxy_pass http://{{ trim $container.Env.VIRTUAL_HOST_NAME }}/;
+    }
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    {{ end }}
+{{ end }}
+
+{{ define "ssl_policy" }}
+    {{ if eq .ssl_policy "Mozilla-Modern" }}
+    ssl_protocols TLSv1.3;
+    ssl_ecdh_curve X25519:prime256v1:secp384r1;
+    ssl_prefer_server_ciphers off;
+    {{ else if eq .ssl_policy "Mozilla-Intermediate" }}
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ecdh_curve X25519:prime256v1:secp384r1;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    {{ else if eq .ssl_policy "Mozilla-Old" }}
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ecdh_curve X25519:prime256v1:secp384r1;
+    ssl_ciphers @SECLEVEL=0:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA;
+    ssl_prefer_server_ciphers on;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    {{ end }}
 {{ end }}
 
 # If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
 # scheme used to connect to this server
 map $http_x_forwarded_proto $proxy_x_forwarded_proto {
-  default $http_x_forwarded_proto;
-  ''      $scheme;
+    default $http_x_forwarded_proto;
+    '' $scheme;
+}
+
+map $http_x_forwarded_host $proxy_x_forwarded_host {
+    default $http_x_forwarded_host;
+    '' $host;
 }
 
 # If we receive X-Forwarded-Port, pass it through; otherwise, pass along the
 # server port the client connected to
 map $http_x_forwarded_port $proxy_x_forwarded_port {
-  default $http_x_forwarded_port;
-  ''      $server_port;
+    default $http_x_forwarded_port;
+    '' $server_port;
+}
+
+# Include the port in the Host header sent to the container if it is non-standard
+map $server_port $host_port {
+    default :$server_port;
+    80 '';
+    443 '';
 }
 
 # If we receive Upgrade, set Connection to "upgrade"; otherwise, delete any
 # Connection header that may have been passed to this server
 map $http_upgrade $proxy_connection {
-  default upgrade;
-  '' close;
+    default upgrade;
+    '' close;
 }
 
 # Apply fix for very long server names
@@ -100,21 +134,25 @@ server_tokens off;
 ssl_dhparam /etc/nginx/dhparam/dhparam.pem;
 {{ end }}
 
-# Set appropriate X-Forwarded-Ssl header
-map $scheme $proxy_x_forwarded_ssl {
-  default off;
-  https on;
+# Set appropriate X-Forwarded-Ssl header based on $proxy_x_forwarded_proto
+map $proxy_x_forwarded_proto $proxy_x_forwarded_ssl {
+    default off;
+    https on;
 }
 
 gzip on;
 gzip_min_length 1000;
-gzip_types image/svg+xml text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+gzip_vary on;
+gzip_proxied any;
+gzip_types text/plain text/css application/javascript application/json text/xml application/xml application/xml+rss image/svg+xml;
 
 log_format vhost '$host $remote_addr - $remote_user [$time_local] '
                  '"$request" $status $body_bytes_sent '
                  '"$http_referer" "$http_user_agent"';
 
 access_log off;
+
+error_log /dev/stderr;
 
 {{ if $.Env.RESOLVERS }}
 resolver {{ $.Env.RESOLVERS }};
@@ -126,14 +164,16 @@ include /etc/nginx/proxy.conf;
 # HTTP 1.1 support
 proxy_http_version 1.1;
 proxy_buffering off;
-proxy_set_header Host $http_host;
+proxy_set_header Host $host$host_port;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection $proxy_connection;
 proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Host $proxy_x_forwarded_host;
 proxy_set_header X-Forwarded-Proto $proxy_x_forwarded_proto;
 proxy_set_header X-Forwarded-Ssl $proxy_x_forwarded_ssl;
 proxy_set_header X-Forwarded-Port $proxy_x_forwarded_port;
+proxy_set_header X-Original-URI $request_uri;
 
 # Mitigate httpoxy attack (see README for details)
 proxy_set_header Proxy "";
@@ -143,18 +183,17 @@ proxy_set_header Proxy "";
 
 {{ if (and (exists "/etc/nginx/certs/default.crt") (exists "/etc/nginx/certs/default.key")) }}
 server {
-	server_name _; # This is just an invalid value which will never trigger on a real hostname.
-	listen 443 ssl;
-	{{ if $enable_ipv6 }}
-	listen [::]:443 ssl;
-	{{ end }}
+    server_name _; # This is just an invalid value which will never trigger on a real hostname.
+    listen 443 ssl;
+    {{ if $enable_ipv6 }}
+    listen [::]:443 ssl;
+    {{ end }}
     http2 on;
-	access_log /var/log/nginx/access.log vhost;
-	return 503;
+    access_log /var/log/nginx/access.log vhost;
+    return 503;
 
-	ssl_session_tickets off;
-	ssl_certificate /etc/nginx/certs/default.crt;
-	ssl_certificate_key /etc/nginx/certs/default.key;
+    ssl_certificate /etc/nginx/certs/default.crt;
+    ssl_certificate_key /etc/nginx/certs/default.key;
 }
 {{ end }}
 
@@ -166,58 +205,58 @@ server {
 upstream {{ $upstream_name }} {
 
 {{ range $container := $containers }}
-	{{ $addrLen := len $container.Addresses }}
+    {{ $addrLen := len $container.Addresses }}
 
-	{{ range $knownNetwork := $CurrentContainer.Networks }}
-		{{ range $containerNetwork := $container.Networks }}
-			{{ if (and (ne $containerNetwork.Name "ingress") (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host"))) }}
-				## Can be connected with "{{ $containerNetwork.Name }}" network
+    {{ range $knownNetwork := $CurrentContainer.Networks }}
+        {{ range $containerNetwork := $container.Networks }}
+            {{ if (and (ne $containerNetwork.Name "ingress") (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host"))) }}
+    ## Can be connected with "{{ $containerNetwork.Name }}" network
 
-				{{/* If only 1 port exposed, use that */}}
-				{{ if eq $addrLen 1 }}
-					{{ $address := index $container.Addresses 0 }}
-					{{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
-				{{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var, falling back to standard web port 80 */}}
-				{{ else }}
-					{{ $port := coalesce $container.Env.VIRTUAL_PORT "80" }}
-					{{ $address := where $container.Addresses "Port" $port | first }}
-					{{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
-				{{ end }}
-			{{ else }}
-				# Cannot connect to network of this container
-				server 127.0.0.1 down;
-			{{ end }}
-		{{ end }}
-	{{ end }}
+                {{/* If only 1 port exposed, use that */}}
+                {{ if eq $addrLen 1 }}
+                    {{ $address := index $container.Addresses 0 }}
+                    {{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
+                {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var, falling back to standard web port 80 */}}
+                {{ else }}
+                    {{ $port := coalesce $container.Env.VIRTUAL_PORT "80" }}
+                    {{ $address := where $container.Addresses "Port" $port | first }}
+                    {{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
+                {{ end }}
+            {{ else }}
+    # Cannot connect to network of this container
+    server 127.0.0.1 down;
+            {{ end }}
+        {{ end }}
+    {{ end }}
 {{ end }}
 }
 
 {{ $hiddenReverseProxy := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_REVERSEPROXY")) "") }}
 {{ if ne $hiddenReverseProxy "" }}
-	{{ $hiddenHostName := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_NAME")) "") }}
-	{{ $onionHost := read (printf "/var/lib/tor/hidden_services/%s/hostname" $hiddenHostName) }}
-	{{ if ne $onionHost "" }}
+    {{ $hiddenHostName := trim (or (first (groupByKeys $containers "Env.HIDDENSERVICE_NAME")) "") }}
+    {{ $onionHost := read (printf "/var/lib/tor/hidden_services/%s/hostname" $hiddenHostName) }}
+    {{ if ne $onionHost "" }}
 server {
     client_max_body_size 100M;
-	server_name {{ trim $onionHost }};
-	listen 80 ;
-	access_log /var/log/nginx/access.log vhost;
-	{{ if (exists "/etc/nginx/vhost.d/default") }}
-	include /etc/nginx/vhost.d/default;
-	{{ end }}
-	location / {
-		proxy_pass http://{{ trim $upstream_name }};
-	}
-	{{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
+    server_name {{ trim $onionHost }};
+    listen 80;
+    access_log /var/log/nginx/access.log vhost;
+    {{ if (exists "/etc/nginx/vhost.d/default") }}
+    include /etc/nginx/vhost.d/default;
+    {{ end }}
+    location / {
+        proxy_pass http://{{ trim $upstream_name }};
+    }
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
-	{{ end }}
+    {{ end }}
 {{ end }}
 
 {{ range $host, $containers := groupByMulti $containers "Env.VIRTUAL_HOST" "," }}
 {{ $host := trim $host }}
 {{ if ne $host "" }}
 {{ $default_host := or ($.Env.DEFAULT_HOST) "" }}
-{{ $default_server := index (dict $host "" $default_host "default_server") $host }}
+{{ $default_server := index (dict $host "" $default_host " default_server") $host }}
 
 {{/* Get the VIRTUAL_PROTO defined by containers w/ the same vhost, falling back to "http" */}}
 {{ $proto := trim (or (first (groupByKeys $containers "Env.VIRTUAL_PROTO")) "http") }}
@@ -251,19 +290,19 @@ server {
 {{/* Use the cert specified on the container or fallback to the best vhost match */}}
 {{ $cert := (coalesce $certName $vhostCert) }}
 
-{{ $is_https := (and (ne $https_method "nohttps") (ne $cert "") (exists (printf "/etc/nginx/certs/%s.crt" $cert)) (exists (printf "/etc/nginx/certs/%s.key" $cert)) (eq $CurrentContainer.Env.HTTPS_ENABLED "true")) }}
+{{ $is_https := (and (ne $https_method "nohttps") (ne $cert "") (exists (printf "/etc/nginx/certs/%s.crt" $cert)) (exists (printf "/etc/nginx/certs/%s.key" $cert)) (eq $.Env.HTTPS_ENABLED "true")) }}
 
 server {
     client_max_body_size 100M;
-	server_name _;
-	listen 80;
-	{{ if $enable_ipv6 }}
-	listen [::]:80;
-	{{ end }}
-	access_log /var/log/nginx/access.log vhost;
-	location / {
-		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
-	}
+    server_name _;
+    listen 80;
+    {{ if $enable_ipv6 }}
+    listen [::]:80;
+    {{ end }}
+    access_log /var/log/nginx/access.log vhost;
+    location / {
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+    }
     {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
@@ -271,122 +310,87 @@ server {
 
 {{ if eq $https_method "redirect" }}
 server {
-	server_name {{ $host }};
-	listen 80 {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:80 {{ $default_server }};
-	{{ end }}
-    listen 10082 proxy_protocol {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:10082 proxy_protocol {{ $default_server }};
+    server_name {{ $host }};
+    listen 80 {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:80 {{- $default_server }};
     {{ end }}
-	access_log /var/log/nginx/access.log vhost;
-	return 301 https://$host$request_uri;
+    {{ if eq $.Env.PROXY_PROTOCOL "true" }}
+    listen 10082 proxy_protocol {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:10082 proxy_protocol {{- $default_server }};
+    {{ end }}
+    {{ end }}
+    access_log /var/log/nginx/access.log vhost;
+    return 301 https://$host$request_uri;
 }
 {{ end }}
 
 server {
     client_max_body_size 100M;
-	server_name {{ $host }};
-	listen 443 ssl {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:443 ssl {{ $default_server }};
-	{{ end }}
-    listen 10083 ssl proxy_protocol {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:10083 ssl proxy_protocol {{ $default_server }};
+    server_name {{ $host }};
+    listen 443 ssl {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:443 ssl {{- $default_server }};
     {{ end }}
-    http2 on;
-	access_log /var/log/nginx/access.log vhost;
-
+    {{ if eq $.Env.PROXY_PROTOCOL "true" }}
+    listen 10083 ssl proxy_protocol {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:10083 ssl proxy_protocol {{- $default_server }};
+    {{ end }}
     set_real_ip_from 172.16.0.0/12;
     real_ip_header proxy_protocol;
+    {{ end }}
+    http2 on;
+    access_log /var/log/nginx/access.log vhost;
 
-	{{ if eq $network_tag "internal" }}
-	# Only allow traffic from internal clients
-	include /etc/nginx/network_internal.conf;
-	{{ end }}
+    {{ if eq $network_tag "internal" }}
+    # Only allow traffic from internal clients
+    include /etc/nginx/network_internal.conf;
+    {{ end }}
 
-	{{ if eq $ssl_policy "Mozilla-Modern" }}
-	ssl_protocols TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
-	{{ else if eq $ssl_policy "Mozilla-Intermediate" }}
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:!DSS';
-	{{ else if eq $ssl_policy "Mozilla-Old" }}
-	ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-DES-CBC3-SHA:ECDHE-ECDSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:DES-CBC3-SHA:HIGH:SEED:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!RSAPSK:!aDH:!aECDH:!EDH-DSS-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA:!SRP';
-	{{ else if eq $ssl_policy "AWS-TLS-1-2-2017-01" }}
-	ssl_protocols TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:AES128-GCM-SHA256:AES128-SHA256:AES256-GCM-SHA384:AES256-SHA256';
-	{{ else if eq $ssl_policy "AWS-TLS-1-1-2017-01" }}
-	ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA';
-	{{ else if eq $ssl_policy "AWS-2016-08" }}
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA';
-	{{ else if eq $ssl_policy "AWS-2015-05" }}
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA:DES-CBC3-SHA';
-	{{ else if eq $ssl_policy "AWS-2015-03" }}
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA:DHE-DSS-AES128-SHA:DES-CBC3-SHA';
-	{{ else if eq $ssl_policy "AWS-2015-02" }}
-	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-	ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA:DHE-DSS-AES128-SHA';
-	{{ end }}
+    {{ template "ssl_policy" (dict "ssl_policy" $ssl_policy) }}
 
-	ssl_prefer_server_ciphers on;
-	ssl_session_timeout 5m;
-	ssl_session_cache shared:SSL:50m;
-	ssl_session_tickets off;
+    ssl_certificate /etc/nginx/certs/{{ (printf "%s.crt" $cert) }};
+    ssl_certificate_key /etc/nginx/certs/{{ (printf "%s.key" $cert) }};
 
-	ssl_certificate /etc/nginx/certs/{{ (printf "%s.crt" $cert) }};
-	ssl_certificate_key /etc/nginx/certs/{{ (printf "%s.key" $cert) }};
+    {{ if (exists (printf "/etc/nginx/certs/%s.dhparam.pem" $cert)) }}
+    ssl_dhparam {{ printf "/etc/nginx/certs/%s.dhparam.pem" $cert }};
+    {{ end }}
 
-	{{ if (exists (printf "/etc/nginx/certs/%s.dhparam.pem" $cert)) }}
-	ssl_dhparam {{ printf "/etc/nginx/certs/%s.dhparam.pem" $cert }};
-	{{ end }}
+    {{ if (and (ne $https_method "noredirect") (ne $hsts "off")) }}
+    add_header Strict-Transport-Security "{{ trim $hsts }}" always;
+    {{ end }}
 
-	{{ if (exists (printf "/etc/nginx/certs/%s.chain.pem" $cert)) }}
-	ssl_stapling on;
-	ssl_stapling_verify on;
-	ssl_trusted_certificate {{ printf "/etc/nginx/certs/%s.chain.pem" $cert }};
-	{{ end }}
+    {{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
+    include {{ printf "/etc/nginx/vhost.d/%s" $host }};
+    {{ else if (exists "/etc/nginx/vhost.d/default") }}
+    include /etc/nginx/vhost.d/default;
+    {{ end }}
 
-	{{ if (and (ne $https_method "noredirect") (ne $hsts "off")) }}
-	add_header Strict-Transport-Security "{{ trim $hsts }}" always;
-	{{ end }}
+    location / {
+        {{ if eq $proto "uwsgi" }}
+        include uwsgi_params;
+        uwsgi_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        {{ else if eq $proto "fastcgi" }}
+        root   {{ trim $vhost_root }};
+        include fastcgi.conf;
+        fastcgi_pass {{ trim $upstream_name }};
+        {{ else }}
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        {{ end }}
 
-	{{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
-	include {{ printf "/etc/nginx/vhost.d/%s" $host }};
-	{{ else if (exists "/etc/nginx/vhost.d/default") }}
-	include /etc/nginx/vhost.d/default;
-	{{ end }}
-
-	location / {
-		{{ if eq $proto "uwsgi" }}
-		include uwsgi_params;
-		uwsgi_pass {{ trim $proto }}://{{ trim $upstream_name }};
-		{{ else if eq $proto "fastcgi" }}
-		root   {{ trim $vhost_root }};
-		include fastcgi.conf;
-		fastcgi_pass {{ trim $upstream_name }};
-		{{ else }}
-		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
-		{{ end }}
-
-		{{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
-		auth_basic	"Restricted {{ $host }}";
-		auth_basic_user_file	{{ (printf "/etc/nginx/htpasswd/%s" $host) }};
-		{{ end }}
-		{{ if (exists (printf "/etc/nginx/vhost.d/%s_location" $host)) }}
-		include {{ printf "/etc/nginx/vhost.d/%s_location" $host}};
-		{{ else if (exists "/etc/nginx/vhost.d/default_location") }}
-		include /etc/nginx/vhost.d/default_location;
-		{{ end }}
-	}
-	{{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
+        {{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
+        auth_basic	"Restricted {{ $host }}";
+        auth_basic_user_file	{{ (printf "/etc/nginx/htpasswd/%s" $host) }};
+        {{ end }}
+        {{ if (exists (printf "/etc/nginx/vhost.d/%s_location" $host)) }}
+        include {{ printf "/etc/nginx/vhost.d/%s_location" $host}};
+        {{ else if (exists "/etc/nginx/vhost.d/default_location") }}
+        include /etc/nginx/vhost.d/default_location;
+        {{ end }}
+    }
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
 {{ end }}
@@ -395,68 +399,69 @@ server {
 
 server {
     client_max_body_size 100M;
-	server_name {{ $host }};
-	listen 80 {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:80 {{ $default_server }};
-	{{ end }}
-    listen 10082 proxy_protocol {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:10082 proxy_protocol {{ $default_server }};
+    server_name {{ $host }};
+    listen 80 {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:80 {{- $default_server }};
     {{ end }}
-	access_log /var/log/nginx/access.log vhost;
-
+    {{ if eq $.Env.PROXY_PROTOCOL "true" }}
+    listen 10082 proxy_protocol {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:10082 proxy_protocol {{- $default_server }};
+    {{ end }}
     set_real_ip_from 172.16.0.0/12;
     real_ip_header proxy_protocol;
+    {{ end }}
+    access_log /var/log/nginx/access.log vhost;
 
-	{{ if eq $network_tag "internal" }}
-	# Only allow traffic from internal clients
-	include /etc/nginx/network_internal.conf;
-	{{ end }}
+    {{ if eq $network_tag "internal" }}
+    # Only allow traffic from internal clients
+    include /etc/nginx/network_internal.conf;
+    {{ end }}
 
-	{{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
-	include {{ printf "/etc/nginx/vhost.d/%s" $host }};
-	{{ else if (exists "/etc/nginx/vhost.d/default") }}
-	include /etc/nginx/vhost.d/default;
-	{{ end }}
+    {{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
+    include {{ printf "/etc/nginx/vhost.d/%s" $host }};
+    {{ else if (exists "/etc/nginx/vhost.d/default") }}
+    include /etc/nginx/vhost.d/default;
+    {{ end }}
 
-	location / {
-		{{ if eq $proto "uwsgi" }}
-		include uwsgi_params;
-		uwsgi_pass {{ trim $proto }}://{{ trim $upstream_name }};
-		{{ else if eq $proto "fastcgi" }}
-		root   {{ trim $vhost_root }};
-		include fastcgi.conf;
-		fastcgi_pass {{ trim $upstream_name }};
-		{{ else }}
-		proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
-		{{ end }}
-		{{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
-		auth_basic	"Restricted {{ $host }}";
-		auth_basic_user_file	{{ (printf "/etc/nginx/htpasswd/%s" $host) }};
-		{{ end }}
-		{{ if (exists (printf "/etc/nginx/vhost.d/%s_location" $host)) }}
-		include {{ printf "/etc/nginx/vhost.d/%s_location" $host}};
-		{{ else if (exists "/etc/nginx/vhost.d/default_location") }}
-		include /etc/nginx/vhost.d/default_location;
-		{{ end }}
-	}
-	{{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
+    location / {
+        {{ if eq $proto "uwsgi" }}
+        include uwsgi_params;
+        uwsgi_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        {{ else if eq $proto "fastcgi" }}
+        root   {{ trim $vhost_root }};
+        include fastcgi.conf;
+        fastcgi_pass {{ trim $upstream_name }};
+        {{ else }}
+        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
+        {{ end }}
+        {{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
+        auth_basic	"Restricted {{ $host }}";
+        auth_basic_user_file	{{ (printf "/etc/nginx/htpasswd/%s" $host) }};
+        {{ end }}
+        {{ if (exists (printf "/etc/nginx/vhost.d/%s_location" $host)) }}
+        include {{ printf "/etc/nginx/vhost.d/%s_location" $host}};
+        {{ else if (exists "/etc/nginx/vhost.d/default_location") }}
+        include /etc/nginx/vhost.d/default_location;
+        {{ end }}
+    }
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
 {{ if (and (not $is_https) (exists "/etc/nginx/certs/default.crt") (exists "/etc/nginx/certs/default.key")) }}
 server {
-	server_name {{ $host }};
-	listen 443 ssl {{ $default_server }};
-	{{ if $enable_ipv6 }}
-	listen [::]:443 ssl {{ $default_server }};
-	{{ end }}
+    server_name {{ $host }};
+    listen 443 ssl {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:443 ssl {{- $default_server }};
+    {{ end }}
     http2 on;
-	access_log /var/log/nginx/access.log vhost;
-	return 500;
+    access_log /var/log/nginx/access.log vhost;
+    return 500;
 
-	ssl_certificate /etc/nginx/certs/default.crt;
-	ssl_certificate_key /etc/nginx/certs/default.key;
+    ssl_certificate /etc/nginx/certs/default.crt;
+    ssl_certificate_key /etc/nginx/certs/default.key;
 }
 {{ end }}
 {{ end }}
