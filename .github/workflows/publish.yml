@@ -18,6 +18,47 @@ jobs:
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  demo:
+    needs: ci
+    name: demo
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: bitcart/bitcart-actions/actions/setup-python@master
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen --compile-bytecode
+
+      - name: Build demo
+        run: |
+          just build-demo
+          mkdir -p site
+          cp generator/demo/index.html site/
+          cp generator/demo/bitcart_compose_generator-*.whl site/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
   publish:
     needs: ci
     uses: bitcart/bitcart-actions/.github/workflows/build-docker-image.yml@master

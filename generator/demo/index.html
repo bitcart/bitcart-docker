@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bitcart Docker Compose Generator</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"></script>
+        <style>
+            .code-output {
+                font-family:
+                    "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
+                    "Source Code Pro", monospace;
+                font-size: 13px;
+                line-height: 1.6;
+            }
+            pre code.hljs {
+                background: transparent !important;
+                padding: 0 !important;
+            }
+            .hljs {
+                background: transparent !important;
+            }
+            .crypto-label:has(.crypto-checkbox:checked) {
+                border-color: rgb(59 130 246);
+                background-color: rgb(239 246 255);
+            }
+            .crypto-label:has(.crypto-checkbox:checked) .crypto-ticker {
+                color: rgb(37 99 235);
+            }
+            .crypto-label:has(.crypto-checkbox:checked) .crypto-dot {
+                background-color: rgb(59 130 246);
+            }
+            .crypto-dot {
+                transition: background-color 0.15s;
+            }
+            .status-loading {
+                background: rgb(255 251 235);
+                color: rgb(146 64 14);
+                border-color: rgb(253 230 138);
+            }
+            .status-ready {
+                background: rgb(240 253 244);
+                color: rgb(22 101 52);
+                border-color: rgb(187 247 208);
+            }
+            .status-working {
+                background: rgb(239 246 255);
+                color: rgb(30 64 175);
+                border-color: rgb(191 219 254);
+            }
+            .status-error {
+                background: rgb(254 242 242);
+                color: rgb(153 27 27);
+                border-color: rgb(254 202 202);
+            }
+            .dot-loading {
+                background: rgb(251 191 36);
+                animation: pulse 1.5s infinite;
+            }
+            .dot-ready {
+                background: rgb(34 197 94);
+                animation: none;
+            }
+            .dot-working {
+                background: rgb(96 165 250);
+                animation: pulse 1.5s infinite;
+            }
+            .dot-error {
+                background: rgb(239 68 68);
+                animation: none;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.4;
+                }
+            }
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: rgb(100 116 139);
+                border-radius: 3px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgb(71 85 105);
+            }
+        </style>
+    </head>
+    <body class="bg-slate-50 h-screen flex flex-col overflow-hidden">
+        <!-- Header -->
+        <header
+            class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between flex-shrink-0 z-10"
+        >
+            <div>
+                <h1 class="text-lg font-semibold text-slate-800 leading-tight">
+                    Bitcart Docker Compose Generator (Alpha)
+                </h1>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Configure your deployment and preview the generated
+                    docker-compose.yml
+                </p>
+            </div>
+            <div
+                id="status-badge"
+                class="status-loading flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors"
+            >
+                <span
+                    id="status-dot"
+                    class="w-2 h-2 rounded-full dot-loading flex-shrink-0"
+                ></span>
+                <span id="status-text">Loading Pyodide...</span>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Left Panel: Configuration -->
+            <div
+                class="w-96 flex-shrink-0 bg-white border-r border-slate-200 overflow-y-auto"
+            >
+                <div class="p-5 space-y-5">
+                    <!-- Installation -->
+                    <section>
+                        <h2
+                            class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3"
+                        >
+                            Installation
+                        </h2>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                    >Install Pack</label
+                                >
+                                <select
+                                    id="install-pack"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="all">
+                                        all (full stack)
+                                    </option>
+                                    <option value="backend">
+                                        backend only
+                                    </option>
+                                    <option value="frontend">
+                                        frontend only
+                                    </option>
+                                    <option value="none">none (custom)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                    >Reverse Proxy</label
+                                >
+                                <select
+                                    id="reverse-proxy"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="nginx-https">
+                                        nginx + HTTPS
+                                    </option>
+                                    <option value="nginx">nginx only</option>
+                                    <option value="none">none</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Host Settings -->
+                    <section>
+                        <h2
+                            class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3"
+                        >
+                            Host Settings
+                        </h2>
+                        <div class="space-y-3">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                >
+                                    Host
+                                    <span
+                                        class="text-slate-400 font-normal ml-1"
+                                        >BITCART_HOST</span
+                                    >
+                                </label>
+                                <input
+                                    type="text"
+                                    id="host"
+                                    placeholder="yourdomain.com"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                >
+                                    Admin Host
+                                    <span
+                                        class="text-slate-400 font-normal ml-1"
+                                        >BITCART_ADMIN_HOST</span
+                                    >
+                                </label>
+                                <input
+                                    type="text"
+                                    id="admin-host"
+                                    placeholder="admin.yourdomain.com (optional)"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                >
+                                    Store Host
+                                    <span
+                                        class="text-slate-400 font-normal ml-1"
+                                        >BITCART_STORE_HOST</span
+                                    >
+                                </label>
+                                <input
+                                    type="text"
+                                    id="store-host"
+                                    placeholder="store.yourdomain.com (optional)"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                >
+                                    Admin API URL
+                                    <span
+                                        class="text-slate-400 font-normal ml-1"
+                                        >BITCART_ADMIN_API_URL</span
+                                    >
+                                </label>
+                                <input
+                                    type="text"
+                                    id="admin-api-url"
+                                    placeholder="https://api.yourdomain.com (optional)"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                >
+                                    Store API URL
+                                    <span
+                                        class="text-slate-400 font-normal ml-1"
+                                        >BITCART_STORE_API_URL</span
+                                    >
+                                </label>
+                                <input
+                                    type="text"
+                                    id="store-api-url"
+                                    placeholder="https://api.yourdomain.com (optional)"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Cryptocurrencies -->
+                    <section>
+                        <h2
+                            class="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3"
+                        >
+                            Cryptocurrencies
+                        </h2>
+                        <div
+                            id="crypto-grid"
+                            class="grid grid-cols-2 gap-2"
+                        ></div>
+                        <p class="text-xs text-slate-400 mt-2">
+                            BITCART_CRYPTOS — at least one required
+                        </p>
+                    </section>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Advanced -->
+                    <section>
+                        <div class="flex items-center justify-between mb-3">
+                            <h2
+                                class="text-xs font-semibold text-slate-500 uppercase tracking-widest"
+                            >
+                                Advanced
+                            </h2>
+                            <button
+                                onclick="addEnvVar()"
+                                class="text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                            >
+                                + Add variable
+                            </button>
+                        </div>
+                        <div id="env-vars-list" class="space-y-2"></div>
+                        <p class="text-xs text-slate-400 mt-2">
+                            Any additional BITCART_* or REVERSEPROXY_*
+                            environment variables
+                        </p>
+                    </section>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Generate -->
+                    <button
+                        id="generate-btn"
+                        onclick="generate()"
+                        disabled
+                        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition-colors"
+                    >
+                        Generate docker-compose.yml
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Output -->
+            <div class="flex-1 flex flex-col bg-[#282c34] overflow-hidden">
+                <div
+                    class="flex items-center justify-between px-4 py-2.5 border-b border-[#3a3f4b] flex-shrink-0"
+                >
+                    <div class="flex items-center gap-2">
+                        <svg
+                            class="w-4 h-4 text-slate-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
+                        <span class="text-sm font-medium text-slate-400"
+                            >docker-compose.yml</span
+                        >
+                    </div>
+                    <button
+                        id="copy-btn"
+                        onclick="copyOutput()"
+                        class="text-xs font-medium text-slate-400 hover:text-slate-200 bg-[#3a3f4b] hover:bg-[#4a5060] px-3 py-1.5 rounded-md transition-colors"
+                    >
+                        Copy
+                    </button>
+                </div>
+                <div class="flex-1 overflow-auto p-5 code-output">
+                    <pre id="output" class="text-slate-500 text-sm italic">
+Output will appear here after clicking Generate.</pre
+                    >
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ─── Crypto metadata ───────────────────────────────────────────────────────
+
+            const CRYPTOS = [
+                { id: "btc", ticker: "BTC", name: "Bitcoin", checked: true },
+                { id: "ltc", ticker: "LTC", name: "Litecoin", checked: false },
+                {
+                    id: "bch",
+                    ticker: "BCH",
+                    name: "Bitcoin Cash",
+                    checked: false,
+                },
+                { id: "eth", ticker: "ETH", name: "Ethereum", checked: false },
+                { id: "bnb", ticker: "BNB", name: "BNB Chain", checked: false },
+                {
+                    id: "matic",
+                    ticker: "MATIC",
+                    name: "Polygon",
+                    checked: false,
+                },
+                { id: "trx", ticker: "TRX", name: "Tron", checked: false },
+                {
+                    id: "grs",
+                    ticker: "GRS",
+                    name: "Groestlcoin",
+                    checked: false,
+                },
+                { id: "xmr", ticker: "XMR", name: "Monero", checked: false },
+                { id: "xrg", ticker: "XRG", name: "Ergon", checked: false },
+            ];
+
+            // ─── Python runner ────────────────────────────────────────────────────────
+
+            const RUNNER_SETUP = `
+import os, json
+from generator import generate_config as _generate_config
+import yaml as _yaml
+
+def run_generator(env_json_str):
+    env_dict = json.loads(env_json_str)
+    for key in list(os.environ.keys()):
+        if key.startswith(('BITCART_', 'REVERSEPROXY_')):
+            del os.environ[key]
+    for key, value in env_dict.items():
+        os.environ[key] = str(value)
+    try:
+        data = _generate_config()
+        output = _yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        return json.dumps({'ok': True, 'output': output})
+    except Exception as e:
+        return json.dumps({'ok': False, 'error': str(e)})
+`;
+
+            // ─── State ────────────────────────────────────────────────────────────────
+
+            let pyodide = null;
+            let isReady = false;
+            let currentOutput = "";
+
+            // ─── UI helpers ───────────────────────────────────────────────────────────
+
+            function setStatus(text, type = "loading") {
+                const badge = document.getElementById("status-badge");
+                const dot = document.getElementById("status-dot");
+                const label = document.getElementById("status-text");
+                badge.className = `status-${type} flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors`;
+                dot.className = `w-2 h-2 rounded-full dot-${type} flex-shrink-0`;
+                label.textContent = text;
+            }
+
+            function setOutput(text, isError = false) {
+                const pre = document.getElementById("output");
+                currentOutput = text;
+                if (isError) {
+                    pre.innerHTML = "";
+                    pre.className =
+                        "text-red-400 text-sm whitespace-pre-wrap code-output";
+                    pre.textContent = text;
+                } else {
+                    pre.className = "code-output";
+                    const highlighted = hljs.highlight(text, {
+                        language: "yaml",
+                    }).value;
+                    pre.innerHTML = `<code class="hljs language-yaml">${highlighted}</code>`;
+                }
+            }
+
+            function setGenerateDisabled(disabled) {
+                document.getElementById("generate-btn").disabled = disabled;
+            }
+
+            // ─── Crypto checkboxes ───────────────────────────────────────────────────
+
+            function buildCryptoGrid() {
+                const grid = document.getElementById("crypto-grid");
+                grid.innerHTML = CRYPTOS.map(
+                    (c) => `
+        <label class="crypto-label flex items-center gap-2.5 border border-slate-200 rounded-lg px-3 py-2.5 cursor-pointer hover:border-slate-300 transition-colors select-none">
+          <input type="checkbox" value="${c.id}" class="crypto-checkbox sr-only" ${c.checked ? "checked" : ""}>
+          <span class="crypto-dot w-2 h-2 rounded-full bg-slate-300 flex-shrink-0"></span>
+          <span>
+            <span class="crypto-ticker block text-sm font-semibold text-slate-600">${c.ticker}</span>
+            <span class="block text-xs text-slate-400">${c.name}</span>
+          </span>
+        </label>
+      `,
+                ).join("");
+            }
+
+            // ─── Add advanced env var row ─────────────────────────────────────────────
+
+            function addEnvVar(key = "", value = "") {
+                const container = document.getElementById("env-vars-list");
+                const row = document.createElement("div");
+                row.className = "env-var-row flex gap-2 items-center";
+                row.innerHTML = `
+        <input type="text" placeholder="KEY" value="${key}"
+          class="env-key w-2/5 border border-slate-300 rounded-md px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <span class="text-slate-400 text-xs font-medium">=</span>
+        <input type="text" placeholder="value" value="${value}"
+          class="env-value flex-1 border border-slate-300 rounded-md px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500">
+        <button onclick="this.closest('.env-var-row').remove()"
+          class="text-slate-400 hover:text-red-500 text-sm leading-none transition-colors flex-shrink-0">✕</button>
+      `;
+                container.appendChild(row);
+            }
+
+            // ─── Collect env vars from form ───────────────────────────────────────────
+
+            function collectEnvVars() {
+                const vars = {};
+
+                // Installation
+                vars["BITCART_INSTALL"] =
+                    document.getElementById("install-pack").value;
+                vars["BITCART_REVERSEPROXY"] =
+                    document.getElementById("reverse-proxy").value;
+
+                // Hosts
+                const hostFields = [
+                    ["host", "BITCART_HOST"],
+                    ["admin-host", "BITCART_ADMIN_HOST"],
+                    ["store-host", "BITCART_STORE_HOST"],
+                    ["admin-api-url", "BITCART_ADMIN_API_URL"],
+                    ["store-api-url", "BITCART_STORE_API_URL"],
+                ];
+                for (const [id, envKey] of hostFields) {
+                    const val = document.getElementById(id).value.trim();
+                    if (val) vars[envKey] = val;
+                }
+
+                // Cryptos
+                const checked = [
+                    ...document.querySelectorAll(".crypto-checkbox:checked"),
+                ].map((cb) => cb.value);
+                if (checked.length > 0)
+                    vars["BITCART_CRYPTOS"] = checked.join(",");
+
+                // Advanced
+                for (const row of document.querySelectorAll(".env-var-row")) {
+                    const key = row.querySelector(".env-key").value.trim();
+                    const val = row.querySelector(".env-value").value.trim();
+                    if (key) vars[key] = val;
+                }
+
+                return vars;
+            }
+
+            // ─── Copy output ──────────────────────────────────────────────────────────
+
+            async function copyOutput() {
+                if (!currentOutput) return;
+                try {
+                    await navigator.clipboard.writeText(currentOutput);
+                    const btn = document.getElementById("copy-btn");
+                    btn.textContent = "Copied!";
+                    setTimeout(() => {
+                        btn.textContent = "Copy";
+                    }, 2000);
+                } catch {
+                    // Fallback: select the pre content
+                    const pre = document.getElementById("output");
+                    const range = document.createRange();
+                    range.selectNodeContents(pre);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                }
+            }
+
+            // ─── Generate ─────────────────────────────────────────────────────────────
+
+            async function generate() {
+                if (!isReady) return;
+                setGenerateDisabled(true);
+                setStatus("Generating...", "working");
+                try {
+                    const envVars = collectEnvVars();
+                    const runFn = pyodide.globals.get("run_generator");
+                    const resultJson = runFn(JSON.stringify(envVars));
+                    const result = JSON.parse(resultJson);
+                    if (result.ok) {
+                        setOutput(result.output);
+                        setStatus("Ready", "ready");
+                    } else {
+                        setOutput(result.error, true);
+                        setStatus("Error", "error");
+                    }
+                } catch (err) {
+                    setOutput(`Unexpected error: ${err.message}`, true);
+                    setStatus("Error", "error");
+                } finally {
+                    setGenerateDisabled(false);
+                }
+            }
+
+            // ─── Init ─────────────────────────────────────────────────────────────────
+
+            async function init() {
+                try {
+                    setStatus("Loading Pyodide…", "loading");
+                    pyodide = await loadPyodide();
+
+                    setStatus("Loading packages…", "loading");
+                    await pyodide.loadPackage(["pyyaml", "micropip"]);
+
+                    setStatus("Installing generator…", "loading");
+                    const micropip = pyodide.pyimport("micropip");
+                    const wheelUrl = new URL(
+                        "./bitcart_compose_generator-1.0.0-py3-none-any.whl",
+                        window.location.href,
+                    ).href;
+                    await micropip.install(wheelUrl);
+
+                    setStatus("Initializing…", "loading");
+                    pyodide.runPython(RUNNER_SETUP);
+
+                    isReady = true;
+                    setStatus("Ready", "ready");
+                    setGenerateDisabled(false);
+
+                    // Auto-generate with defaults
+                    await generate();
+                } catch (err) {
+                    console.error(err);
+                    setStatus("Failed to load", "error");
+                    setOutput(`Initialization error: ${err.message}`, true);
+                }
+            }
+
+            // ─── Bootstrap ────────────────────────────────────────────────────────────
+
+            buildCryptoGrid();
+            init();
+        </script>
+    </body>
+</html>

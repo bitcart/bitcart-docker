@@ -101,6 +101,14 @@ Here is a complete list of configuration settings:
 | TOR_RELAY_NICKNAME            | If tor relay is activated, the relay nickname                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | :x:         | Extension |
 | TOR_RELAY_EMAIL               | If tor relay is activated, the email for Tor to contact you regarding your relay                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | :x:         | Extension |
 
+## docker-compose.yml generator
+
+You can preview and generate a `docker-compose.yml` for your configuration at [generator.bitcart.ai](https://generator.bitcart.ai).
+
+It lets you pick components and environment variables in the browser and download the resulting compose file.
+
+> **Note:** Using this repository directly is the recommended approach. It manages much more than a plain compose file — including persisting your environment settings, backing up and restoring your database and Docker volumes, and regenerating the compose file dynamically whenever your configuration changes. The web generator is useful for previewing or one-off manual setups.
+
 ## Live demo
 
 We have live demo available at:

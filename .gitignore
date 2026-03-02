@@ -15,3 +15,5 @@ venv/
 compose/plugins/*
 !compose/plugins/.gitkeep
 .prettiercache
+.DS_Store
+generator/demo/*.whl

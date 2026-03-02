@@ -1,3 +1,14 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+exclude = ["demo", "tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+sources = { "." = "generator" }
+
 [project]
 name = "bitcart-compose-generator"
 version = "1.0.0"
@@ -40,6 +51,7 @@ mccabe = { max-complexity = 12 }
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S"]
+"demo/*" = ["S"]
 
 [tool.pytest.ini_options]
 junit_duration_report = "call"

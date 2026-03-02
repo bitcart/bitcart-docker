@@ -35,3 +35,13 @@ ci-lint: lint-check
 # run ci checks
 [group("CI")]
 ci *args: ci-lint (test args)
+
+# build the demo wheel
+[group("Demo")]
+build-demo:
+    @python3 generator/demo/build.py
+
+# serve the demo
+[group("Demo")]
+serve-demo: build-demo
+    @python3 -m http.server --directory generator/demo -b 127.0.0.1 8080
