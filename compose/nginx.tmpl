@@ -107,6 +107,7 @@ map $http_x_forwarded_host $proxy_x_forwarded_host {
 map $http_x_forwarded_port $proxy_x_forwarded_port {
     default $http_x_forwarded_port;
     '' $server_port;
+}
 
 # Include the port in the Host header sent to the container if it is non-standard
 map $server_port $host_port {
