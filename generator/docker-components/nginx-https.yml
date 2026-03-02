@@ -1,4 +1,8 @@
 services:
+  nginx-gen:
+    environment:
+      HTTPS_ENABLED: "true"
+
   nginx-https:
     restart: unless-stopped
     image: nginxproxy/acme-companion:2.1
