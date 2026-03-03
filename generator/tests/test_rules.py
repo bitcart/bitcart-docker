@@ -6,7 +6,9 @@ from generator.generator import generate_config
 
 from .utils import delete_env, set_env
 
-CLOUDFLARE_IPS_SAMPLE = "103.21.244.0/22\n103.22.200.0/22\n103.31.4.0/22"
+CLOUDFLARE_IPS_V4_SAMPLE = "103.21.244.0/22\n103.22.200.0/22\n103.31.4.0/22"
+CLOUDFLARE_IPS_V6_SAMPLE = "2400:cb00::/32\n2606:4700::/32"
+CLOUDFLARE_IPS_COMBINED = "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,2400:cb00::/32,2606:4700::/32"
 
 
 # Rule 1
@@ -275,9 +277,9 @@ def test_trusted_ips_unknown_preset():
 def test_trusted_ips_cloudflare_preset():
     module = get_trusted_ips_module()
     set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
-    with patch.object(module, "fetch", new=AsyncMock(return_value=CLOUDFLARE_IPS_SAMPLE)):
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
         services = generate_config()["services"]
-    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22"
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == CLOUDFLARE_IPS_COMBINED
     delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
 
 
@@ -285,8 +287,8 @@ def test_trusted_ips_preset_with_custom():
     module = get_trusted_ips_module()
     set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
     set_env("REVERSEPROXY_TRUSTED_IPS", "10.0.0.0/8", prefix="")
-    with patch.object(module, "fetch", new=AsyncMock(return_value=CLOUDFLARE_IPS_SAMPLE)):
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
         services = generate_config()["services"]
-    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,10.0.0.0/8"
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == f"{CLOUDFLARE_IPS_COMBINED},10.0.0.0/8"
     delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
     delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")

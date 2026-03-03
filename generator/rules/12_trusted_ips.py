@@ -5,7 +5,10 @@ import aiohttp
 from generator.utils import env, modify_key
 
 PRESET_URLS = {
-    "cloudflare": "https://www.cloudflare.com/ips-v4",
+    "cloudflare": [
+        "https://www.cloudflare.com/ips-v4",
+        "https://www.cloudflare.com/ips-v6",
+    ],
 }
 
 
@@ -20,11 +23,16 @@ def rule(services, settings):
         return
     if not services.get("nginx-gen"):  # pragma: no cover
         return
-    url = PRESET_URLS.get(preset)
-    if not url:
+    urls = PRESET_URLS.get(preset)
+    if not urls:
         return
-    fetched = asyncio.run(fetch(url)).strip()
-    preset_ips = ",".join(line.strip() for line in fetched.splitlines() if line.strip())
+
+    async def fetch_all():
+        return await asyncio.gather(*[fetch(url) for url in urls])
+
+    results = asyncio.run(fetch_all())
+    all_ips = [line.strip() for text in results for line in text.splitlines() if line.strip()]
+    preset_ips = ",".join(all_ips)
     trusted_ips = env("REVERSEPROXY_TRUSTED_IPS", prefix="")
     combined = f"{preset_ips},{trusted_ips}" if trusted_ips else preset_ips
     with modify_key(services, "nginx-gen", "environment") as environment:
