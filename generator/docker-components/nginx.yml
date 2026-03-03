@@ -17,6 +17,7 @@ services:
     environment:
       DEFAULT_HOST: ${REVERSEPROXY_DEFAULT_HOST:-none}
       PROXY_PROTOCOL: ${REVERSEPROXY_PROXYPROTOCOL:-false}
+      TRUSTED_IPS: ${REVERSEPROXY_TRUSTED_IPS:-}
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"

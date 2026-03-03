@@ -1,7 +1,12 @@
+import sys
+from unittest.mock import AsyncMock, patch
+
 from generator.constants import CRYPTO_COMPONENTS, HOST_COMPONENTS, TOR_CRYPTOS
 from generator.generator import generate_config
 
 from .utils import delete_env, set_env
+
+CLOUDFLARE_IPS_SAMPLE = "103.21.244.0/22\n103.22.200.0/22\n103.31.4.0/22"
 
 
 # Rule 1
@@ -248,3 +253,40 @@ def test_proxyprotocol_rule():
     assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" in services["nginx"]["ports"]
     # Cleanup
     delete_env("REVERSEPROXY_PROXYPROTOCOL", prefix="")
+
+
+# Rule 12: trusted IPs
+def get_trusted_ips_module():
+    return sys.modules["generator.rules.12_trusted_ips"]
+
+
+def test_trusted_ips_no_preset():
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "${REVERSEPROXY_TRUSTED_IPS:-}"
+
+
+def test_trusted_ips_unknown_preset():
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "unknown", prefix="")
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "${REVERSEPROXY_TRUSTED_IPS:-}"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+
+
+def test_trusted_ips_cloudflare_preset():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(return_value=CLOUDFLARE_IPS_SAMPLE)):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+
+
+def test_trusted_ips_preset_with_custom():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_IPS", "10.0.0.0/8", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(return_value=CLOUDFLARE_IPS_SAMPLE)):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,10.0.0.0/8"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")

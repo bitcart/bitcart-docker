@@ -15,7 +15,7 @@ name = "bitcart-compose-generator"
 version = "1.0.0"
 description = "Generate docker compose files based on env variables"
 requires-python = ">=3.12"
-dependencies = ["oyaml"]
+dependencies = ["oyaml", "aiohttp"]
 
 [dependency-groups]
 lint = ["prek", "ruff"]

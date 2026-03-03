@@ -341,6 +341,11 @@ server {
     set_real_ip_from 172.16.0.0/12;
     real_ip_header proxy_protocol;
     {{ end }}
+    {{ if $.Env.TRUSTED_IPS }}
+    {{ range $ip := splitList "," $.Env.TRUSTED_IPS }}
+    set_real_ip_from {{ trim $ip }};
+    {{ end }}
+    {{ end }}
     http2 on;
     access_log /var/log/nginx/access.log vhost;
 
@@ -411,6 +416,11 @@ server {
     {{ end }}
     set_real_ip_from 172.16.0.0/12;
     real_ip_header proxy_protocol;
+    {{ end }}
+    {{ if $.Env.TRUSTED_IPS }}
+    {{ range $ip := splitList "," $.Env.TRUSTED_IPS }}
+    set_real_ip_from {{ trim $ip }};
+    {{ end }}
     {{ end }}
     access_log /var/log/nginx/access.log vhost;
 
