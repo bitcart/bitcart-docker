@@ -98,8 +98,10 @@
 
 geo {{ if (eq $.Env.PROXY_PROTOCOL "true") }}$proxy_protocol_addr{{ else }}$realip_remote_addr{{ end }} $connecting_addr_trusted {
     default 0;
+    {{ if $.Env.TRUSTED_IPS }}
     {{ range $ip := splitList "," $.Env.TRUSTED_IPS }}
     {{ trim $ip }} 1;
+    {{ end }}
     {{ end }}
 }
 
