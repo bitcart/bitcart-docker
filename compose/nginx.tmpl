@@ -1,26 +1,9 @@
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
-{{ define "upstream" }}
-    {{ if .Address }}
-        {{/* If we got the containers from swarm and this container's port is published to host, use host IP:PORT */}}
-        {{ if and .Container.Node.ID .Address.HostPort }}
-    # {{ .Container.Node.Name }}/{{ .Container.Name }}
-    server {{ .Container.Node.Address.IP }}:{{ .Address.HostPort }};
-        {{/* If there is no swarm node or the port is not published on host, use container's IP:PORT */}}
-        {{ else if .Network }}
-    # {{ .Container.Name }}
-    server {{ .Network.IP }}:{{ .Address.Port }};
-        {{ end }}
-    {{ else if .Network }}
-    # {{ .Container.Name }}
-        {{ if .Network.IP }}
-    server {{ .Network.IP }} down;
-        {{ else }}
-    server 127.0.0.1 down;
-        {{ end }}
-    {{ end }}
-
+{{ define "access_log" }}
+    access_log /var/log/nginx/access.log vhost;
 {{ end }}
+
 {{ define "redirects" }}
     {{ range $container := $.Containers }}
         {{ if $container.Env.REAL_IP_HEADER }}
@@ -113,15 +96,15 @@
     real_ip_recursive on;
 {{ end }}
 
-{{ if and $.Env.TRUSTED_IPS (eq $.Env.PROXY_PROTOCOL "true") }}
-geo $proxy_protocol_addr $proxy_protocol_addr_trusted {
+geo {{ if (eq $.Env.PROXY_PROTOCOL "true") }}$proxy_protocol_addr{{ else }}$realip_remote_addr{{ end }} $connecting_addr_trusted {
     default 0;
     {{ range $ip := splitList "," $.Env.TRUSTED_IPS }}
     {{ trim $ip }} 1;
     {{ end }}
 }
 
-map $proxy_protocol_addr_trusted $forwarded_for_proxy_protocol {
+{{ if and $.Env.TRUSTED_IPS (eq $.Env.PROXY_PROTOCOL "true") }}
+map $connecting_addr_trusted $forwarded_for_proxy_protocol {
     default $proxy_protocol_addr;
     1 $http_x_forwarded_for;
 }
@@ -133,21 +116,38 @@ more_set_input_headers "X-Forwarded-For-Proxy-Protocol: $forwarded_for_proxy_pro
 
 # If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
 # scheme used to connect to this server
-map $http_x_forwarded_proto $proxy_x_forwarded_proto {
+map $http_x_forwarded_proto $forwarded_proto_or_scheme {
     default $http_x_forwarded_proto;
     '' $scheme;
 }
 
-map $http_x_forwarded_host $proxy_x_forwarded_host {
+map $connecting_addr_trusted $proxy_x_forwarded_proto {
+    default $scheme;
+    1 $forwarded_proto_or_scheme;
+}
+
+map $http_x_forwarded_host $forwarded_host_or_host {
     default $http_x_forwarded_host;
     '' $host;
 }
 
+map $connecting_addr_trusted $proxy_x_forwarded_host {
+    default $host;
+    1 $forwarded_host_or_host;
+}
+
 # If we receive X-Forwarded-Port, pass it through; otherwise, pass along the
 # server port the client connected to
-map $http_x_forwarded_port $proxy_x_forwarded_port {
+{{ $fallback_port := "server_port" }}
+{{ if (eq $.Env.PROXY_PROTOCOL "true") }}{{ $fallback_port = "proxy_protocol_server_port" }}{{ end }}
+map $http_x_forwarded_port $forwarded_port_or_server_port {
     default $http_x_forwarded_port;
-    '' $server_port;
+    '' ${{ $fallback_port }};
+}
+
+map $connecting_addr_trusted $proxy_x_forwarded_port {
+    default ${{ $fallback_port }};
+    1 $forwarded_port_or_server_port;
 }
 
 # Include the port in the Host header sent to the container if it is non-standard
@@ -157,11 +157,24 @@ map $server_port $host_port {
     443 '';
 }
 
-# If we receive Upgrade, set Connection to "upgrade"; otherwise, delete any
-# Connection header that may have been passed to this server
+# If the request from the downstream client has an "Upgrade:" header (set to any
+# non-empty value), pass "Connection: upgrade" to the upstream (backend) server.
+# Otherwise, the value for the "Connection" header depends on whether the user
+# has enabled keepalive to the upstream server.
 map $http_upgrade $proxy_connection {
     default upgrade;
-    '' close;
+    '' $proxy_connection_noupgrade;
+}
+
+map $upstream_keepalive $proxy_connection_noupgrade {
+    # Preserve nginx's default behavior (send "Connection: close").
+    default close;
+    # Use an empty string to cancel nginx's default behavior.
+    true '';
+}
+
+map "" $upstream_keepalive {
+    default true;
 }
 
 # Apply fix for very long server names
@@ -187,9 +200,15 @@ gzip_vary on;
 gzip_proxied any;
 gzip_types text/plain text/css application/javascript application/json text/xml application/xml application/xml+rss image/svg+xml;
 
-log_format vhost '$host $remote_addr - $remote_user [$time_local] '
-                 '"$request" $status $body_bytes_sent '
-                 '"$http_referer" "$http_user_agent"';
+{{- $logEscape := $.Env.LOG_FORMAT_ESCAPE | default "default" | printf "escape=%s" }}
+{{- $logFormat := $.Env.LOG_FORMAT | default `$host $remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" "$upstream_addr"` }}
+
+{{- if $.Env.LOG_JSON }}
+    {{- $logEscape = $.Env.LOG_FORMAT_ESCAPE | default "json" | printf "escape=%s" }}
+    {{- $logFormat = $.Env.LOG_FORMAT | default `{"time_local":"$time_iso8601","client_ip":"$http_x_forwarded_for","remote_addr":"$remote_addr","request":"$request","status":"$status","body_bytes_sent":"$body_bytes_sent","request_time":"$request_time","upstream_response_time":"$upstream_response_time","upstream_addr":"$upstream_addr","http_referrer":"$http_referer","http_user_agent":"$http_user_agent","request_id":"$request_id"}` }}
+{{- end }}
+
+log_format vhost {{ $logEscape }} '{{ $logFormat }}';
 
 access_log off;
 
@@ -221,22 +240,42 @@ proxy_set_header Proxy "";
 {{ end }}
 
 {{ $enable_ipv6 := eq (or ($.Env.ENABLE_IPV6) "") "true" }}
+{{ $allVirtualHosts := groupByMulti $ "Env.VIRTUAL_HOST" "," }}
+{{ $firstUpstreamName := "" }}
+{{ $firstHostName := "" }}
+{{ range $hn, $cs := groupByMulti $ "Env.VIRTUAL_HOST_NAME" "," }}
+    {{ if eq $firstUpstreamName "" }}
+        {{ $firstUpstreamName = trim $hn }}
+        {{ $firstHostName = trim $hn }}
+    {{ end }}
+{{ end }}
 
-{{ if (and (exists "/etc/nginx/certs/default.crt") (exists "/etc/nginx/certs/default.key")) }}
 server {
-    server_name _; # This is just an invalid value which will never trigger on a real hostname.
+    client_max_body_size 100M;
+    server_name _;
+    listen 80;
+    {{ if $enable_ipv6 }}
+    listen [::]:80;
+    {{ end }}
     listen 443 ssl;
     {{ if $enable_ipv6 }}
     listen [::]:443 ssl;
     {{ end }}
-    http2 on;
-    access_log /var/log/nginx/access.log vhost;
-    return 503;
-
-    ssl_certificate /etc/nginx/certs/default.crt;
-    ssl_certificate_key /etc/nginx/certs/default.key;
+    ssl_reject_handshake on;
+    {{ template "access_log" }}
+    {{ if eq (len $allVirtualHosts) 1 }}
+    location / {
+        proxy_pass http://{{ trim $firstUpstreamName }};
+    }
+    {{ template "redirects" (dict "HostName" $firstHostName "Containers" $) }}
+    {{ else }}
+    location ^~ / {
+        return 503;
+    }
+    {{ end }}
 }
-{{ end }}
+
+
 
 {{ range $host_name, $containers := groupByMulti $ "Env.VIRTUAL_HOST_NAME" "," }}
 
@@ -245,30 +284,81 @@ server {
 
 upstream {{ $upstream_name }} {
 
+{{ $servers := 0 }}
+
 {{ range $container := $containers }}
     {{ $addrLen := len $container.Addresses }}
 
-    {{ range $knownNetwork := $CurrentContainer.Networks }}
-        {{ range $containerNetwork := $container.Networks }}
-            {{ if (and (ne $containerNetwork.Name "ingress") (or (eq $knownNetwork.Name $containerNetwork.Name) (eq $knownNetwork.Name "host"))) }}
-    ## Can be connected with "{{ $containerNetwork.Name }}" network
+    {{ $ip := "" }}
+    {{ range $containerNetwork := sortObjectsByKeysAsc $container.Networks "Name" }}
+        {{ if eq $containerNetwork.Name "ingress" }}
+    # {{ $container.Name }}: skipping ingress network
+            {{ continue }}
+        {{ end }}
 
-                {{/* If only 1 port exposed, use that */}}
-                {{ if eq $addrLen 1 }}
-                    {{ $address := index $container.Addresses 0 }}
-                    {{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
-                {{/* If more than one port exposed, use the one matching VIRTUAL_PORT env var, falling back to standard web port 80 */}}
-                {{ else }}
-                    {{ $port := coalesce $container.Env.VIRTUAL_PORT "80" }}
-                    {{ $address := where $container.Addresses "Port" $port | first }}
-                    {{ template "upstream" (dict "Container" $container "Address" $address "Network" $containerNetwork) }}
+        {{ if eq $containerNetwork.Name "host" }}
+            {{ if (where $CurrentContainer.Networks "Name" "host" | first) }}
+    # {{ $container.Name }}: both proxy and container in host mode, using 127.0.0.1
+                {{ $ip = "127.0.0.1" }}
+                {{ continue }}
+            {{ end }}
+            {{ range $proxyNetwork := sortObjectsByKeysAsc $CurrentContainer.Networks "Name" }}
+                {{ if and $proxyNetwork $proxyNetwork.Gateway (not $proxyNetwork.Internal) }}
+    # {{ $container.Name }}: container in host mode, using gateway {{ $proxyNetwork.Gateway }}
+                    {{ $ip = $proxyNetwork.Gateway }}
+                    {{ break }}
                 {{ end }}
+            {{ end }}
+            {{ if $ip }}
+                {{ continue }}
+            {{ end }}
+        {{ end }}
+
+        {{ $proxyInHost := where $CurrentContainer.Networks "Name" "host" | first }}
+        {{ $sharedNetwork := where $CurrentContainer.Networks "Name" $containerNetwork.Name | first }}
+        {{ if and (not $sharedNetwork) (not $proxyInHost) }}
+    # {{ $container.Name }}: {{ $containerNetwork.Name }} (unreachable)
+            {{ continue }}
+        {{ end }}
+
+        {{ if $ip }}
+    # {{ $container.Name }}: {{ $containerNetwork.Name }} (reachable but redundant, skipped)
+            {{ continue }}
+        {{ end }}
+
+        {{ if and $containerNetwork $containerNetwork.IP }}
+    # {{ $container.Name }}: using {{ $containerNetwork.Name }} network
+            {{ $ip = $containerNetwork.IP }}
+        {{ else }}
+    # {{ $container.Name }}: {{ $containerNetwork.Name }} has no IP!
+        {{ end }}
+    {{ end }}
+
+    {{ if $ip }}
+        {{ if eq $addrLen 1 }}
+            {{ $address := index $container.Addresses 0 }}
+            {{ $servers = add1 $servers }}
+    server {{ $ip }}:{{ $address.Port }};
+        {{ else }}
+            {{ $port := coalesce $container.Env.VIRTUAL_PORT "80" }}
+            {{ $address := where $container.Addresses "Port" $port | first }}
+            {{ $servers = add1 $servers }}
+            {{ if $address }}
+    server {{ $ip }}:{{ $address.Port }};
             {{ else }}
-    # Cannot connect to network of this container
-    server 127.0.0.1 down;
+    server {{ $ip }}:{{ $port }};
             {{ end }}
         {{ end }}
     {{ end }}
+{{ end }}
+
+{{ if lt $servers 1 }}
+    # No reachable servers — fallback entry
+    server 127.0.0.1 down;
+{{ end }}
+
+{{ if (gt $servers 0) }}
+    keepalive {{ mul $servers 2 }};
 {{ end }}
 }
 
@@ -281,7 +371,7 @@ server {
     client_max_body_size 100M;
     server_name {{ trim $onionHost }};
     listen 80;
-    access_log /var/log/nginx/access.log vhost;
+    {{ template "access_log" }}
     {{ if (exists "/etc/nginx/vhost.d/default") }}
     include /etc/nginx/vhost.d/default;
     {{ end }}
@@ -304,9 +394,6 @@ server {
 
 {{/* Get the NETWORK_ACCESS defined by containers w/ the same vhost, falling back to "external" */}}
 {{ $network_tag := or (first (groupByKeys $containers "Env.NETWORK_ACCESS")) "external" }}
-
-{{/* Get the HTTPS_METHOD defined by containers w/ the same vhost, falling back to "redirect" */}}
-{{ $https_method := or (first (groupByKeys $containers "Env.HTTPS_METHOD")) "redirect" }}
 
 {{/* Get the SSL_POLICY defined by containers w/ the same vhost, falling back to "Mozilla-Intermediate" */}}
 {{ $ssl_policy := or (first (groupByKeys $containers "Env.SSL_POLICY")) "Mozilla-Intermediate" }}
@@ -331,25 +418,11 @@ server {
 {{/* Use the cert specified on the container or fallback to the best vhost match */}}
 {{ $cert := (coalesce $certName $vhostCert) }}
 
-{{ $is_https := (and (ne $https_method "nohttps") (ne $cert "") (exists (printf "/etc/nginx/certs/%s.crt" $cert)) (exists (printf "/etc/nginx/certs/%s.key" $cert)) (eq $.Env.HTTPS_ENABLED "true")) }}
+{{ $cert_ok := (and (ne $cert "") (exists (printf "/etc/nginx/certs/%s.crt" $cert)) (exists (printf "/etc/nginx/certs/%s.key" $cert))) }}
 
-server {
-    client_max_body_size 100M;
-    server_name _;
-    listen 80;
-    {{ if $enable_ipv6 }}
-    listen [::]:80;
-    {{ end }}
-    access_log /var/log/nginx/access.log vhost;
-    location / {
-        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
-    }
-    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
-}
+{{ $is_https := (eq $.Env.HTTPS_ENABLED "true") }}
 
 {{ if $is_https }}
-
-{{ if eq $https_method "redirect" }}
 server {
     server_name {{ $host }};
     listen 80 {{- $default_server }};
@@ -362,28 +435,51 @@ server {
     listen [::]:10082 proxy_protocol {{- $default_server }};
     {{ end }}
     {{ end }}
-    access_log /var/log/nginx/access.log vhost;
-    return 301 https://$host$request_uri;
+    {{ template "access_log" }}
+
+    location ^~ /.well-known/acme-challenge/ {
+        auth_basic off;
+        auth_request off;
+        allow all;
+        root /usr/share/nginx/html;
+        try_files $uri =404;
+        break;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
 }
 {{ end }}
 
 server {
     client_max_body_size 100M;
     server_name {{ $host }};
+    {{ if $is_https }}
     listen 443 ssl {{- $default_server }};
     {{ if $enable_ipv6 }}
     listen [::]:443 ssl {{- $default_server }};
     {{ end }}
-
     {{ template "real_ip_policy" (dict "Env" $.Env "default_server" $default_server "ssl" " ssl" "enable_ipv6" $enable_ipv6) }}
-
     http2 on;
-    access_log /var/log/nginx/access.log vhost;
+    {{ else }}
+    listen 80 {{- $default_server }};
+    {{ if $enable_ipv6 }}
+    listen [::]:80 {{- $default_server }};
+    {{ end }}
+    {{ template "real_ip_policy" (dict "Env" $.Env "default_server" $default_server "ssl" "" "enable_ipv6" $enable_ipv6) }}
+    {{ end }}
+    {{ template "access_log" }}
 
     {{ if eq $network_tag "internal" }}
     # Only allow traffic from internal clients
     include /etc/nginx/network_internal.conf;
     {{ end }}
+
+    {{ if $is_https }}
+    {{ if not $cert_ok }}
+    ssl_reject_handshake on;
+    {{ else }}
 
     {{ template "ssl_policy" (dict "ssl_policy" $ssl_policy) }}
 
@@ -394,59 +490,11 @@ server {
     ssl_dhparam {{ printf "/etc/nginx/certs/%s.dhparam.pem" $cert }};
     {{ end }}
 
-    {{ if (and (ne $https_method "noredirect") (ne $hsts "off")) }}
+    {{ if (ne $hsts "off") }}
     add_header Strict-Transport-Security "{{ trim $hsts }}" always;
     {{ end }}
 
-    {{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
-    include {{ printf "/etc/nginx/vhost.d/%s" $host }};
-    {{ else if (exists "/etc/nginx/vhost.d/default") }}
-    include /etc/nginx/vhost.d/default;
     {{ end }}
-
-    location / {
-        {{ if eq $proto "uwsgi" }}
-        include uwsgi_params;
-        uwsgi_pass {{ trim $proto }}://{{ trim $upstream_name }};
-        {{ else if eq $proto "fastcgi" }}
-        root   {{ trim $vhost_root }};
-        include fastcgi.conf;
-        fastcgi_pass {{ trim $upstream_name }};
-        {{ else }}
-        proxy_pass {{ trim $proto }}://{{ trim $upstream_name }};
-        {{ end }}
-
-        {{ if (exists (printf "/etc/nginx/htpasswd/%s" $host)) }}
-        auth_basic	"Restricted {{ $host }}";
-        auth_basic_user_file	{{ (printf "/etc/nginx/htpasswd/%s" $host) }};
-        {{ end }}
-        {{ if (exists (printf "/etc/nginx/vhost.d/%s_location" $host)) }}
-        include {{ printf "/etc/nginx/vhost.d/%s_location" $host}};
-        {{ else if (exists "/etc/nginx/vhost.d/default_location") }}
-        include /etc/nginx/vhost.d/default_location;
-        {{ end }}
-    }
-    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
-}
-
-{{ end }}
-
-{{ if or (not $is_https) (eq $https_method "noredirect") }}
-
-server {
-    client_max_body_size 100M;
-    server_name {{ $host }};
-    listen 80 {{- $default_server }};
-    {{ if $enable_ipv6 }}
-    listen [::]:80 {{- $default_server }};
-    {{ end }}
-    {{ template "real_ip_policy" (dict "Env" $.Env "default_server" $default_server "ssl" "" "enable_ipv6" $enable_ipv6) }}
-
-    access_log /var/log/nginx/access.log vhost;
-
-    {{ if eq $network_tag "internal" }}
-    # Only allow traffic from internal clients
-    include /etc/nginx/network_internal.conf;
     {{ end }}
 
     {{ if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
@@ -479,22 +527,6 @@ server {
     {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
 }
 
-{{ if (and (not $is_https) (exists "/etc/nginx/certs/default.crt") (exists "/etc/nginx/certs/default.key")) }}
-server {
-    server_name {{ $host }};
-    listen 443 ssl {{- $default_server }};
-    {{ if $enable_ipv6 }}
-    listen [::]:443 ssl {{- $default_server }};
-    {{ end }}
-    http2 on;
-    access_log /var/log/nginx/access.log vhost;
-    return 500;
-
-    ssl_certificate /etc/nginx/certs/default.crt;
-    ssl_certificate_key /etc/nginx/certs/default.key;
-}
-{{ end }}
-{{ end }}
 {{ end }}
 {{ end }}
 {{ end }}
