@@ -243,10 +243,10 @@ proxy_set_header Proxy "";
 {{ $allVirtualHosts := groupByMulti $ "Env.VIRTUAL_HOST" "," }}
 {{ $firstUpstreamName := "" }}
 {{ $firstHostName := "" }}
-{{ range $hn, $cs := groupByMulti $ "Env.VIRTUAL_HOST_NAME" "," }}
+{{ range $vh, $cs := $allVirtualHosts }}
     {{ if eq $firstUpstreamName "" }}
-        {{ $firstUpstreamName = trim $hn }}
-        {{ $firstHostName = trim $hn }}
+        {{ $firstUpstreamName = trim (or (first (groupByKeys $cs "Env.VIRTUAL_HOST_NAME")) "") }}
+        {{ $firstHostName = $firstUpstreamName }}
     {{ end }}
 {{ end }}
 
