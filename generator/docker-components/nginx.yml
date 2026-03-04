@@ -7,9 +7,9 @@ services:
       - "${REVERSEPROXY_HTTPS_PORT:-443}:443"
     volumes:
       - "nginx_conf:/etc/nginx/conf.d"
-      - "nginx_vhost:/etc/nginx/vhost.d"
       - "nginx_html:/usr/share/nginx/html"
       - "nginx_certs:/etc/nginx/certs:ro"
+      - "nginx_vhost:/etc/nginx/vhost.d"
 
   nginx-gen:
     restart: unless-stopped
@@ -18,13 +18,14 @@ services:
       DEFAULT_HOST: ${REVERSEPROXY_DEFAULT_HOST:-none}
       PROXY_PROTOCOL: ${REVERSEPROXY_PROXYPROTOCOL:-false}
       TRUSTED_IPS: ${REVERSEPROXY_TRUSTED_IPS:-}
+      TRUSTED_HEADERS: ${REVERSEPROXY_TRUSTED_HEADERS:-}
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
       - "nginx_conf:/etc/nginx/conf.d"
-      - "nginx_vhost:/etc/nginx/vhost.d"
       - "nginx_html:/usr/share/nginx/html"
       - "nginx_certs:/etc/nginx/certs:ro"
+      - "nginx_vhost:/etc/nginx/vhost.d"
     entrypoint: /usr/local/bin/docker-gen -filter-network $<DEPLOYENT_NAME>?_default -notify-sighup $<DEPLOYENT_NAME>?-nginx-1 -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
     links:
       - nginx
