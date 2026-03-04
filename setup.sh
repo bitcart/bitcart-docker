@@ -22,8 +22,8 @@ This script must be run as root, except on Mac OS
     Available presets:
       cloudflare          Bitcart runs behind cloudflare directly
       cloudflare-proxied  Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
-      proxied             Bitcart is behind a reverse proxy, and not behind cloudflare
-      proxied-legacy      Bitcart is behind a reverse proxy that does not support proxyprotocol, and not behind cloudflare
+      proxied             Bitcart is behind a reverse proxy that is not cloudflare (requires PROXY protocol)
+      proxied-legacy      Bitcart is behind a reverse proxy that is not cloudflare (requires X-Forwarded-For HTTP header)
 This script will:
 * Install Docker
 * Install Docker-Compose
@@ -176,10 +176,11 @@ proxied)
 proxied-legacy)
     unset REVERSEPROXY_TRUSTED_IPS_PRESET
     unset REVERSEPROXY_PROXYPROTOCOL
-    BITCART_REVERSEPROXY=nginx-https
+    BITCART_REVERSEPROXY=nginx
     REVERSEPROXY_HTTP_PORT=10080
     REVERSEPROXY_HTTPS_PORT=10081
     BITCART_BEHIND_REVERSEPROXY=true
+    BITCART_HTTPS_ENABLED=true
     ;;
 "") ;;
 *)
