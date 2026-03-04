@@ -40,6 +40,7 @@ Environment variables:
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
     REVERSEPROXY_TRUSTED_IPS: Comma-separated list of trusted proxy IP/CIDR ranges to set as set_real_ip_from in nginx.
     REVERSEPROXY_TRUSTED_IPS_PRESET: Preset name to auto-fetch trusted IPs (e.g. cloudflare). Merges with REVERSEPROXY_TRUSTED_IPS.
+    REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). If unset, all three are trusted when IP is trusted.
     BITCART_ENABLE_SSH: Gives Bitcart SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
     BITCART_SSH_PORT: Port where ssh server runs on host machine. Default: 22
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
@@ -151,6 +152,7 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${REVERSEPROXY_DEFAULT_HOST:=none}"
 : "${REVERSEPROXY_TRUSTED_IPS:=}"
 : "${REVERSEPROXY_TRUSTED_IPS_PRESET:=}"
+: "${REVERSEPROXY_TRUSTED_HEADERS:=}"
 : "${BITCART_ENABLE_SSH:=true}"
 : "${BITCART_SSH_PORT:=22}"
 : "${CLOUDFLARE_TUNNEL_TOKEN:=}"
@@ -211,6 +213,7 @@ REVERSEPROXY_PROXYPROTOCOL=$REVERSEPROXY_PROXYPROTOCOL
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
 REVERSEPROXY_TRUSTED_IPS=$REVERSEPROXY_TRUSTED_IPS
 REVERSEPROXY_TRUSTED_IPS_PRESET=$REVERSEPROXY_TRUSTED_IPS_PRESET
+REVERSEPROXY_TRUSTED_HEADERS=$REVERSEPROXY_TRUSTED_HEADERS
 BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 BITCART_SSH_PORT=$BITCART_SSH_PORT
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL

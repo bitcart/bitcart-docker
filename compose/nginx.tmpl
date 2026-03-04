@@ -125,7 +125,7 @@ map $http_x_forwarded_proto $forwarded_proto_or_scheme {
 
 map $connecting_addr_trusted $proxy_x_forwarded_proto {
     default $scheme;
-    1 $forwarded_proto_or_scheme;
+    {{ if (has "X-Forwarded-Proto" (splitList "," $.Env.TRUSTED_HEADERS)) }}1 $forwarded_proto_or_scheme;{{ end }}
 }
 
 map $http_x_forwarded_host $forwarded_host_or_host {
@@ -135,7 +135,7 @@ map $http_x_forwarded_host $forwarded_host_or_host {
 
 map $connecting_addr_trusted $proxy_x_forwarded_host {
     default $host;
-    1 $forwarded_host_or_host;
+    {{ if (has "X-Forwarded-Host" (splitList "," $.Env.TRUSTED_HEADERS)) }}1 $forwarded_host_or_host;{{ end }}
 }
 
 # If we receive X-Forwarded-Port, pass it through; otherwise, pass along the
@@ -149,7 +149,7 @@ map $http_x_forwarded_port $forwarded_port_or_server_port {
 
 map $connecting_addr_trusted $proxy_x_forwarded_port {
     default ${{ $fallback_port }};
-    1 $forwarded_port_or_server_port;
+    {{ if (has "X-Forwarded-Port" (splitList "," $.Env.TRUSTED_HEADERS)) }}1 $forwarded_port_or_server_port;{{ end }}
 }
 
 # Include the port in the Host header sent to the container if it is non-standard

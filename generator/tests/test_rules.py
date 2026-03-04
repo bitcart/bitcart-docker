@@ -280,6 +280,7 @@ def test_trusted_ips_cloudflare_preset():
     with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
         services = generate_config()["services"]
     assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == CLOUDFLARE_IPS_COMBINED
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
     delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
 
 
@@ -290,5 +291,38 @@ def test_trusted_ips_preset_with_custom():
     with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
         services = generate_config()["services"]
     assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == f"{CLOUDFLARE_IPS_COMBINED},10.0.0.0/8"
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
     delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
     delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")
+
+
+def test_trusted_headers_no_preset():
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "${REVERSEPROXY_TRUSTED_HEADERS:-}"
+
+
+def test_trusted_headers_preset_merges_with_custom():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_HEADERS", "X-Forwarded-Host,X-Forwarded-Port", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_HEADERS", prefix="")
+
+
+def test_trusted_headers_preset_deduplicates():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_HEADERS", "X-Forwarded-Proto,X-Forwarded-Host", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto,X-Forwarded-Host"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_HEADERS", prefix="")
+
+
+def test_trusted_headers_custom_only_no_preset():
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "${REVERSEPROXY_TRUSTED_HEADERS:-}"
