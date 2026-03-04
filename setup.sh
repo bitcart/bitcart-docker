@@ -18,6 +18,10 @@ This script must be run as root, except on Mac OS
     --install-only: Run install only
     --no-startup-register: Do not register Bitcart to start via systemctl or upstart
     --no-systemd-reload: Do not reload systemd configuration
+    --preset name: Apply a configuration preset for this setup run.
+    Available presets:
+      cloudflare        Bitcart runs behind cloudflare directly
+      cloudflare-proxied Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
 This script will:
 * Install Docker
 * Install Docker-Compose
@@ -81,6 +85,7 @@ STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
 NAME_INPUT=false
 PREVIEW_SETTINGS=false
+PRESET=
 NAME=
 SCRIPTS_POSTFIX=
 while (("$#")); do
@@ -109,6 +114,10 @@ while (("$#")); do
         SYSTEMD_RELOAD=false
         shift 1
         ;;
+    --preset)
+        PRESET="$2"
+        shift 2
+        ;;
     --name)
         NAME_INPUT=true
         shift 1
@@ -136,6 +145,25 @@ done
 
 # Check root, and set correct profile file for the platform
 get_profile_file "$SCRIPTS_POSTFIX"
+
+case "$PRESET" in
+cloudflare)
+    REVERSEPROXY_TRUSTED_IPS_PRESET=cloudflare
+    ;;
+cloudflare-proxied)
+    REVERSEPROXY_TRUSTED_IPS_PRESET=cloudflare
+    REVERSEPROXY_HTTP_PORT=10080
+    REVERSEPROXY_HTTPS_PORT=10081
+    REVERSEPROXY_PROXYPROTOCOL=true
+    BITCART_BEHIND_REVERSEPROXY=true
+    ;;
+"") ;;
+*)
+    echo "Error: Unknown preset '$PRESET'" >&2
+    display_help
+    exit 1
+    ;;
+esac
 
 # Set settings default values
 [[ $BITCART_LETSENCRYPT_EMAIL == *@example.com ]] && echo "BITCART_LETSENCRYPT_EMAIL ends with @example.com, setting to empty email instead" && BITCART_LETSENCRYPT_EMAIL=""
