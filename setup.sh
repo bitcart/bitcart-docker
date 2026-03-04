@@ -20,8 +20,10 @@ This script must be run as root, except on Mac OS
     --no-systemd-reload: Do not reload systemd configuration
     --preset name: Apply a configuration preset for this setup run.
     Available presets:
-      cloudflare        Bitcart runs behind cloudflare directly
-      cloudflare-proxied Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
+      cloudflare          Bitcart runs behind cloudflare directly
+      cloudflare-proxied  Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
+      proxied             Bitcart is behind a reverse proxy, and not behind cloudflare
+      proxied-legacy      Bitcart is behind a reverse proxy that does not support proxyprotocol, and not behind cloudflare
 This script will:
 * Install Docker
 * Install Docker-Compose
@@ -161,6 +163,22 @@ cloudflare-proxied)
     REVERSEPROXY_HTTP_PORT=10080
     REVERSEPROXY_HTTPS_PORT=10081
     REVERSEPROXY_PROXYPROTOCOL=true
+    BITCART_BEHIND_REVERSEPROXY=true
+    ;;
+proxied)
+    unset REVERSEPROXY_TRUSTED_IPS_PRESET
+    BITCART_REVERSEPROXY=nginx-https
+    REVERSEPROXY_HTTP_PORT=10080
+    REVERSEPROXY_HTTPS_PORT=10081
+    REVERSEPROXY_PROXYPROTOCOL=true
+    BITCART_BEHIND_REVERSEPROXY=true
+    ;;
+proxied-legacy)
+    unset REVERSEPROXY_TRUSTED_IPS_PRESET
+    unset REVERSEPROXY_PROXYPROTOCOL
+    BITCART_REVERSEPROXY=nginx-https
+    REVERSEPROXY_HTTP_PORT=10080
+    REVERSEPROXY_HTTPS_PORT=10081
     BITCART_BEHIND_REVERSEPROXY=true
     ;;
 "") ;;
