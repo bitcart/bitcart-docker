@@ -1,8 +1,8 @@
-networks:
-  default:
-    enable_ipv6: true
-
 services:
   nginx-gen:
     environment:
       ENABLE_IPV6: "true"
+
+networks:
+  default:
+    enable_ipv6: true
