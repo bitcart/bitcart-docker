@@ -1,7 +1,7 @@
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
 {{ define "access_log" }}
-    {{ if eq $.Env.ACCESS_LOG "true" }}
+    {{ if eq .Env.ACCESS_LOG "true" }}
     access_log /var/log/nginx/access.log vhost;
     {{ else }}
     access_log off;
@@ -268,7 +268,7 @@ server {
     listen [::]:443 ssl;
     {{ end }}
     ssl_reject_handshake on;
-    {{ template "access_log" }}
+    {{ template "access_log" $ }}
     {{ if eq (len $allVirtualHosts) 1 }}
     location / {
         proxy_pass http://{{ trim $firstUpstreamName }};
@@ -377,7 +377,7 @@ server {
     client_max_body_size 100M;
     server_name {{ trim $onionHost }};
     listen 80;
-    {{ template "access_log" }}
+    {{ template "access_log" $ }}
     {{ if (exists "/etc/nginx/vhost.d/default") }}
     include /etc/nginx/vhost.d/default;
     {{ end }}
@@ -441,7 +441,7 @@ server {
     listen [::]:10082 proxy_protocol {{- $default_server }};
     {{ end }}
     {{ end }}
-    {{ template "access_log" }}
+    {{ template "access_log" $ }}
 
     location ^~ /.well-known/acme-challenge/ {
         auth_basic off;
@@ -475,7 +475,7 @@ server {
     {{ end }}
     {{ template "real_ip_policy" (dict "Env" $.Env "default_server" $default_server "ssl" "" "enable_ipv6" $enable_ipv6) }}
     {{ end }}
-    {{ template "access_log" }}
+    {{ template "access_log" $ }}
 
     {{ if eq $network_tag "internal" }}
     # Only allow traffic from internal clients
