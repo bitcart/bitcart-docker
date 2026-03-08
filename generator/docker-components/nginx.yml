@@ -19,7 +19,6 @@ services:
       PROXY_PROTOCOL: ${REVERSEPROXY_PROXYPROTOCOL:-false}
       TRUSTED_IPS: ${REVERSEPROXY_TRUSTED_IPS:-}
       TRUSTED_HEADERS: ${REVERSEPROXY_TRUSTED_HEADERS:-}
-      ACCESS_LOG: "true"
     volumes:
       - "/var/run/docker.sock:/tmp/docker.sock:ro"
       - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"

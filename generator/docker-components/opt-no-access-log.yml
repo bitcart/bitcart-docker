@@ -1,4 +1,4 @@
 services:
   nginx-gen:
     environment:
-      ACCESS_LOG: "false"
+      DISABLE_ACCESS_LOG: "true"

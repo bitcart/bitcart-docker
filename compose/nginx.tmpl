@@ -1,10 +1,10 @@
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
 {{ define "access_log" }}
-    {{ if eq .Env.ACCESS_LOG "true" }}
-    access_log /var/log/nginx/access.log vhost;
-    {{ else }}
+    {{ if eq .Env.DISABLE_ACCESS_LOG "true" }}
     access_log off;
+    {{ else }}
+    access_log /var/log/nginx/access.log vhost;
     {{ end }}
 {{ end }}
 
