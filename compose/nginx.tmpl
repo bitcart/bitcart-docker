@@ -1,7 +1,11 @@
 {{ $CurrentContainer := where $ "ID" .Docker.CurrentContainerID | first }}
 
 {{ define "access_log" }}
+    {{ if eq $.Env.ACCESS_LOG "true" }}
     access_log /var/log/nginx/access.log vhost;
+    {{ else }}
+    access_log off;
+    {{ end }}
 {{ end }}
 
 {{ define "redirects" }}
