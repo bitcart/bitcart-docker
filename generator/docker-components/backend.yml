@@ -2,7 +2,7 @@ services:
   backend:
     restart: unless-stopped
     image: bitcart/bitcart:stable
-    command: bash -c "uv run task db_migrate && uv run task production"
+    command: just prod-api-up
     environment:
       BITCART_ENV: production
       LOG_FILE: bitcart.log
@@ -40,13 +40,13 @@ services:
       BITCART_BACKEND_PLUGINS_DIR: /plugins/backend
       BITCART_ADMIN_PLUGINS_DIR: /plugins/admin
       BITCART_STORE_PLUGINS_DIR: /plugins/store
-      BITCART_DAEMON_PLUGINS_DIR: /plugins/daemon
       BITCART_DOCKER_PLUGINS_DIR: /plugins/docker
       BITCART_HOST: ${BITCART_HOST}
       BITCART_ADMIN_HOST: ${BITCART_ADMIN_HOST}
       BITCART_ADMIN_ROOTPATH: ${BITCART_ADMIN_ROOTPATH:-/}
       BITCART_REVERSEPROXY: ${BITCART_REVERSEPROXY:-nginx-https}
       BITCART_HTTPS_ENABLED: ${BITCART_HTTPS_ENABLED:-false}
+      FORWARDED_ALLOW_IPS: 172.16.0.0/12
       SENTRY_DSN: ${BITCART_SENTRY_DSN:-}
       BITCART_API_WORKERS: ${BITCART_API_WORKERS}
       BITCART_PROMETHEUS_METRICS_ENABLED: ${BITCART_PROMETHEUS_METRICS_ENABLED:-false}
@@ -60,7 +60,6 @@ services:
       - "./plugins/backend:/plugins/backend"
       - "./plugins/admin:/plugins/admin"
       - "./plugins/store:/plugins/store"
-      - "./plugins/daemon:/plugins/daemon"
       - "./plugins/docker:/plugins/docker"
       - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
 

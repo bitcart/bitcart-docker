@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow_ref }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: CI
+    uses: ./.github/workflows/test.yml
+    permissions:
+      contents: read
+      security-events: write
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

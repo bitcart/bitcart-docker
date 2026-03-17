@@ -1,7 +1,14 @@
+import sys
+from unittest.mock import AsyncMock, patch
+
 from generator.constants import CRYPTO_COMPONENTS, HOST_COMPONENTS, TOR_CRYPTOS
 from generator.generator import generate_config
 
 from .utils import delete_env, set_env
+
+CLOUDFLARE_IPS_V4_SAMPLE = "103.21.244.0/22\n103.22.200.0/22\n103.31.4.0/22"
+CLOUDFLARE_IPS_V6_SAMPLE = "2400:cb00::/32\n2606:4700::/32"
+CLOUDFLARE_IPS_COMBINED = "103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,2400:cb00::/32,2606:4700::/32"
 
 
 # Rule 1
@@ -50,18 +57,40 @@ def test_one_domain_rule():
     check_one_domain_setting("ADMIN_API_URL")
     check_one_domain_setting("STORE_API_URL")
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None/api"
+    assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
     set_env("REVERSEPROXY_HTTPS_PORT", "445", prefix="")
     services = generate_config()["services"]
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None:445/api"
+    assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
     delete_env("REVERSEPROXY_HTTPS_PORT", prefix="")
     set_env("REVERSEPROXY_HTTP_PORT", "445", prefix="")
     set_env("REVERSEPROXY", "nginx")
     services = generate_config()["services"]
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None:445/api"
+    assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
     delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
     delete_env("REVERSEPROXY")
+    # Without backend+worker (frontend-only), falls back to external URL only
+    set_env("EXCLUDE_COMPONENTS", "backend,worker")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None/api"
+    assert "BITCART_ADMIN_SERVER_API_URL" not in services["admin"]["environment"]
+    set_env("REVERSEPROXY_HTTPS_PORT", "445", prefix="")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None:445/api"
+    assert "BITCART_ADMIN_SERVER_API_URL" not in services["admin"]["environment"]
+    delete_env("REVERSEPROXY_HTTPS_PORT", prefix="")
+    set_env("REVERSEPROXY_HTTP_PORT", "445", prefix="")
+    set_env("REVERSEPROXY", "nginx")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None:445/api"
+    assert "BITCART_ADMIN_SERVER_API_URL" not in services["admin"]["environment"]
+    delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
+    delete_env("REVERSEPROXY")
+    delete_env("EXCLUDE_COMPONENTS")
     # Check preferred service setting
     # Store preferred
+    services = generate_config()["services"]
     check_preferred(services, "store")
     check_root_path(services, "store", "/")
     check_root_path(services, "admin", "/admin")
@@ -212,3 +241,88 @@ def test_local_deploy():
     services = generate_config()["services"]
     assert services["store"]["extra_hosts"] == ["bitcart.local:172.17.0.1"]
     delete_env("HOST")
+
+
+# Rule 11: proxy protocol port
+def test_proxyprotocol_rule():
+    services = generate_config()["services"]
+    nginx_ports = services["nginx"]["ports"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
+    set_env("REVERSEPROXY_PROXYPROTOCOL", "true", prefix="")
+    services = generate_config()["services"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" in services["nginx"]["ports"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" in services["nginx"]["ports"]
+    # Cleanup
+    delete_env("REVERSEPROXY_PROXYPROTOCOL", prefix="")
+
+
+# Rule 12: trusted IPs
+def get_trusted_ips_module():
+    return sys.modules["generator.rules.12_trusted_ips"]
+
+
+def test_trusted_ips_no_preset():
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "${REVERSEPROXY_TRUSTED_IPS:-}"
+
+
+def test_trusted_ips_unknown_preset():
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "unknown", prefix="")
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "${REVERSEPROXY_TRUSTED_IPS:-}"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+
+
+def test_trusted_ips_cloudflare_preset():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == CLOUDFLARE_IPS_COMBINED
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+
+
+def test_trusted_ips_preset_with_custom():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_IPS", "10.0.0.0/8", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == f"{CLOUDFLARE_IPS_COMBINED},10.0.0.0/8"
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")
+
+
+def test_trusted_headers_no_preset():
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "${REVERSEPROXY_TRUSTED_HEADERS:-}"
+
+
+def test_trusted_headers_preset_merges_with_custom():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_HEADERS", "X-Forwarded-Host,X-Forwarded-Port", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_HEADERS", prefix="")
+
+
+def test_trusted_headers_preset_deduplicates():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "cloudflare", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_HEADERS", "X-Forwarded-Proto,X-Forwarded-Host", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock(side_effect=[CLOUDFLARE_IPS_V4_SAMPLE, CLOUDFLARE_IPS_V6_SAMPLE])):
+        services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto,X-Forwarded-Host"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_HEADERS", prefix="")
+
+
+def test_trusted_headers_custom_only_no_preset():
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "${REVERSEPROXY_TRUSTED_HEADERS:-}"

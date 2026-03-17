@@ -45,4 +45,4 @@ ENV PATH="$ELECTRUM_HOME/.venv/bin:$PATH"
 USER $ELECTRUM_USER
 WORKDIR $ELECTRUM_HOME/site
 
-CMD ["python","daemons/eth.py"]
+CMD ["just","daemon", "eth"]

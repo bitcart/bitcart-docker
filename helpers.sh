@@ -15,7 +15,13 @@ BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
 REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
+REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT=$REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT
+REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT=$REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT
+REVERSEPROXY_PROXYPROTOCOL=$REVERSEPROXY_PROXYPROTOCOL
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
+REVERSEPROXY_TRUSTED_IPS=$REVERSEPROXY_TRUSTED_IPS
+REVERSEPROXY_TRUSTED_IPS_PRESET=$REVERSEPROXY_TRUSTED_IPS_PRESET
+REVERSEPROXY_TRUSTED_HEADERS=$REVERSEPROXY_TRUSTED_HEADERS
 BITCART_SSH_KEY_FILE=$BITCART_SSH_KEY_FILE
 BITCART_SSH_AUTHORIZED_KEYS=$BITCART_SSH_AUTHORIZED_KEYS
 BITCART_HOST_SSH_AUTHORIZED_KEYS=$BITCART_HOST_SSH_AUTHORIZED_KEYS
@@ -71,7 +77,6 @@ bitcart_reset_plugins() {
     export ADMIN_PLUGINS_HASH=
     export STORE_PLUGINS_HASH=
     export BACKEND_PLUGINS_HASH=
-    export DAEMON_PLUGINS_HASH=
     export DOCKER_PLUGINS_HASH=
 }
 
@@ -294,7 +299,6 @@ SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
 ADMIN_PLUGINS_HASH=$(get_plugins_hash admin)
 STORE_PLUGINS_HASH=$(get_plugins_hash store)
 BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
-DAEMON_PLUGINS_HASH=$(get_plugins_hash daemon)
 DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
 BACKUP_ENCRYPTION_KEY=$BACKUP_ENCRYPTION_KEY
 EOF
@@ -344,11 +348,6 @@ install_plugins() {
     fi
     if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " store " ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
         docker build -t bitcart/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
-    fi
-    if [[ "$error" = false ]] && [[ "$DAEMON_PLUGINS_HASH" != "$(get_plugins_hash daemon)" ]]; then
-        for coin in $COIN_COMPONENTS; do
-            docker build -t bitcart/bitcart-$coin:stable -f compose/coin-plugins.Dockerfile compose --build-arg COIN=$coin || error=true
-        done
     fi
     if [[ "$error" = true ]]; then
         echo "Plugins installation failed, restoring original images"

@@ -18,6 +18,12 @@ This script must be run as root, except on Mac OS
     --install-only: Run install only
     --no-startup-register: Do not register Bitcart to start via systemctl or upstart
     --no-systemd-reload: Do not reload systemd configuration
+    --preset name: Apply a configuration preset for this setup run.
+    Available presets:
+      cloudflare          Bitcart runs behind cloudflare directly
+      cloudflare-proxied  Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
+      proxied             Bitcart is behind a reverse proxy that is not cloudflare (requires PROXY protocol)
+      proxied-legacy      Bitcart is behind a reverse proxy that is not cloudflare (requires X-Forwarded-For HTTP header)
 This script will:
 * Install Docker
 * Install Docker-Compose
@@ -34,7 +40,13 @@ Environment variables:
     BITCART_REVERSEPROXY: which reverse proxy to use (eg. nginx, nginx-https, none)
     REVERSEPROXY_HTTP_PORT: The port the reverse proxy binds to for public HTTP requests. Default: 80
     REVERSEPROXY_HTTPS_PORT: The port the reverse proxy binds to for public HTTPS requests. Default: 443
+    REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT: The port the reverse proxy binds to for proxyprotocol (HTTP). Default: 10082
+    REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT: The port the reverse proxy binds to for proxyprotocol (HTTPS). Default: 10083
+    REVERSEPROXY_PROXYPROTOCOL: Whether to enable proxyprotocol support. Used in advanced deployments, e.g. behind sslh. Default: false.
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
+    REVERSEPROXY_TRUSTED_IPS: Comma-separated list of trusted proxy IP/CIDR ranges to set as set_real_ip_from in nginx.
+    REVERSEPROXY_TRUSTED_IPS_PRESET: Preset name to auto-fetch trusted IPs (e.g. cloudflare). Merges with REVERSEPROXY_TRUSTED_IPS.
+    REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). If unset, all three are trusted when IP is trusted.
     BITCART_ENABLE_SSH: Gives Bitcart SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
     BITCART_SSH_PORT: Port where ssh server runs on host machine. Default: 22
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
@@ -75,6 +87,7 @@ STARTUP_REGISTER=true
 SYSTEMD_RELOAD=true
 NAME_INPUT=false
 PREVIEW_SETTINGS=false
+PRESET=
 NAME=
 SCRIPTS_POSTFIX=
 while (("$#")); do
@@ -102,6 +115,10 @@ while (("$#")); do
     --no-systemd-reload)
         SYSTEMD_RELOAD=false
         shift 1
+        ;;
+    --preset)
+        PRESET="$2"
+        shift 2
         ;;
     --name)
         NAME_INPUT=true
@@ -131,6 +148,51 @@ done
 # Check root, and set correct profile file for the platform
 get_profile_file "$SCRIPTS_POSTFIX"
 
+case "$PRESET" in
+cloudflare)
+    BITCART_REVERSEPROXY=nginx-https
+    REVERSEPROXY_TRUSTED_IPS_PRESET=cloudflare
+    unset REVERSEPROXY_HTTP_PORT
+    unset REVERSEPROXY_HTTPS_PORT
+    unset REVERSEPROXY_PROXYPROTOCOL
+    unset BITCART_BEHIND_REVERSEPROXY
+    unset BITCART_HTTPS_ENABLED
+    ;;
+cloudflare-proxied)
+    BITCART_REVERSEPROXY=nginx-https
+    REVERSEPROXY_TRUSTED_IPS_PRESET=cloudflare
+    REVERSEPROXY_HTTP_PORT=10080
+    REVERSEPROXY_HTTPS_PORT=10081
+    REVERSEPROXY_PROXYPROTOCOL=true
+    BITCART_BEHIND_REVERSEPROXY=true
+    unset BITCART_HTTPS_ENABLED
+    ;;
+proxied)
+    BITCART_REVERSEPROXY=nginx-https
+    REVERSEPROXY_HTTP_PORT=10080
+    REVERSEPROXY_HTTPS_PORT=10081
+    REVERSEPROXY_PROXYPROTOCOL=true
+    BITCART_BEHIND_REVERSEPROXY=true
+    unset REVERSEPROXY_TRUSTED_IPS_PRESET
+    unset BITCART_HTTPS_ENABLED
+    ;;
+proxied-legacy)
+    BITCART_REVERSEPROXY=nginx
+    REVERSEPROXY_HTTP_PORT=10080
+    REVERSEPROXY_HTTPS_PORT=10081
+    BITCART_BEHIND_REVERSEPROXY=true
+    BITCART_HTTPS_ENABLED=true
+    unset REVERSEPROXY_TRUSTED_IPS_PRESET
+    unset REVERSEPROXY_PROXYPROTOCOL
+    ;;
+"") ;;
+*)
+    echo "Error: Unknown preset '$PRESET'" >&2
+    display_help
+    exit 1
+    ;;
+esac
+
 # Set settings default values
 [[ $BITCART_LETSENCRYPT_EMAIL == *@example.com ]] && echo "BITCART_LETSENCRYPT_EMAIL ends with @example.com, setting to empty email instead" && BITCART_LETSENCRYPT_EMAIL=""
 
@@ -138,9 +200,15 @@ get_profile_file "$SCRIPTS_POSTFIX"
 : "${BITCART_INSTALL:=all}"
 : "${BITCART_CRYPTOS:=btc}"
 : "${BITCART_REVERSEPROXY:=nginx-https}"
-: "${REVERSEPROXY_DEFAULT_HOST:=none}"
 : "${REVERSEPROXY_HTTP_PORT:=80}"
 : "${REVERSEPROXY_HTTPS_PORT:=443}"
+: "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:=10082}"
+: "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:=10083}"
+: "${REVERSEPROXY_PROXYPROTOCOL:=false}"
+: "${REVERSEPROXY_DEFAULT_HOST:=none}"
+: "${REVERSEPROXY_TRUSTED_IPS:=}"
+: "${REVERSEPROXY_TRUSTED_IPS_PRESET:=}"
+: "${REVERSEPROXY_TRUSTED_HEADERS:=}"
 : "${BITCART_ENABLE_SSH:=true}"
 : "${BITCART_SSH_PORT:=22}"
 : "${CLOUDFLARE_TUNNEL_TOKEN:=}"
@@ -195,7 +263,13 @@ Parameters passed:
 BITCART_HOST=$BITCART_HOST
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
 REVERSEPROXY_HTTPS_PORT=$REVERSEPROXY_HTTPS_PORT
+REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT=$REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT
+REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT=$REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT
+REVERSEPROXY_PROXYPROTOCOL=$REVERSEPROXY_PROXYPROTOCOL
 REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
+REVERSEPROXY_TRUSTED_IPS=$REVERSEPROXY_TRUSTED_IPS
+REVERSEPROXY_TRUSTED_IPS_PRESET=$REVERSEPROXY_TRUSTED_IPS_PRESET
+REVERSEPROXY_TRUSTED_HEADERS=$REVERSEPROXY_TRUSTED_HEADERS
 BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
 BITCART_SSH_PORT=$BITCART_SSH_PORT
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL

@@ -1,12 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+exclude = ["demo", "tests"]
+dev-mode-dirs = ["."]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+sources = { "." = "generator" }
+
 [project]
 name = "bitcart-compose-generator"
 version = "1.0.0"
 description = "Generate docker compose files based on env variables"
 requires-python = ">=3.12"
-dependencies = ["oyaml"]
+dependencies = ["oyaml", "aiohttp"]
 
 [dependency-groups]
-dev = ["pre-commit", "pytest", "pytest-cov", "ruff"]
+lint = ["prek", "ruff"]
+test = ["pytest", "pytest-cov", "pytest-durations"]
+dev = [
+    "rust-just>=1.46.0",
+    { include-group = "lint" },
+    { include-group = "test" },
+]
 
 [tool.ruff]
 target-version = "py312"
@@ -34,8 +52,11 @@ mccabe = { max-complexity = 12 }
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S"]
+"demo/*" = ["S"]
 
 [tool.pytest.ini_options]
+junit_duration_report = "call"
+junit_suite_name = "bitcart_generator_test_suite"
 addopts = ["--cov=.", "--cov-report", "term-missing"]
 filterwarnings = [
     "error::DeprecationWarning",

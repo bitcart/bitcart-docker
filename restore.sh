@@ -10,7 +10,7 @@ This script must be run as root
     --delete-backup: Delete backup file after restoring. Default: false
     --encryption-key KEY: Custom encryption key to decrypt the backup. If not provided, uses the key from .deploy file
 This script will restore the database from SQL script and copy essential volumes to /var/lib/docker/volumes
-extracted from tar.gz backup archive
+extracted from tar.zst (or legacy tar.gz) backup archive
 If the backup file is encrypted (.enc extension), it will be automatically decrypted using the encryption key
 from the .deploy file or the custom key provided via --encryption-key
 END
@@ -80,7 +80,12 @@ if [[ "$BACKUP_FILE" == *.enc ]]; then
         ENCRYPTION_KEY="$BACKUP_ENCRYPTION_KEY"
     fi
     echo "Decrypting backup …"
-    decrypted_file="${TEMP_DIR}/backup.tar.gz"
+    enc_source="${BACKUP_FILE%.enc}"
+    if [[ "$enc_source" == *.tar.gz ]]; then
+        decrypted_file="${TEMP_DIR}/backup.tar.gz"
+    else
+        decrypted_file="${TEMP_DIR}/backup.tar.zst"
+    fi
     openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$BACKUP_FILE" -out "$decrypted_file" -pass pass:"$ENCRYPTION_KEY"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to decrypt backup file"
@@ -90,7 +95,14 @@ if [[ "$BACKUP_FILE" == *.enc ]]; then
     BACKUP_FILE="$decrypted_file"
 fi
 
-tar -C $TEMP_DIR -xvf "$BACKUP_FILE"
+if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
+    tar -C $TEMP_DIR -xzvf "$BACKUP_FILE"
+else
+    tar_file="${TEMP_DIR}/backup.tar"
+    zstdmt -d "$BACKUP_FILE" -o "$tar_file"
+    tar -C $TEMP_DIR -xvf "$tar_file"
+    rm "$tar_file"
+fi
 
 echo "Stopping Bitcart…"
 bitcart_stop

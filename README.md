@@ -1,6 +1,6 @@
 # Bitcart Docker Deployment
 
-[![CircleCI](https://circleci.com/gh/bitcart/bitcart-docker.svg?style=svg)](https://circleci.com/gh/bitcart/bitcart-docker)
+[![CI](https://github.com/bitcart/bitcart-docker/actions/workflows/publish.yml/badge.svg)](https://github.com/bitcart/bitcart-docker/actions/workflows/publish.yml)
 ![Codecov](https://img.shields.io/codecov/c/github/bitcart/bitcart-docker?style=flat-square)
 
 ## Using provided scripts (easy)
@@ -75,7 +75,9 @@ export BITCART_STORE_API_URL=http://$BITCART_HOST
 
 Configuration settings are set like so:
 
-    export VARIABLE_NAME=value
+```bash
+export VARIABLE_NAME=value
+```
 
 Here is a complete list of configuration settings:
 
@@ -98,6 +100,14 @@ Here is a complete list of configuration settings:
 | BITCART_COMPONENT_SCALE       | Scale component up to X processes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 1           | Generator |
 | TOR_RELAY_NICKNAME            | If tor relay is activated, the relay nickname                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | :x:         | Extension |
 | TOR_RELAY_EMAIL               | If tor relay is activated, the email for Tor to contact you regarding your relay                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | :x:         | Extension |
+
+## docker-compose.yml generator
+
+You can preview and generate a `docker-compose.yml` for your configuration at [generator.bitcart.ai](https://generator.bitcart.ai).
+
+It lets you pick components and environment variables in the browser and download the resulting compose file.
+
+> **Note:** Using this repository directly is the recommended approach. It manages much more than a plain compose file — including persisting your environment settings, backing up and restoring your database and Docker volumes, and regenerating the compose file dynamically whenever your configuration changes. The web generator is useful for previewing or one-off manual setups.
 
 ## Live demo
 
