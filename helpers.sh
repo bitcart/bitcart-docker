@@ -68,7 +68,7 @@ EOF
 bitcart_start() {
     create_backup_volume
     install_plugins
-    docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d "$1"
+    docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d "$@"
 }
 
 bitcart_stop() {
@@ -327,13 +327,13 @@ install_plugins() {
     failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
     error=false
     rm -f "$failed_file"
-    if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
+    if [[ " ${COMPONENTS[*]} " == *" backend "* ]]; then
         make_backup_image bitcart/bitcart
     fi
-    if [[ " ${COMPONENTS[*]} " =~ " admin " ]]; then
+    if [[ " ${COMPONENTS[*]} " == *" admin "* ]]; then
         make_backup_image bitcart/bitcart-admin
     fi
-    if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
+    if [[ " ${COMPONENTS[*]} " == *" store "* ]]; then
         make_backup_image bitcart/bitcart-store
     fi
     for coin in $COIN_COMPONENTS; do
@@ -343,24 +343,24 @@ install_plugins() {
         ./build.sh || touch "$failed_file"
         docker compose -f compose/generated.yml config || touch "$failed_file"
     fi
-    if [[ " ${COMPONENTS[*]} " =~ " backend " ]] && [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
+    if [[ " ${COMPONENTS[*]} " == *" backend "* ]] && [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
         docker build -t bitcart/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
     fi
-    if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " admin " ]] && [[ "$ADMIN_PLUGINS_HASH" != "$(get_plugins_hash admin)" ]]; then
+    if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " == *" admin "* ]] && [[ "$ADMIN_PLUGINS_HASH" != "$(get_plugins_hash admin)" ]]; then
         docker build -t bitcart/bitcart-admin:stable -f compose/admin-plugins.Dockerfile compose || error=true
     fi
-    if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " =~ " store " ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
+    if [[ "$error" = false ]] && [[ " ${COMPONENTS[*]} " == *" store "* ]] && [[ "$STORE_PLUGINS_HASH" != "$(get_plugins_hash store)" ]]; then
         docker build -t bitcart/bitcart-store:stable -f compose/store-plugins.Dockerfile compose || error=true
     fi
     if [[ "$error" = true ]]; then
         echo "Plugins installation failed, restoring original images"
-        if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
+        if [[ " ${COMPONENTS[*]} " == *" backend "* ]]; then
             docker tag bitcart/bitcart:original bitcart/bitcart:stable
         fi
-        if [[ " ${COMPONENTS[*]} " =~ " admin " ]]; then
+        if [[ " ${COMPONENTS[*]} " == *" admin "* ]]; then
             docker tag bitcart/bitcart-admin:original bitcart/bitcart-admin:stable
         fi
-        if [[ " ${COMPONENTS[*]} " =~ " store " ]]; then
+        if [[ " ${COMPONENTS[*]} " == *" store "* ]]; then
             docker tag bitcart/bitcart-store:original bitcart/bitcart-store:stable
         fi
         for coin in $COIN_COMPONENTS; do

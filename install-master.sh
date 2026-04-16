@@ -20,7 +20,7 @@ IFS=', ' read -r -a CRYPTOS <<<"$BITCART_CRYPTOS"
 
 cd compose
 
-if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
+if [[ " ${COMPONENTS[*]} " == *" backend "* ]]; then
     docker build -t bitcart/bitcart:stable -f backend.Dockerfile . || true
 fi
 
