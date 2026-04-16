@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 for org in modules/*; do
     if [[ -d "$org" && ! -L "$org" ]]; then
         for plugin in "$org"/*; do

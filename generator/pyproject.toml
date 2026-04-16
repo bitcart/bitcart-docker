@@ -20,33 +20,14 @@ dependencies = ["oyaml", "aiohttp"]
 [dependency-groups]
 lint = ["prek", "ruff"]
 test = ["pytest", "pytest-cov", "pytest-durations"]
-dev = [
-    "rust-just>=1.46.0",
-    { include-group = "lint" },
-    { include-group = "test" },
-]
+dev = ["rust-just>=1.46.0", { include-group = "lint" }, { include-group = "test" }]
 
 [tool.ruff]
 target-version = "py312"
 line-length = 127
 
 [tool.ruff.lint]
-select = [
-    "F",
-    "E",
-    "I",
-    "UP",
-    "YTT",
-    "B",
-    "T10",
-    "C",
-    "SIM",
-    "RUF100",
-    "RET",
-    "A",
-    "S",
-    "ASYNC",
-]
+select = ["F", "E", "I", "UP", "YTT", "B", "T10", "C", "SIM", "RUF100", "RET", "A", "S", "ASYNC"]
 ignore = ["RET502", "RET503", "S104", "S507", "ASYNC110"]
 mccabe = { max-complexity = 12 }
 
@@ -58,7 +39,4 @@ mccabe = { max-complexity = 12 }
 junit_duration_report = "call"
 junit_suite_name = "bitcart_generator_test_suite"
 addopts = ["--cov=.", "--cov-report", "term-missing"]
-filterwarnings = [
-    "error::DeprecationWarning",
-    "error::PendingDeprecationWarning",
-]
+filterwarnings = ["error::DeprecationWarning", "error::PendingDeprecationWarning"]

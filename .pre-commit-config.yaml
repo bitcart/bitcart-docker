@@ -1,16 +1,7 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+  - repo: builtin
     hooks:
       - id: check-merge-conflict
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.1
-    hooks:
-      - id: ruff-check
-      - id: ruff-format
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: mixed-line-ending
@@ -20,21 +11,35 @@ repos:
       - id: check-toml
       - id: check-yaml
       - id: check-symlinks
-      - id: debug-statements
       - id: fix-byte-order-marker
       - id: detect-private-key
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.10
+    hooks:
+      - id: ruff-check
+      - id: ruff-format
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.11.6
+    hooks:
+      - id: uv-lock
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.22.0
+    rev: v1.24.1
     hooks:
       - id: zizmor
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        args: [--external-sources]
+        exclude: ^compose/scripts/cli-(zsh-)?autocomplete\.sh$
   - repo: local
     hooks:
-      - id: prettier
-        name: prettier
+      - id: oxfmt
+        name: oxfmt
         types: [text]
         language: node
         require_serial: true
-        entry: npx prettier --write --ignore-unknown
+        entry: npx oxfmt --no-error-on-unmatched-pattern
       - id: docker-shell-shfmt
         name: Run shfmt with docker
         entry: mvdan/shfmt:latest -d -i 4
@@ -47,7 +52,3 @@ repos:
         language: system
         files: >-
           ^compose/Dockerfile-coin.template$
-  - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.10.2
-    hooks:
-      - id: uv-lock

@@ -6,7 +6,7 @@ else
     sudo apt install -y git
 fi
 branch=${1:-master}
-rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcart/bitcart -b $branch compose/bitcart
+rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcart/bitcart -b "$branch" compose/bitcart
 cd compose/bitcart
 rm -rf .git
 cat >conf/.env <<EOF

@@ -2,6 +2,7 @@
 
 set +x
 
+# shellcheck source=helpers.sh
 . helpers.sh
 
 function display_help() {
@@ -128,7 +129,7 @@ while (("$#")); do
         shift
         break
         ;;
-    -* | --*=) # unsupported flags
+    --*= | -*) # unsupported flags
         echo "Error: Unsupported flag $1" >&2
         display_help
         exit 1
@@ -247,8 +248,8 @@ fi
 
 if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
     if ! [[ -f "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
-        mkdir -p "$(dirname $BITCART_HOST_SSH_AUTHORIZED_KEYS)"
-        touch $BITCART_HOST_SSH_AUTHORIZED_KEYS
+        mkdir -p "$(dirname "$BITCART_HOST_SSH_AUTHORIZED_KEYS")"
+        touch "$BITCART_HOST_SSH_AUTHORIZED_KEYS"
     fi
     BITCART_SSH_AUTHORIZED_KEYS="/datadir/host_authorized_keys"
     BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
@@ -317,7 +318,7 @@ save_deploy_config
 
 # Init the variables when a user log interactively
 touch "$BASH_PROFILE_SCRIPT"
-cat >${BASH_PROFILE_SCRIPT} <<EOF
+cat >"${BASH_PROFILE_SCRIPT}" <<EOF
 #!/bin/bash
 export COMPOSE_HTTP_TIMEOUT="180"
 export BITCART_BASE_DIRECTORY="$BITCART_BASE_DIRECTORY"
@@ -338,7 +339,7 @@ if cat "\$BITCART_ENV_FILE" &> /dev/null; then
 fi
 EOF
 
-chmod +x ${BASH_PROFILE_SCRIPT}
+chmod +x "${BASH_PROFILE_SCRIPT}"
 
 echo -e "Bitcart environment variables successfully saved in $BASH_PROFILE_SCRIPT\n"
 echo -e "Bitcart deployment config saved in $BITCART_DEPLOYMENT_CONFIG\n"
@@ -347,6 +348,7 @@ bitcart_update_docker_env
 
 echo -e "Bitcart docker-compose parameters saved in $BITCART_ENV_FILE\n"
 
+# shellcheck source=/dev/null
 . "$BASH_PROFILE_SCRIPT"
 
 # Try to install docker

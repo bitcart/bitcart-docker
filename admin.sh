@@ -1,13 +1,14 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+# shellcheck source=helpers.sh
 . "${SCRIPT_DIR}/helpers.sh"
 load_env
 
 policiesupdate() {
     local action="$1"
     local data="$2"
-    docker exec -i $(container_name worker-1) python3 <<EOF
+    docker exec -i "$(container_name worker-1)" python3 <<EOF
 import asyncio
 import json
 
@@ -45,7 +46,7 @@ EOF
 }
 
 sqlquery() {
-    docker exec $(container_name database-1) psql -U postgres -d bitcart -c "$*"
+    docker exec "$(container_name database-1)" psql -U postgres -d bitcart -c "$*"
 }
 
 print_usage() {

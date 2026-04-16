@@ -14,8 +14,7 @@
         <style>
             .code-output {
                 font-family:
-                    "SF Mono", "Monaco", "Inconsolata", "Roboto Mono",
-                    "Source Code Pro", monospace;
+                    "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "Source Code Pro", monospace;
                 font-size: 13px;
                 line-height: 1.6;
             }
@@ -115,26 +114,20 @@
                     Bitcart Docker Compose Generator (Alpha)
                 </h1>
                 <p class="text-xs text-slate-500 mt-0.5">
-                    Configure your deployment and preview the generated
-                    docker-compose.yml
+                    Configure your deployment and preview the generated docker-compose.yml
                 </p>
             </div>
             <div
                 id="status-badge"
                 class="status-loading flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors"
             >
-                <span
-                    id="status-dot"
-                    class="w-2 h-2 rounded-full dot-loading flex-shrink-0"
-                ></span>
+                <span id="status-dot" class="w-2 h-2 rounded-full dot-loading flex-shrink-0"></span>
                 <span id="status-text">Loading Pyodide...</span>
             </div>
         </header>
 
         <!-- Mobile Tab Bar -->
-        <div
-            class="flex md:hidden border-b border-slate-200 bg-white flex-shrink-0"
-        >
+        <div class="flex md:hidden border-b border-slate-200 bg-white flex-shrink-0">
             <button
                 id="tab-config"
                 onclick="switchTab('config')"
@@ -168,38 +161,28 @@
                         </h2>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5"
                                     >Install Pack</label
                                 >
                                 <select
                                     id="install-pack"
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="all">
-                                        all (full stack)
-                                    </option>
-                                    <option value="backend">
-                                        backend only
-                                    </option>
-                                    <option value="frontend">
-                                        frontend only
-                                    </option>
+                                    <option value="all">all (full stack)</option>
+                                    <option value="backend">backend only</option>
+                                    <option value="frontend">frontend only</option>
                                     <option value="none">none (custom)</option>
                                 </select>
                             </div>
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5"
                                     >Reverse Proxy</label
                                 >
                                 <select
                                     id="reverse-proxy"
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 >
-                                    <option value="nginx-https">
-                                        nginx + HTTPS
-                                    </option>
+                                    <option value="nginx-https">nginx + HTTPS</option>
                                     <option value="nginx">nginx only</option>
                                     <option value="none">none</option>
                                 </select>
@@ -218,12 +201,9 @@
                         </h2>
                         <div class="space-y-3">
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
-                                >
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5">
                                     Host
-                                    <span
-                                        class="text-slate-400 font-normal ml-1"
+                                    <span class="text-slate-400 font-normal ml-1"
                                         >BITCART_HOST</span
                                     >
                                 </label>
@@ -235,12 +215,9 @@
                                 />
                             </div>
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
-                                >
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5">
                                     Admin Host
-                                    <span
-                                        class="text-slate-400 font-normal ml-1"
+                                    <span class="text-slate-400 font-normal ml-1"
                                         >BITCART_ADMIN_HOST</span
                                     >
                                 </label>
@@ -252,12 +229,9 @@
                                 />
                             </div>
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
-                                >
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5">
                                     Store Host
-                                    <span
-                                        class="text-slate-400 font-normal ml-1"
+                                    <span class="text-slate-400 font-normal ml-1"
                                         >BITCART_STORE_HOST</span
                                     >
                                 </label>
@@ -269,12 +243,9 @@
                                 />
                             </div>
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
-                                >
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5">
                                     Admin API URL
-                                    <span
-                                        class="text-slate-400 font-normal ml-1"
+                                    <span class="text-slate-400 font-normal ml-1"
                                         >BITCART_ADMIN_API_URL</span
                                     >
                                 </label>
@@ -286,12 +257,9 @@
                                 />
                             </div>
                             <div>
-                                <label
-                                    class="block text-xs font-medium text-slate-600 mb-1.5"
-                                >
+                                <label class="block text-xs font-medium text-slate-600 mb-1.5">
                                     Store API URL
-                                    <span
-                                        class="text-slate-400 font-normal ml-1"
+                                    <span class="text-slate-400 font-normal ml-1"
                                         >BITCART_STORE_API_URL</span
                                     >
                                 </label>
@@ -314,10 +282,7 @@
                         >
                             Cryptocurrencies
                         </h2>
-                        <div
-                            id="crypto-grid"
-                            class="grid grid-cols-2 gap-2"
-                        ></div>
+                        <div id="crypto-grid" class="grid grid-cols-2 gap-2"></div>
                         <p class="text-xs text-slate-400 mt-2">
                             BITCART_CRYPTOS — at least one required
                         </p>
@@ -342,8 +307,7 @@
                         </div>
                         <div id="env-vars-list" class="space-y-2"></div>
                         <p class="text-xs text-slate-400 mt-2">
-                            Any additional BITCART_* or REVERSEPROXY_*
-                            environment variables
+                            Any additional BITCART_* or REVERSEPROXY_* environment variables
                         </p>
                     </section>
 
@@ -383,9 +347,7 @@
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                             />
                         </svg>
-                        <span class="text-sm font-medium text-slate-400"
-                            >docker-compose.yml</span
-                        >
+                        <span class="text-sm font-medium text-slate-400">docker-compose.yml</span>
                     </div>
                     <button
                         id="copy-btn"
@@ -478,8 +440,7 @@ def run_generator(env_json_str):
                 currentOutput = text;
                 if (isError) {
                     pre.innerHTML = "";
-                    pre.className =
-                        "text-red-400 text-sm whitespace-pre-wrap code-output";
+                    pre.className = "text-red-400 text-sm whitespace-pre-wrap code-output";
                     pre.textContent = text;
                 } else {
                     pre.className = "code-output";
@@ -536,10 +497,8 @@ def run_generator(env_json_str):
                 const vars = {};
 
                 // Installation
-                vars["BITCART_INSTALL"] =
-                    document.getElementById("install-pack").value;
-                vars["BITCART_REVERSEPROXY"] =
-                    document.getElementById("reverse-proxy").value;
+                vars["BITCART_INSTALL"] = document.getElementById("install-pack").value;
+                vars["BITCART_REVERSEPROXY"] = document.getElementById("reverse-proxy").value;
 
                 // Hosts
                 const hostFields = [
@@ -555,11 +514,10 @@ def run_generator(env_json_str):
                 }
 
                 // Cryptos
-                const checked = [
-                    ...document.querySelectorAll(".crypto-checkbox:checked"),
-                ].map((cb) => cb.value);
-                if (checked.length > 0)
-                    vars["BITCART_CRYPTOS"] = checked.join(",");
+                const checked = [...document.querySelectorAll(".crypto-checkbox:checked")].map(
+                    (cb) => cb.value,
+                );
+                if (checked.length > 0) vars["BITCART_CRYPTOS"] = checked.join(",");
 
                 // Advanced
                 for (const row of document.querySelectorAll(".env-var-row")) {
@@ -601,8 +559,7 @@ def run_generator(env_json_str):
                 const tabOutput = document.getElementById("tab-output");
                 const active =
                     "flex-1 py-2.5 text-sm font-medium text-blue-600 border-b-2 border-blue-600";
-                const inactive =
-                    "flex-1 py-2.5 text-sm font-medium text-slate-500";
+                const inactive = "flex-1 py-2.5 text-sm font-medium text-slate-500";
                 if (tab === "config") {
                     configPanel.classList.remove("tab-hidden");
                     outputPanel.classList.add("tab-hidden");

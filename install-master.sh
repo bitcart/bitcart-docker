@@ -2,6 +2,7 @@
 
 set -e
 
+# shellcheck source=helpers.sh
 . helpers.sh
 load_env
 
@@ -24,22 +25,22 @@ if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
 fi
 
 for coin in "${CRYPTOS[@]}"; do
-    docker build -t bitcart/bitcart-$coin:stable -f $coin.Dockerfile . || true
+    docker build -t "bitcart/bitcart-$coin:stable" -f "$coin.Dockerfile" . || true
 done
 
 cd ..
 rm -rf compose/bitcart
 
 build_additional_image() {
-    if [[ " ${COMPONENTS[*]} " =~ " $1 " ]]; then
+    if [[ " ${COMPONENTS[*]} " == *" $1 "* ]]; then
         OLDDIR="$PWD"
         TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
-        cd $TEMP_DIR
-        git clone https://github.com/bitcart/bitcart-$1
-        cd bitcart-$1
-        docker build -t bitcart/bitcart-$1:stable . || true
+        cd "$TEMP_DIR"
+        git clone "https://github.com/bitcart/bitcart-$1"
+        cd "bitcart-$1"
+        docker build -t "bitcart/bitcart-$1:stable" . || true
         cd "$OLDDIR"
-        rm -rf $TEMP_DIR
+        rm -rf "$TEMP_DIR"
     fi
 }
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 found=false
 for org in modules/*; do
     if [ -d "$org" ]; then
@@ -9,9 +11,9 @@ for org in modules/*; do
                 found=true
                 echo "Installing $plugin"
                 if [ -f "$plugin/package.json" ]; then
-                    cd "$plugin"
+                    cd "$plugin" || exit 1
                     yarn
-                    cd $OLDPWD
+                    cd "$OLDPWD" || exit 1
                 fi
             fi
         done

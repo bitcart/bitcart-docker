@@ -60,7 +60,7 @@ while (("$#")); do
         shift
         break
         ;;
-    -* | --*=) # unsupported flags
+    --*= | -*) # unsupported flags
         echo "Error: Unsupported flag $1" >&2
         display_help
         exit 1
@@ -71,6 +71,7 @@ while (("$#")); do
     esac
 done
 
+# shellcheck source=helpers.sh
 . helpers.sh
 load_env true
 
@@ -87,12 +88,12 @@ backup_path="$backup_dir/_data/${filename}"
 dbdump_path="$backup_dir/_data/${dumpname}"
 
 echo "Dumping database …"
-bitcart_dump_db $dumpname
+bitcart_dump_db "$dumpname"
 
 if $ONLY_DB; then
     tar_path="${backup_path%.zst}"
-    tar -cvf $tar_path $dbdump_path
-    zstdmt -1 --rm $tar_path -o $backup_path
+    tar -cvf "$tar_path" "$dbdump_path"
+    zstdmt -1 --rm "$tar_path" -o "$backup_path"
 else
     if $RESTART_SERVICES; then
         echo "Stopping Bitcart…"
@@ -102,17 +103,17 @@ else
     echo "Backing up files …"
     files=()
     for fname in "${BACKUP_VOLUMES[@]}"; do
-        fname=$(volume_name $fname)
+        fname=$(volume_name "$fname")
         if [ -d "$volumes_dir/$fname" ]; then
             files+=("$fname")
         fi
     done
     # put all volumes to volumes directory and remove timestamps
     tar_path="${backup_path%.zst}"
-    tar -cvf $tar_path -C $volumes_dir --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa.pub" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
-        -C "$(dirname $dbdump_path)" --transform "s|$timestamp-||" --transform "s|$timestamp||" $dumpname \
+    tar -cvf "$tar_path" -C "$volumes_dir" --exclude="$(volume_name bitcart_datadir)/_data/host_authorized_keys" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa" --exclude="$(volume_name bitcart_datadir)/_data/host_id_rsa.pub" --transform "s|^$deployment_name|volumes/$deployment_name|" "${files[@]}" \
+        -C "$(dirname "$dbdump_path")" --transform "s|$timestamp-||" --transform "s|$timestamp||" "$dumpname" \
         -C "$BITCART_BASE_DIRECTORY/compose" plugins
-    zstdmt -1 --rm $tar_path -o $backup_path
+    zstdmt -1 --rm "$tar_path" -o "$backup_path"
 
     if $RESTART_SERVICES; then
         echo "Restarting Bitcart…"
@@ -127,8 +128,7 @@ if [ "$BACKUP_ENCRYPTION" = "true" ]; then
         exit 1
     fi
     echo "Encrypting backup …"
-    openssl enc -aes-256-cbc -salt -pbkdf2 -in "$backup_path" -out "${backup_path}.enc" -pass pass:"$BACKUP_ENCRYPTION_KEY"
-    if [ $? -ne 0 ]; then
+    if ! openssl enc -aes-256-cbc -salt -pbkdf2 -in "$backup_path" -out "${backup_path}.enc" -pass pass:"$BACKUP_ENCRYPTION_KEY"; then
         echo "Error: Failed to encrypt backup file"
         exit 1
     fi
@@ -139,24 +139,27 @@ fi
 
 delete_backup() {
     echo "Deleting local backup …"
-    rm $backup_path
+    rm "$backup_path"
 }
 
 case $BACKUP_PROVIDER in
 "s3")
     echo "Uploading to S3 …"
-    docker_cmd="docker run --rm -e AWS_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=$S3_DEFAULT_REGION"
+    docker_args=(--rm
+        -e AWS_ACCESS_KEY_ID="$S3_ACCESS_KEY_ID"
+        -e AWS_SECRET_ACCESS_KEY="$S3_SECRET_ACCESS_KEY"
+        -e AWS_DEFAULT_REGION="$S3_DEFAULT_REGION")
     if [ -n "$S3_ENDPOINT_URL" ]; then
-        docker_cmd="$docker_cmd -e AWS_ENDPOINT_URL=$S3_ENDPOINT_URL"
+        docker_args+=(-e AWS_ENDPOINT_URL="$S3_ENDPOINT_URL")
     fi
-    docker_cmd="$docker_cmd -v $backup_path:/aws/$filename amazon/aws-cli s3 cp $filename s3://$S3_BUCKET/$S3_PATH/$filename"
-    eval $docker_cmd
+    docker_args+=(-v "$backup_path:/aws/$filename" amazon/aws-cli s3 cp "$filename" "s3://$S3_BUCKET/$S3_PATH/$filename")
+    docker run "${docker_args[@]}"
     delete_backup
     ;;
 
 "scp")
     echo "Uploading via SCP …"
-    scp $backup_path $SCP_TARGET
+    scp "$backup_path" "$SCP_TARGET"
     delete_backup
     ;;
 
@@ -166,7 +169,7 @@ case $BACKUP_PROVIDER in
 esac
 
 # cleanup
-rm $dbdump_path
+rm "$dbdump_path"
 
 echo "Backup done."
 

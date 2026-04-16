@@ -1,7 +1,9 @@
+#!/usr/bin/env bash
+
 read_from_env_file() {
     if cat "$1" &>/dev/null; then
         while IFS= read -r line; do
-            ! [[ "$line" == "#"* ]] && [[ "$line" == *"="* ]] && export "$line" || true
+            ! [[ "$line" == "#"* ]] && [[ "$line" == *"="* ]] && export "${line?}" || true
         done <"$1"
     fi
 }
@@ -9,8 +11,8 @@ read_from_env_file() {
 read_from_env_file .deploy
 
 bitcart_update_docker_env() {
-    touch $BITCART_ENV_FILE
-    cat >$BITCART_ENV_FILE <<EOF
+    touch "$BITCART_ENV_FILE"
+    cat >"$BITCART_ENV_FILE" <<EOF
 BITCART_HOST=$BITCART_HOST
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 REVERSEPROXY_HTTP_PORT=$REVERSEPROXY_HTTP_PORT
@@ -66,7 +68,7 @@ EOF
 bitcart_start() {
     create_backup_volume
     install_plugins
-    docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d $1
+    docker compose -p "$NAME" -f compose/generated.yml up --build --remove-orphans -d "$1"
 }
 
 bitcart_stop() {
@@ -108,7 +110,7 @@ get_profile_file() {
             if [[ ! -f "$HOME/.zprofile" ]]; then
                 touch "$HOME/.zprofile"
             fi
-            if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.zprofile") ]]; then
+            if ! grep -q ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.zprofile"; then
                 # Line does not exist, add it
                 echo ". \"$BASH_PROFILE_SCRIPT\"" >>"$HOME/.zprofile"
             fi
@@ -116,7 +118,7 @@ get_profile_file() {
             if [[ ! -f "$HOME/.bash_profile" ]]; then
                 touch "$HOME/.bash_profile"
             fi
-            if [[ -z $(grep ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile") ]]; then
+            if ! grep -q ". \"$BASH_PROFILE_SCRIPT\"" "$HOME/.bash_profile"; then
                 # Line does not exist, add it
                 echo ". \"$BASH_PROFILE_SCRIPT\"" >>"$HOME/.bash_profile"
             fi
@@ -134,8 +136,9 @@ get_profile_file() {
 }
 
 load_env() {
-    get_profile_file "$SCRIPTS_POSTFIX" ${1:-false}
-    . ${BASH_PROFILE_SCRIPT}
+    get_profile_file "$SCRIPTS_POSTFIX" "${1:-false}"
+    # shellcheck source=/dev/null
+    . "${BASH_PROFILE_SCRIPT}"
 }
 
 try() {
@@ -143,13 +146,13 @@ try() {
 }
 
 remove_host() {
-    if [ -n "$(grep -w "$1$" /etc/hosts)" ]; then
+    if grep -wq "$1$" /etc/hosts; then
         try sudo sed -ie "/[[:space:]]$1/d" /etc/hosts
     fi
 }
 
 add_host() {
-    if [ -z "$(grep -E "[[:space:]]$2" /etc/hosts)" ]; then
+    if ! grep -Eq "[[:space:]]$2" /etc/hosts; then
         try sudo printf "%s\t%s\n" "$1" "$2" | sudo tee -a /etc/hosts >/dev/null
     fi
 }
@@ -158,8 +161,8 @@ modify_host() {
     if [ -z "$2" ]; then
         return
     fi
-    remove_host $2
-    add_host $1 $2
+    remove_host "$2"
+    add_host "$1" "$2"
 }
 
 apply_local_modifications() {
@@ -169,9 +172,9 @@ apply_local_modifications() {
             echo "Not modifying hosts."
         else
             echo "WARNING! Modifying /etc/hosts to make local setup work. It may require superuser privileges."
-            modify_host 172.17.0.1 $BITCART_STORE_HOST
-            modify_host 172.17.0.1 $BITCART_HOST
-            modify_host 172.17.0.1 $BITCART_ADMIN_HOST
+            modify_host 172.17.0.1 "$BITCART_STORE_HOST"
+            modify_host 172.17.0.1 "$BITCART_HOST"
+            modify_host 172.17.0.1 "$BITCART_ADMIN_HOST"
         fi
     fi
 }
@@ -195,17 +198,17 @@ create_backup_volume() {
 
 bitcart_dump_db() {
     create_backup_volume
-    docker exec $(container_name "database-1") pg_dumpall -c -U postgres >"$backup_dir/$1"
+    docker exec "$(container_name "database-1")" pg_dumpall -c -U postgres >"$backup_dir/$1"
 }
 
 bitcart_restore_db() {
     bitcart_start database
     # wait for db to be up
-    until docker exec -i $(container_name "database-1") psql -U postgres -c '\l'; do
+    until docker exec -i "$(container_name "database-1")" psql -U postgres -c '\l'; do
         echo >&2 "Postgres is unavailable - sleeping"
         sleep 1
     done
-    cat $1 | docker exec -i $(container_name "database-1") psql -U postgres
+    docker exec -i "$(container_name "database-1")" psql -U postgres <"$1"
 }
 
 version() {
@@ -213,7 +216,7 @@ version() {
 }
 
 check_docker_compose() {
-    if [ ! -z "$(docker-compose --version 2>/dev/null | grep docker-compose)" ] || ! [[ $(docker compose version 2>/dev/null) ]] || [ $(version $(docker compose version --short)) -lt $(version "2.9.0") ]; then
+    if docker-compose --version 2>/dev/null | grep -q docker-compose || ! [[ $(docker compose version 2>/dev/null) ]] || [ "$(version "$(docker compose version --short)")" -lt "$(version "2.9.0")" ]; then
         install_docker_compose
     fi
 }
@@ -230,9 +233,9 @@ install_docker_compose() {
     fi
     DOCKER_COMPOSE_DOWNLOAD="https://github.com/docker/compose/releases/latest/download/docker-compose-$OS-$ARCH"
     echo "Trying to install docker-compose by downloading on $DOCKER_COMPOSE_DOWNLOAD ($(uname -m))"
-    sudo mkdir -p $INSTALL_PATH
-    sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o $INSTALL_PATH/docker-compose
-    sudo chmod +x $INSTALL_PATH/docker-compose
+    sudo mkdir -p "$INSTALL_PATH"
+    sudo curl -L "$DOCKER_COMPOSE_DOWNLOAD" -o "$INSTALL_PATH/docker-compose"
+    sudo chmod +x "$INSTALL_PATH/docker-compose"
     # remove old docker-compose
     try sudo rm "$(command -v docker-compose)" &>/dev/null
 }
@@ -248,7 +251,7 @@ install_tooling() {
             else
                 COMPLETION_DIR="$HOME/.zsh/completions"
                 mkdir -p "$COMPLETION_DIR"
-                if [[ -z $(grep "fpath.*\.zsh/completions" "$HOME/.zshrc" 2>/dev/null) ]]; then
+                if ! grep -q "fpath.*\.zsh/completions" "$HOME/.zshrc" 2>/dev/null; then
                     echo "fpath=($COMPLETION_DIR \$fpath)" >>"$HOME/.zshrc"
                 fi
             fi
@@ -261,7 +264,7 @@ install_tooling() {
             else
                 COMPLETION_DIR="$HOME/.bash_completion.d"
                 mkdir -p "$COMPLETION_DIR"
-                if [[ -z $(grep "bash_completion.d/bitcart-cli.sh" "$HOME/.bash_profile" 2>/dev/null) ]]; then
+                if ! grep -q "bash_completion.d/bitcart-cli.sh" "$HOME/.bash_profile" 2>/dev/null; then
                     echo ". \"$COMPLETION_DIR/bitcart-cli.sh\" 2>/dev/null" >>"$HOME/.bash_profile"
                 fi
             fi
@@ -269,11 +272,11 @@ install_tooling() {
         if [[ "$SHELL" == */zsh ]]; then
             {
                 echo "#compdef bitcart-cli.sh"
-                cat compose/scripts/$AUTOCOMPLETE_FILE
+                cat "compose/scripts/$AUTOCOMPLETE_FILE"
             } >"$COMPLETION_DIR/_bitcart-cli.sh"
             try chmod +x "$COMPLETION_DIR/_bitcart-cli.sh"
         else
-            try cp compose/scripts/$AUTOCOMPLETE_FILE "$COMPLETION_DIR/bitcart-cli.sh"
+            try cp "compose/scripts/$AUTOCOMPLETE_FILE" "$COMPLETION_DIR/bitcart-cli.sh"
             try chmod +x "$COMPLETION_DIR/bitcart-cli.sh"
         fi
     else
@@ -292,7 +295,7 @@ save_deploy_config() {
     else
         BACKUP_ENCRYPTION_KEY="$existing_key"
     fi
-    cat >${BITCART_DEPLOYMENT_CONFIG} <<EOF
+    cat >"${BITCART_DEPLOYMENT_CONFIG}" <<EOF
 #!/bin/bash
 NAME=$NAME
 SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
@@ -302,19 +305,19 @@ BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
 DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
 BACKUP_ENCRYPTION_KEY=$BACKUP_ENCRYPTION_KEY
 EOF
-    chmod +x ${BITCART_DEPLOYMENT_CONFIG}
-    read_from_env_file $BITCART_DEPLOYMENT_CONFIG
+    chmod +x "${BITCART_DEPLOYMENT_CONFIG}"
+    read_from_env_file "$BITCART_DEPLOYMENT_CONFIG"
 }
 
 get_plugins_hash() {
-    LC_ALL=C find compose/plugins/$1 -type f -print0 2>/dev/null | sort -z | xargs -0 sha1sum | sha1sum | awk '{print $1}'
+    LC_ALL=C find "compose/plugins/$1" -type f -print0 2>/dev/null | sort -z | xargs -0 sha1sum | sha1sum | awk '{print $1}'
 }
 
 make_backup_image() {
-    if [ "$(docker inspect --format '{{ index .Config.Labels "org.bitcart.plugins"}}' $1:stable)" = true ]; then
+    if [ "$(docker inspect --format '{{ index .Config.Labels "org.bitcart.plugins"}}' "$1:stable")" = true ]; then
         :
     else
-        docker tag $1:stable $1:original
+        docker tag "$1:stable" "$1:original"
     fi
 }
 
@@ -323,7 +326,7 @@ install_plugins() {
     COIN_COMPONENTS=$(./build.sh --cryptos-only | tail -1)
     failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
     error=false
-    rm -f $failed_file
+    rm -f "$failed_file"
     if [[ " ${COMPONENTS[*]} " =~ " backend " ]]; then
         make_backup_image bitcart/bitcart
     fi
@@ -334,11 +337,11 @@ install_plugins() {
         make_backup_image bitcart/bitcart-store
     fi
     for coin in $COIN_COMPONENTS; do
-        make_backup_image bitcart/bitcart-$coin
+        make_backup_image "bitcart/bitcart-$coin"
     done
     if [[ "$DOCKER_PLUGINS_HASH" != "$(get_plugins_hash docker)" ]]; then
-        ./build.sh || touch $failed_file
-        docker compose -f compose/generated.yml config || touch $failed_file
+        ./build.sh || touch "$failed_file"
+        docker compose -f compose/generated.yml config || touch "$failed_file"
     fi
     if [[ " ${COMPONENTS[*]} " =~ " backend " ]] && [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
         docker build -t bitcart/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
@@ -361,9 +364,9 @@ install_plugins() {
             docker tag bitcart/bitcart-store:original bitcart/bitcart-store:stable
         fi
         for coin in $COIN_COMPONENTS; do
-            docker tag bitcart/bitcart-$coin:original bitcart/bitcart-$coin:stable
+            docker tag "bitcart/bitcart-$coin:original" "bitcart/bitcart-$coin:stable"
         done
-        touch $failed_file
+        touch "$failed_file"
     fi
     save_deploy_config
 }

@@ -20,17 +20,18 @@ generated_warning() {
 	EOH
 }
 
-coins="$(jq -r '.[].dockerfile | sub(".Dockerfile"; "")' $images)"
+coins="$(jq -r '.[].dockerfile | sub(".Dockerfile"; "")' "$images")"
 eval "coins=( $coins )"
 
 for coin in "${coins[@]}"; do
     if [ "$coin" == "backend" ]; then
         continue
     fi
-    export bases=$(jq -r ".[\"bitcart-$coin\"].bases // \"btc\"" $images)
+    bases=$(jq -r ".[\"bitcart-$coin\"].bases // \"btc\"" "$images")
+    export bases
     export coin
     custom=false
-    name=$(jq -r ".[\"bitcart-$coin\"].name // \"\"" $images)
+    name=$(jq -r ".[\"bitcart-$coin\"].name // \"\"" "$images")
     if [ -z "$name" ]; then
         if [ "$bases" == "btc" ]; then
             name="electrum"

@@ -42,7 +42,7 @@ while (("$#")); do
         shift
         break
         ;;
-    -* | --*=) # unsupported flags
+    --*= | -*) # unsupported flags
         echo "Error: Unsupported flag $1" >&2
         display_help
         exit 1
@@ -61,9 +61,10 @@ if [ -z "$BACKUP_FILE" ]; then
     exit 0
 fi
 
+# shellcheck source=helpers.sh
 . helpers.sh
 load_env true
-cd "$BITCART_BASE_DIRECTORY"
+cd "$BITCART_BASE_DIRECTORY" || exit 1
 
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 
@@ -86,21 +87,20 @@ if [[ "$BACKUP_FILE" == *.enc ]]; then
     else
         decrypted_file="${TEMP_DIR}/backup.tar.zst"
     fi
-    openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$BACKUP_FILE" -out "$decrypted_file" -pass pass:"$ENCRYPTION_KEY"
-    if [ $? -ne 0 ]; then
+    if ! openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$BACKUP_FILE" -out "$decrypted_file" -pass pass:"$ENCRYPTION_KEY"; then
         echo "Error: Failed to decrypt backup file"
-        rm -rf $TEMP_DIR
+        rm -rf "$TEMP_DIR"
         exit 1
     fi
     BACKUP_FILE="$decrypted_file"
 fi
 
 if [[ "$BACKUP_FILE" == *.tar.gz ]]; then
-    tar -C $TEMP_DIR -xzvf "$BACKUP_FILE"
+    tar -C "$TEMP_DIR" -xzvf "$BACKUP_FILE"
 else
     tar_file="${TEMP_DIR}/backup.tar"
     zstdmt -d "$BACKUP_FILE" -o "$tar_file"
-    tar -C $TEMP_DIR -xvf "$tar_file"
+    tar -C "$TEMP_DIR" -xvf "$tar_file"
     rm "$tar_file"
 fi
 
@@ -108,15 +108,15 @@ echo "Stopping Bitcart…"
 bitcart_stop
 
 echo "Restoring database …"
-bitcart_restore_db $TEMP_DIR/database.sql
+bitcart_restore_db "$TEMP_DIR/database.sql"
 echo "Restoring docker volumes…"
-cp -r $TEMP_DIR/volumes/ /var/lib/docker
-cp -r $TEMP_DIR/plugins compose
+cp -r "$TEMP_DIR/volumes/" /var/lib/docker
+cp -r "$TEMP_DIR/plugins" compose
 
 echo "Restarting Bitcart…"
 bitcart_start
 
-rm -rf $TEMP_DIR
+rm -rf "$TEMP_DIR"
 
 if $DELETE_BACKUP; then
     rm -rf "$BACKUP_FILE"

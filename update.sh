@@ -2,6 +2,7 @@
 
 set -e
 
+# shellcheck source=helpers.sh
 . helpers.sh
 load_env
 
@@ -26,6 +27,7 @@ if ! ./build.sh; then
     exit 1
 fi
 
+# shellcheck source=helpers.sh
 . helpers.sh
 check_docker_compose
 install_tooling
