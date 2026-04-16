@@ -7,9 +7,7 @@ if [ "$BITCARTGEN_DOCKER_IMAGE" == "bitcart/docker-compose-generator:local" ]; t
 else
     set +e
     docker pull "$BITCARTGEN_DOCKER_IMAGE"
-    # word-splitting intentional: pass each dangling image ID as separate arg to docker rmi
-    # shellcheck disable=SC2046
-    docker rmi $(docker images bitcart/docker-compose-generator --format "{{.Tag}};{{.ID}}" | grep "^<none>" | cut -f2 -d ';') >/dev/null 2>&1
+    docker images bitcart/docker-compose-generator --format "{{.Tag}};{{.ID}}" | grep "^<none>" | cut -f2 -d ';' | xargs -r docker rmi >/dev/null 2>&1
     set -e
 fi
 
