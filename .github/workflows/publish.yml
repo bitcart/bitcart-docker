@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: ${{ github.workflow_ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -14,7 +18,7 @@ jobs:
     uses: ./.github/workflows/test.yml
     permissions:
       contents: read
-      security-events: write
+      security-events: write # needed for github advanced security
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -28,8 +32,8 @@ jobs:
 
     permissions:
       contents: read
-      pages: write
-      id-token: write
+      pages: write # to publish on github pages
+      id-token: write # OIDC token for pages deployment
 
     steps:
       - uses: actions/checkout@v6
@@ -65,10 +69,10 @@ jobs:
     uses: bitcart/bitcart-actions/.github/workflows/build-docker-image.yml@master
     permissions:
       contents: read
-      packages: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
+      packages: write # publishing to GHCR
+      id-token: write # OIDC for provenance
+      attestations: write # github attestations
+      artifact-metadata: write # artifact storage metadata (recommended by actions/attest)
     with:
       dockerfile: generator/Dockerfile
       image-name: bitcart/docker-compose-generator

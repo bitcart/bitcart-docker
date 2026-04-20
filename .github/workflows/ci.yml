@@ -16,6 +16,6 @@ jobs:
     uses: ./.github/workflows/test.yml
     permissions:
       contents: read
-      security-events: write
+      security-events: write # needed for github advanced security
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
