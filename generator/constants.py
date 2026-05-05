@@ -15,6 +15,7 @@ GENERATED_PATH = path_join(COMPOSE_DIR, GENERATED_NAME)
 # Crypto constants
 CRYPTOS = {
     "btc": {"component": "bitcoin"},
+    "btclnd": {"component": "bitcoinlnd"},
     "ltc": {"component": "litecoin"},
     "bch": {"component": "bitcoincash"},
     "xrg": {"component": "ergon"},

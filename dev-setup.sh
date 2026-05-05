@@ -13,6 +13,7 @@ cat >conf/.env <<EOF
 DB_HOST=database
 REDIS_HOST=redis://redis
 BTC_HOST=bitcoin
+BTCLND_HOST=bitcoinlnd
 LTC_HOST=litecoin
 BCH_HOST=bitcoincash
 XRG_HOST=ergon
