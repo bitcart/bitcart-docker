@@ -62,6 +62,7 @@ Environment variables:
     ETH_NETWORK: The network to run ethereum daemon on (eg. mainnet, kovan)
     BNB_NETWORK: The network to run binancecoin daemon on (eg. mainnet, testnet)
     MATIC_NETWORK: The network to run polygon daemon on (eg. mainnet, testnet)
+    ARBETH_NETWORK: The network to run arbitrum daemon on (eg. mainnet, testnet)
     TRX_NETWORK: The network to run tron daemon on (eg. mainnet, testnet)
     XRG_NETWORK: The network to run ergon daemon on (eg. mainnet)
     LTC_NETWORK: The network to run litecoin daemon on (eg. mainnet, testnet)
@@ -222,6 +223,7 @@ esac
 : "${ETH_NETWORK:=mainnet}"
 : "${BNB_NETWORK:=mainnet}"
 : "${MATIC_NETWORK:=mainnet}"
+: "${ARBETH_NETWORK:=mainnet}"
 : "${TRX_NETWORK:=mainnet}"
 : "${XRG_NETWORK:=mainnet}"
 : "${LTC_NETWORK:=mainnet}"
@@ -289,6 +291,7 @@ BCH_NETWORK=$BCH_NETWORK
 ETH_NETWORK=$ETH_NETWORK
 BNB_NETWORK=$BNB_NETWORK
 MATIC_NETWORK=$MATIC_NETWORK
+ARBETH_NETWORK=$ARBETH_NETWORK
 TRX_NETWORK=$TRX_NETWORK
 XRG_NETWORK=$XRG_NETWORK
 LTC_NETWORK=$LTC_NETWORK

@@ -24,6 +24,7 @@ CRYPTOS = {
     "trx": {"component": "tron"},
     "grs": {"component": "groestlcoin"},
     "xmr": {"component": "monero"},
+    "arbeth": {"component": "arbitrum"},
 }
 TOR_CRYPTOS = {"btc": CRYPTOS["btc"]}  # cryptos to enable tor proxy for
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
