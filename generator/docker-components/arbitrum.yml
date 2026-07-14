@@ -1,0 +1,24 @@
+services:
+  arbitrum:
+    restart: unless-stopped
+    image: bitcart/bitcart-arbeth:stable
+    environment:
+      ARBETH_NETWORK: ${ARBETH_NETWORK:-mainnet}
+      ARBETH_SERVER: ${ARBETH_SERVER:-https://arb1.arbitrum.io/rpc}
+      ARBETH_SEED_SERVER: ${ARBETH_SEED_SERVER:-}
+      ARBETH_SEED_SERVER_REFRESH_INTERVAL: ${ARBETH_SEED_SERVER_REFRESH_INTERVAL:-3600}
+      ARBETH_ARCHIVE_SERVER: ${ARBETH_ARCHIVE_SERVER:-}
+      ARBETH_DEBUG: ${ARBETH_DEBUG:-false}
+    expose:
+      - "5012"
+    volumes:
+      - "arbitrum_datadir:/data"
+
+  backend:
+    depends_on:
+      - arbitrum
+    links:
+      - arbitrum
+
+volumes:
+  arbitrum_datadir:

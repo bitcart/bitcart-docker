@@ -19,6 +19,7 @@ XRG_HOST=ergon
 ETH_HOST=ethereum
 BNB_HOST=binancecoin
 MATIC_HOST=polygon
+ARBETH_HOST=arbitrum
 TRX_HOST=tron
 GRS_HOST=groestlcoin
 XMR_HOST=monero
