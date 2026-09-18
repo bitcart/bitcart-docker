@@ -3,7 +3,7 @@ set -e
 
 : "${BITCARTGEN_DOCKER_IMAGE:=bitcart/docker-compose-generator}"
 if [ "$BITCARTGEN_DOCKER_IMAGE" == "bitcart/docker-compose-generator:local" ]; then
-    docker build -f generator/Dockerfile . --tag "$BITCARTGEN_DOCKER_IMAGE"
+    docker build --pull -f generator/Dockerfile . --tag "$BITCARTGEN_DOCKER_IMAGE"
 else
     set +e
     docker pull "$BITCARTGEN_DOCKER_IMAGE"

@@ -21,11 +21,11 @@ IFS=', ' read -r -a CRYPTOS <<<"$BITCART_CRYPTOS"
 cd compose
 
 if [[ " ${COMPONENTS[*]} " == *" backend "* ]]; then
-    docker build -t bitcart/bitcart:stable -f backend.Dockerfile . || true
+    docker build --pull -t bitcart/bitcart:stable -f backend.Dockerfile . || true
 fi
 
 for coin in "${CRYPTOS[@]}"; do
-    docker build -t "bitcart/bitcart-$coin:stable" -f "$coin.Dockerfile" . || true
+    docker build --pull -t "bitcart/bitcart-$coin:stable" -f "$coin.Dockerfile" . || true
 done
 
 cd ..
@@ -38,7 +38,7 @@ build_additional_image() {
         cd "$TEMP_DIR"
         git clone "https://github.com/bitcart/bitcart-$1"
         cd "bitcart-$1"
-        docker build -t "bitcart/bitcart-$1:stable" . || true
+        docker build --pull -t "bitcart/bitcart-$1:stable" . || true
         cd "$OLDDIR"
         rm -rf "$TEMP_DIR"
     fi
