@@ -15,7 +15,7 @@ permissions:
 jobs:
   ci:
     name: CI
-    uses: ./.github/workflows/test.yml
+    uses: $/.github/workflows/test.yml
     permissions:
       contents: read
       security-events: write # needed for github advanced security
