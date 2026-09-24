@@ -1,0 +1,14 @@
+# Dev overrides for rootless local development.
+#
+# The admin/store images don't support SERVER_API_URL, so their SSR
+# requests use the public sslip.io URL. That resolves to 127.0.0.1
+# which inside a container is the container itself. We add extra_hosts
+# so the sslip.io hostnames resolve to the Docker host instead, where
+# nginx is listening on port 8080.
+services:
+  admin:
+    extra_hosts:
+      - "api.127-0-0-1.sslip.io:host-gateway"
+  store:
+    extra_hosts:
+      - "api.127-0-0-1.sslip.io:host-gateway"

@@ -17,3 +17,4 @@ compose/plugins/*
 .prettiercache
 .DS_Store
 generator/demo/*.whl
+var/
