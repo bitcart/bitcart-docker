@@ -60,7 +60,7 @@ jobs:
         if: ${{ !cancelled() }}
 
   agent:
-    name: agent-(${{ matrix.os }})
+    name: agent-${{ matrix.os }}
     needs: [lint, zizmor]
     strategy:
       fail-fast: false
