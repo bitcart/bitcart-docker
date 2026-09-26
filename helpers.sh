@@ -24,9 +24,6 @@ REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
 REVERSEPROXY_TRUSTED_IPS=$REVERSEPROXY_TRUSTED_IPS
 REVERSEPROXY_TRUSTED_IPS_PRESET=$REVERSEPROXY_TRUSTED_IPS_PRESET
 REVERSEPROXY_TRUSTED_HEADERS=$REVERSEPROXY_TRUSTED_HEADERS
-BITCART_SSH_KEY_FILE=$BITCART_SSH_KEY_FILE
-BITCART_SSH_AUTHORIZED_KEYS=$BITCART_SSH_AUTHORIZED_KEYS
-BITCART_HOST_SSH_AUTHORIZED_KEYS=$BITCART_HOST_SSH_AUTHORIZED_KEYS
 BITCART_STORE_HOST=$BITCART_STORE_HOST
 BITCART_STORE_API_URL=$BITCART_STORE_API_URL
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
@@ -55,6 +52,8 @@ BITCART_UPDATE_URL=$BITCART_UPDATE_URL
 BITCART_SENTRY_DSN=$BITCART_SENTRY_DSN
 BITCART_API_WORKERS=$BITCART_API_WORKERS
 BITCART_PROMETHEUS_METRICS_ENABLED=$BITCART_PROMETHEUS_METRICS_ENABLED
+BITCART_AGENT_TRANSPORT=$BITCART_AGENT_TRANSPORT
+BITCART_AGENT_TOKEN=$BITCART_AGENT_TOKEN
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_SCALE")
@@ -304,9 +303,17 @@ STORE_PLUGINS_HASH=$(get_plugins_hash store)
 BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
 DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
 BACKUP_ENCRYPTION_KEY=$BACKUP_ENCRYPTION_KEY
+BITCART_UPGRADES=$BITCART_UPGRADES
 EOF
     chmod +x "${BITCART_DEPLOYMENT_CONFIG}"
     read_from_env_file "$BITCART_DEPLOYMENT_CONFIG"
+}
+
+set_deploy_value() {
+    local file="$BITCART_BASE_DIRECTORY/.deploy" rest
+    rest=$(grep -v "^$1=" "$file" 2>/dev/null)
+    printf '%s\n%s=%s\n' "$rest" "$1" "$2" >"$file"
+    export "$1=$2"
 }
 
 get_plugins_hash() {
@@ -369,4 +376,38 @@ install_plugins() {
         touch "$failed_file"
     fi
     save_deploy_config
+}
+
+job_result() {
+    if [ -n "$BITCART_JOB_RESULT" ]; then
+        "$BITCART_BASE_DIRECTORY/bitcart-agent" --job-result "$@" || echo "Failed to record the job result"
+    fi
+}
+
+upgrade_names() {
+    local file
+    for file in "$BITCART_BASE_DIRECTORY"/contrib/upgrades/[0-9]*.sh; do
+        if [ -f "$file" ]; then
+            basename "$file" .sh
+        fi
+    done
+}
+
+run_upgrades() {
+    local upgrade
+    for upgrade in $(upgrade_names); do
+        if [[ ",$BITCART_UPGRADES," == *",$upgrade,"* ]]; then
+            continue
+        fi
+        echo "Applying upgrade $upgrade"
+        if ! "$BITCART_BASE_DIRECTORY/contrib/upgrades/$upgrade.sh"; then
+            echo "WARNING: upgrade $upgrade failed, the next update retries it"
+            return 0
+        fi
+        set_deploy_value BITCART_UPGRADES "${BITCART_UPGRADES:+$BITCART_UPGRADES,}$upgrade"
+    done
+}
+
+mark_upgrades_applied() {
+    set_deploy_value BITCART_UPGRADES "$(upgrade_names | paste -sd, -)"
 }

@@ -101,6 +101,86 @@ Here is a complete list of configuration settings:
 | TOR_RELAY_NICKNAME            | If tor relay is activated, the relay nickname                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | :x:         | Extension |
 | TOR_RELAY_EMAIL               | If tor relay is activated, the email for Tor to contact you regarding your relay                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | :x:         | Extension |
 
+## Host agent
+
+The admin panel manages its own instance through the **host agent**, `bitcart-agent`. The agent runs the scripts of this repository for a fixed set of operations, one job at a time. Jobs run outside the containers and keep running while the containers restart or update. Among the containers, only the worker has access to the agent.
+
+The agent is a static binary with its source in `host-agent/`. `setup.sh` and `update.sh` copy it from the generator image to the repository root. To run a modified agent, set `BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local`: `build.sh` then builds the generator image from this repository.
+
+| Transport | Default                                   | Worker connection                                                                          |
+| --------- | ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `systemd` | Linux with systemd                        | unix socket `/run/bitcart/agent.sock`, open to all local users                             |
+| `launchd` | macOS                                     | `127.0.0.1:$BITCART_AGENT_PORT` through `host.docker.internal`, with a token               |
+| `ssh`     | Linux without systemd that had SSH access | a root key in `.agent/ssh/`, restricted to the agent (see [SSH transport](#ssh-transport)) |
+| `manual`  | never                                     | a self-managed listener (see [Manual transport](#manual-transport))                        |
+| `none`    | other Linux hosts                         | none: the scripts of this repository manage the instance                                   |
+
+| Name                    | Description                                                                  | Default |
+| ----------------------- | ---------------------------------------------------------------------------- | ------- |
+| BITCART_AGENT_TRANSPORT | `auto`, `systemd`, `launchd`, `ssh`, `manual` or `none`                      | `auto`  |
+| BITCART_AGENT_PORT      | `launchd` only: loopback port, different for each deployment on the same Mac | `47123` |
+| BITCART_SSH_PORT        | `ssh` only: port of the host's sshd                                          | `22`    |
+
+`auto` is resolved on the first run and saved in `.env`. To switch transports, export another `BITCART_AGENT_TRANSPORT` value and rerun `setup.sh`. Every run of `setup.sh` or `update.sh` removes the files of the other transports. Named deployments (`setup.sh --name <name>`) add a `-<name>` suffix to the socket directory and the service names. The agent is installed only when the Bitcart directory path consists of letters, digits and `._/-`.
+
+### Logs and checks
+
+- Job state and logs: `.agent/jobs/<id>/`, for the 50 newest jobs.
+- Started jobs and rejected requests: the system log, tag `bitcart-agent` (`journalctl -t bitcart-agent` on Linux).
+- Agent crashes: `.agent/agent.log`.
+- Service: `systemctl status bitcart-agent` on Linux, `launchctl print gui/$(id -u)/org.bitcart.agent` on macOS.
+
+```bash
+# Runs the agent directly on Linux
+printf 'ping\0\0' | ./bitcart-agent
+# Runs the agent directly on macOS, with the token from .env
+printf 'ping\0auth=%s\0\0' "$BITCART_AGENT_TOKEN" | ./bitcart-agent
+```
+
+### SSH transport
+
+The `ssh` transport serves Linux hosts without systemd. `setup.sh` generates a key in `.agent/ssh/` and mounts it read-only into the worker. The key is added to root's `authorized_keys` with `restrict,command=`, limiting it to running the agent. Requirements: sshd accepts key logins for root on `BITCART_SSH_PORT` (`PermitRootLogin` is not `no`), and root's shell startup files print nothing.
+
+### Manual transport
+
+The `manual` transport is not supported. `setup.sh` and `update.sh` only install and update `bitcart-agent`; the listener is managed by the host administrator. An example for Alpine with OpenRC:
+
+1. Run a listener that starts `<bitcart-docker>/bitcart-agent` as root for each connection, with the connection on stdin and stdout. The socket must be writable by all users, because the worker does not run as root:
+
+   ```bash
+   #!/sbin/openrc-run
+   # /etc/init.d/bitcart-agent
+   supervisor=supervise-daemon
+   command=/usr/bin/socat
+   command_args="UNIX-LISTEN:/run/bitcart/agent.sock,fork,mode=666 EXEC:/root/bitcart-docker/bitcart-agent"
+   start_pre() { mkdir -p /run/bitcart; }
+   ```
+
+2. Add a docker component, `generator/docker-components/host-agent.yml`. It mounts the socket directory into the worker and sets the agent address:
+
+   ```yaml
+   services:
+     worker:
+       environment:
+         BITCART_AGENT_URL: unix:///run/bitcart-agent/agent.sock
+       volumes:
+         - /run/bitcart:/run/bitcart-agent
+   ```
+
+3. Run `setup.sh` with the local generator image and the component added to any existing additional components:
+
+   ```bash
+   export BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local
+   export BITCART_ADDITIONAL_COMPONENTS=host-agent
+   ./setup.sh
+   ```
+
+   Then check the connection with `printf 'ping\0\0' | socat - UNIX-CONNECT:/run/bitcart/agent.sock`.
+
+### Migration from SSH access
+
+Earlier versions gave the containers root SSH access to the host. The first update installs the host agent. The old key (comment `bitcart`) is removed from `authorized_keys` once the worker reaches the agent, or immediately with the `none` transport. Until then the key is kept, and each update retries. To disable in-panel management, export `BITCART_AGENT_TRANSPORT=none` before the first `./update.sh`, or switch to `none` with `setup.sh` later.
+
 ## docker-compose.yml generator
 
 You can preview and generate a `docker-compose.yml` for your configuration at [generator.bitcart.ai](https://generator.bitcart.ai).

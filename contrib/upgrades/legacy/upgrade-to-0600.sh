@@ -11,9 +11,9 @@ EOF
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=helpers.sh
-. "${SCRIPT_DIR}/../../helpers.sh"
+. "${SCRIPT_DIR}/../../../helpers.sh"
 load_env
-COMPOSE_DIR="$(realpath "${SCRIPT_DIR}/../../compose")"
+COMPOSE_DIR="$(realpath "${SCRIPT_DIR}/../../../compose")"
 
 volumes_dir=/var/lib/docker/volumes
 datadir="$volumes_dir/$(volume_name bitcart_datadir)/_data"

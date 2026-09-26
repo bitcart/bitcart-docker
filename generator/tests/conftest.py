@@ -12,7 +12,7 @@ from generator.settings import Settings
 
 def pytest_generate_tests(metafunc):
     # clean up settings before a test session
-    for key in filter(lambda env: env.startswith("BITCART_"), os.environ):
+    for key in filter(lambda env: env.startswith(("BITCART_", "REVERSEPROXY_")) or env == "NAME", os.environ):
         del os.environ[key]
 
 

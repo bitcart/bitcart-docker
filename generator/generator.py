@@ -1,6 +1,7 @@
 import glob
 import importlib
 import importlib.util
+import json
 import os
 import sys
 from collections import UserDict
@@ -16,6 +17,7 @@ from generator.constants import (
     CRYPTOS,
     FRONTEND_COMPONENTS,
     GENERATED_PATH,
+    METADATA_PATH,
     PLUGINS_DIR,
     RULES_DIR,
     RULES_PYTHON_DIR,
@@ -211,6 +213,23 @@ def save(data, out_path=GENERATED_PATH):
         yaml.dump(data, f, default_flow_style=False)
 
 
+def generate_metadata():
+    return {
+        "components": [component_name(component) for component in get_components_list()],
+        "cryptos": get_cryptos_list(),
+    }
+
+
+def save_metadata(metadata, out_path=METADATA_PATH):
+    with open(out_path, "w") as f:
+        json.dump(metadata, f, indent=4)
+        f.write("\n")
+
+
+def component_name(component):
+    return basename(component).removesuffix(".yml")
+
+
 def generate_config():
     settings = Settings()
     return generate(add_components(settings), settings)
@@ -221,7 +240,7 @@ def get_components_list():
     return list(add_components(settings))
 
 
-def get_cryptos_list():  # pragma: no cover
+def get_cryptos_list():
     def get_crypto(crypto):
         for coin in CRYPTOS:
             if CRYPTOS[coin]["component"] == crypto:
@@ -240,6 +259,7 @@ def main():  # pragma: no cover
             print(" ".join(get_cryptos_list()))
             return
         save(generate_config())
+        save_metadata(generate_metadata())
     except ConfigError as e:
         sys.exit(str(e))
 

@@ -13,6 +13,7 @@ export BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local
 ./setup.sh
 
 timeout 1m bash .github/test-connectivity.sh
+timeout 5m bash .github/test-agent.sh
 
 # # Testing scripts are not crashing and installed
 ./start.sh

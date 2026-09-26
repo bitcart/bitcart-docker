@@ -59,9 +59,35 @@ jobs:
         uses: bitcart/bitcart-actions/actions/upload-test-results@master
         if: ${{ !cancelled() }}
 
+  agent:
+    name: agent-(${{ matrix.os }})
+    needs: [lint, zizmor]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: bitcart/bitcart-actions/actions/setup-go@master
+        with:
+          enable-cache: "false"
+
+      - name: Run host agent tests
+        working-directory: host-agent
+        run: |
+          go vet ./...
+          go test -race ./...
+          go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
   cansetup:
     name: cansetup
-    needs: test
+    needs: [test, agent]
     runs-on: ubuntu-latest
 
     steps:

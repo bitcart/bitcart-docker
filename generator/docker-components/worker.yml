@@ -24,10 +24,6 @@ services:
       GRS_LIGHTNING: ${GRS_LIGHTNING:-false}
       XMR_NETWORK: ${XMR_NETWORK:-mainnet}
       UPDATE_URL: ${BITCART_UPDATE_URL:-https://api.bitcart.ai/updates/latest}
-      SSH_CONNECTION: "root@host.docker.internal:$<BITCART_SSH_PORT>:22?"
-      SSH_KEY_FILE: ${BITCART_SSH_KEY_FILE}
-      SSH_AUTHORIZED_KEYS: ${BITCART_SSH_AUTHORIZED_KEYS}
-      BASH_PROFILE_SCRIPT: ${BASH_PROFILE_SCRIPT}
       BITCART_BACKEND_PLUGINS_DIR: /plugins/backend
       BITCART_ADMIN_PLUGINS_DIR: /plugins/admin
       BITCART_STORE_PLUGINS_DIR: /plugins/store
@@ -39,8 +35,6 @@ services:
       BITCART_HTTPS_ENABLED: ${BITCART_HTTPS_ENABLED:-false}
       SENTRY_DSN: ${BITCART_SENTRY_DSN:-}
       BITCART_PROMETHEUS_METRICS_ENABLED: ${BITCART_PROMETHEUS_METRICS_ENABLED:-false}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     expose:
       - "9020"
     volumes:
@@ -50,7 +44,6 @@ services:
       - "./plugins/admin:/plugins/admin"
       - "./plugins/store:/plugins/store"
       - "./plugins/docker:/plugins/docker"
-      - "$<BITCART_HOST_SSH_AUTHORIZED_KEYS>?:${BITCART_SSH_AUTHORIZED_KEYS}"
       - /var/lib/dbus/machine-id:/var/lib/dbus/machine-id # for paid plugins
 
 volumes:

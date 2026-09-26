@@ -23,6 +23,7 @@ class Settings:
         self.apply_checks()
 
     def add_custom_settings(self):
+        self.NAME = env("NAME", "", prefix="")
         self.CRYPTOS = self.load_comma_separated("CRYPTOS", "btc")
         self.ADDITIONAL_COMPONENTS = self.load_comma_separated("ADDITIONAL_COMPONENTS")
         self.EXCLUDE_COMPONENTS = self.load_comma_separated("EXCLUDE_COMPONENTS")

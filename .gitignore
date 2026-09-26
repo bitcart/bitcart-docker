@@ -9,6 +9,7 @@
 /compose/bitcart/
 __pycache__/
 compose/generated.yml
+compose/metadata.json
 coverage.xml
 htmlcov/
 venv/
@@ -17,3 +18,5 @@ compose/plugins/*
 .prettiercache
 .DS_Store
 generator/demo/*.whl
+/.agent/
+/bitcart-agent

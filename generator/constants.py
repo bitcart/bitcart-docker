@@ -11,6 +11,7 @@ RULES_PYTHON_PKG = "generator"
 RULES_PYTHON_DIR = "generator.rules"
 GENERATED_NAME = "generated.yml"
 GENERATED_PATH = path_join(COMPOSE_DIR, GENERATED_NAME)
+METADATA_PATH = path_join(COMPOSE_DIR, "metadata.json")
 
 # Crypto constants
 CRYPTOS = {
@@ -49,5 +50,9 @@ AVAILABLE_SETTINGS = [
     ("STORE_API_URL",),
     ("HTTPS_ENABLED",),
     ("BEHIND_REVERSE_PROXY", "BEHIND_REVERSEPROXY"),
+    ("BASE_DIRECTORY",),
+    ("AGENT_TRANSPORT",),
+    ("AGENT_PORT", "AGENT_PORT", "47123"),
+    ("SSH_PORT", "SSH_PORT", "22"),
 ]
 ENV_PREFIX = "BITCART_"

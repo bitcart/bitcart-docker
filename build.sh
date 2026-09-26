@@ -11,6 +11,10 @@ else
     set -e
 fi
 
+if [ "$1" == "--pull-only" ]; then
+    exit 0
+fi
+
 docker run -v "$PWD/compose:/app/compose" \
     --env-file <(env | grep BITCART_) \
     --env-file <(env | grep REVERSEPROXY_) \

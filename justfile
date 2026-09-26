@@ -28,6 +28,11 @@ lint-check:
 test *args:
     pytest generator/tests/ {{ trim(test-args + " " + args) }}
 
+# run host agent tests
+[group("Testing")]
+agent-test *args:
+    cd host-agent && go vet ./... && go test {{ args }} ./...
+
 # run ci checks (without tests)
 [group("CI")]
 ci-lint: lint-check

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=helpers.sh
-. "${SCRIPT_DIR}/../../helpers.sh"
+. "${SCRIPT_DIR}/../../../helpers.sh"
 load_env
 
 try mv "/etc/profile.d/bitcartcc-env${SCRIPTS_POSTFIX}.sh" "/etc/profile.d/bitcart-env${SCRIPTS_POSTFIX}.sh"
