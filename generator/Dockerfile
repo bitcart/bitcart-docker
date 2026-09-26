@@ -1,8 +1,9 @@
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS agent-build
 ARG TARGETARCH
+ARG AGENT_OS="linux darwin"
 WORKDIR /src
 COPY host-agent/ ./
-RUN for os in linux darwin; do \
+RUN for os in $AGENT_OS; do \
         if go tool dist list | grep -qx "$os/$TARGETARCH"; then \
             CGO_ENABLED=0 GOOS=$os GOARCH=$TARGETARCH go build -trimpath -ldflags "-s -w" \
                 -o "/out/bitcart-agent-$os" . || exit 1; \

@@ -133,6 +133,42 @@ func nullable(s string) any {
 	return s
 }
 
+type imageInfo struct {
+	Version  any `json:"version"`
+	Revision any `json:"revision"`
+}
+
+func runningImages() map[string]imageInfo {
+	project := deployName
+	if project == "" {
+		project = "compose"
+	}
+	return parseImageLabels(
+		commandOutput(
+			"docker",
+			"ps",
+			"--filter",
+			"label=com.docker.compose.project="+project,
+			"--filter",
+			"label=org.bitcart.image",
+			"--format",
+			`{{.Label "org.bitcart.image"}}|{{.Label "org.opencontainers.image.version"}}|{{.Label "org.opencontainers.image.revision"}}`,
+		),
+	)
+}
+
+func parseImageLabels(output string) map[string]imageInfo {
+	images := map[string]imageInfo{}
+	for line := range strings.Lines(output) {
+		role, labels, _ := strings.Cut(strings.TrimSpace(line), "|")
+		version, revision, _ := strings.Cut(labels, "|")
+		if role != "" {
+			images[role] = imageInfo{nullable(version), nullable(revision)}
+		}
+	}
+	return images
+}
+
 func capabilities(args) *apiError {
 	type runtimeInfo struct {
 		Engine  any `json:"engine"`
@@ -143,16 +179,17 @@ func capabilities(args) *apiError {
 		Cryptos    []string `json:"cryptos"`
 	}
 	data := struct {
-		Protocol        int         `json:"protocol"`
-		ScriptsVersion  any         `json:"scripts_version"`
-		Transport       string      `json:"transport"`
-		Executor        string      `json:"executor"`
-		Runtime         runtimeInfo `json:"runtime"`
-		Verbs           []string    `json:"verbs"`
-		BackupProviders []string    `json:"backup_providers"`
-		UpdateChannels  []string    `json:"update_channels"`
-		RunningJob      any         `json:"running_job"`
-		Host            *hostInfo   `json:"host,omitempty"`
+		Protocol        int                  `json:"protocol"`
+		ScriptsVersion  any                  `json:"scripts_version"`
+		Transport       string               `json:"transport"`
+		Executor        string               `json:"executor"`
+		Runtime         runtimeInfo          `json:"runtime"`
+		Images          map[string]imageInfo `json:"images"`
+		Verbs           []string             `json:"verbs"`
+		BackupProviders []string             `json:"backup_providers"`
+		UpdateChannels  []string             `json:"update_channels"`
+		RunningJob      any                  `json:"running_job"`
+		Host            *hostInfo            `json:"host,omitempty"`
 	}{Protocol: protocol, Transport: transport, Executor: detectExecutor(), Verbs: verbOrder,
 		BackupProviders: backupProviders, UpdateChannels: updateChannels}
 	data.ScriptsVersion = nullable(
@@ -177,6 +214,7 @@ func capabilities(args) *apiError {
 		}
 	}
 	data.Runtime = runtimeInfo{nullable(engine), nullable(version)}
+	data.Images = runningImages()
 	data.RunningJob = nullable(runningJob())
 	var meta hostInfo
 	if raw, err := os.ReadFile(filepath.Join(base, "compose", "metadata.json")); err == nil &&

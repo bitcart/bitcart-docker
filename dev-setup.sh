@@ -8,6 +8,7 @@ fi
 branch=${1:-master}
 rm -rf compose/bitcart && git clone --depth=1 https://github.com/bitcart/bitcart -b "$branch" compose/bitcart
 cd compose/bitcart
+git rev-parse HEAD >.revision
 rm -rf .git
 cat >conf/.env <<EOF
 DB_HOST=database

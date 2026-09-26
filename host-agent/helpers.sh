@@ -104,7 +104,6 @@ After=network.target
 RuntimeDirectory=bitcart$SCRIPTS_POSTFIX
 RuntimeDirectoryPreserve=yes
 ExecStart=$activate --accept --inetd --listen=$socket $BITCART_BASE_DIRECTORY/bitcart-agent
-# systemd-socket-activate always creates the socket as 0644, which lets only root connect, and the worker is not root
 ExecStartPost=$timeout 10 $sh -c 'until [ -S $socket ]; do sleep 0.1; done'
 ExecStartPost=$chmod 0666 $socket
 Restart=always

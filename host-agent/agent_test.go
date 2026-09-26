@@ -28,7 +28,6 @@ func TestMain(m *testing.M) {
 	if err := build.Run(); err != nil {
 		panic(err)
 	}
-	// macOS scans a new binary on first launch via one of its paths; if that is a test's hard link deleted mid-scan, held execs are SIGKILLed
 	warm := exec.Command(agentBin)
 	warm.Stdin = strings.NewReader("ping\x00\x00")
 	if out, err := warm.Output(); err != nil || len(out) == 0 {
@@ -86,7 +85,13 @@ func newAgent(t *testing.T) *testAgent {
 	a := &testAgent{t: t, base: base, env: []string{
 		"BITCART_AGENT_PROFILE_DIR=" + filepath.Join(base, "profile"),
 	}}
-	if err := os.Link(agentBin, a.path("bitcart-agent")); err != nil {
+	// A copy, not a hard link: macOS scans each new path on first launch, and deleting a test's path
+	// mid-scan SIGKILLs pending launches of the same file from other tests
+	binary, err := os.ReadFile(agentBin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(a.path("bitcart-agent"), binary, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	for _, script := range []string{"restart.sh", "start.sh", "cleanup.sh", "update.sh", "install-master.sh", "backup.sh", "restore.sh", "setup.sh"} {
@@ -181,6 +186,15 @@ func (a *testAgent) sendRaw(input []byte) *agentReply {
 	cmd := a.command()
 	cmd.Stdin = bytes.NewReader(input)
 	out, err := cmd.Output()
+	if err != nil {
+		a.t.Fatalf("agent failed: %v, reply: %q", err, out)
+	}
+	return a.parse(out)
+}
+
+func (a *testAgent) run(args ...string) *agentReply {
+	a.t.Helper()
+	out, err := a.command(args...).Output()
 	if err != nil {
 		a.t.Fatalf("agent failed: %v, reply: %q", err, out)
 	}

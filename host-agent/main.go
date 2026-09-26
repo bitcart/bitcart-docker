@@ -212,10 +212,7 @@ func setup() {
 	}
 }
 
-func handleRequest() *apiError {
-	if readHostConfig() != nil {
-		return fail("internal", "could not read the host configuration")
-	}
+func readRequest() ([]string, *apiError) {
 	timer := time.AfterFunc(requestTimeout, func() {
 		if send(reply{Error: fail("bad_request", "request timed out")}, nil) {
 			os.Exit(0)
@@ -226,10 +223,20 @@ func handleRequest() *apiError {
 		select {}
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := checkAuth(fields); err != nil {
-		return err
+	return fields, checkAuth(fields)
+}
+
+func handleRequest(fields []string) *apiError {
+	if readHostConfig() != nil {
+		return fail("internal", "could not read the host configuration")
+	}
+	if len(fields) == 0 {
+		var err *apiError
+		if fields, err = readRequest(); err != nil {
+			return err
+		}
 	}
 	name := fields[0]
 	v, ok := verbs[name]
@@ -303,7 +310,7 @@ func main() {
 			send(reply{Error: fail("internal", "internal agent error")}, nil)
 		}
 	}()
-	if err := handleRequest(); err != nil {
+	if err := handleRequest(os.Args[1:]); err != nil {
 		send(reply{Error: err}, nil)
 	}
 }

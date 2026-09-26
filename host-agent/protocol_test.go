@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -55,6 +56,9 @@ func TestCapabilitiesDescribesTheAgentAndTheHost(t *testing.T) {
 	}
 	if len(host) != 2 {
 		t.Errorf("host = %v", host)
+	}
+	if _, ok := r.Data["images"].(map[string]any); !ok {
+		t.Errorf("images = %v", r.Data["images"])
 	}
 	_, hasEngine := runtimeInfo["engine"]
 	_, hasVersion := runtimeInfo["version"]
@@ -179,6 +183,29 @@ func TestAnUnreadableEnvFailsClosed(t *testing.T) {
 	a.write(".env", "LONG="+strings.Repeat("x", 70<<10)+"\nBITCART_AGENT_TOKEN="+testToken+"\n")
 	a.fails(a.send("ping"), "internal")
 	a.fails(a.send("ping", "auth="+testToken), "internal")
+}
+
+func TestArgumentsAreARequestThatNeedsNoToken(t *testing.T) {
+	a := newAgent(t)
+	a.write(".env", "BITCART_AGENT_TOKEN="+testToken+"\n")
+	r := a.ok(a.run("ping"))
+	a.singleLine(r)
+	a.fails(a.run("job_status", "id=20260923T140651Z-7f3a9c"), "not_found")
+	a.fails(a.run("backup", "PATH=x"), "invalid_argument")
+	a.fails(a.run("nope"), "unknown_verb")
+	a.fails(a.send("ping"), "unauthorized")
+}
+
+func TestImageLabelsAreParsedPerRole(t *testing.T) {
+	got := parseImageLabels("backend|0.10.3.0|69d0575\nadmin|master|491de14\n\nbtc-daemon||\n")
+	want := map[string]imageInfo{
+		"backend":    {"0.10.3.0", "69d0575"},
+		"admin":      {"master", "491de14"},
+		"btc-daemon": {nil, nil},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("parseImageLabels = %v", got)
+	}
 }
 
 func TestAuthIsCheckedBeforeAnythingElse(t *testing.T) {

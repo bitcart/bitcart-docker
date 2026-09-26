@@ -21,7 +21,8 @@ systemctl is-active --quiet bitcart-agent
 
 agent_ping_from_worker
 call capabilities | head -n 1 | jq -e '.ok and .data.transport == "systemd" and .data.executor == "systemd-run"
-    and (.data.host.components | index("worker")) and (.data.host.cryptos | index("btc"))'
+    and (.data.host.components | index("worker")) and (.data.host.cryptos | index("btc"))
+    and (.data.images.backend.revision | length == 40)'
 call get_config | head -n 1 | jq -e '.data.settings | .BITCART_HOST == "bitcart.local" and .BITCART_REVERSEPROXY == "nginx"
     and .BITCART_INSTALL == "all" and .BITCART_CRYPTOS == "btc,ltc" and .BTC_LIGHTNING == "true"
     and (has("BITCART_ADMIN_HOST") or has("BITCART_STORE_HOST") | not)'
