@@ -105,7 +105,7 @@ Here is a complete list of configuration settings:
 
 The admin panel manages its own instance through the **host agent**, `bitcart-agent`. The agent runs the scripts of this repository for a fixed set of operations, one job at a time. Jobs run outside the containers and keep running while the containers restart or update. Among the containers, only the worker has access to the agent.
 
-The agent is a static binary with its source in `host-agent/`. `setup.sh` and `update.sh` copy it from the generator image to the repository root. To run a modified agent, set `BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local`: `build.sh` then builds the generator image from this repository.
+The agent is a static binary with its source in `host-agent/`. `setup.sh` and `update.sh` copy it from the generator image to the repository root. To run a modified agent, set `BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local`: `build.sh` then builds the generator image from this repository. `./update.sh --agent-only` updates only the agent, leaving the stack and its images unchanged.
 
 | Transport | Default                                   | Worker connection                                                                          |
 | --------- | ----------------------------------------- | ------------------------------------------------------------------------------------------ |

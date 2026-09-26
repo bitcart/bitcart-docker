@@ -10,10 +10,18 @@ load_env
 
 cd "$BITCART_BASE_DIRECTORY"
 
-if [[ "$1" != "--skip-git-pull" ]]; then
+skip_git_pull=false
+agent_only=false
+for arg in "$@"; do
+    case $arg in
+    --skip-git-pull) skip_git_pull=true ;;
+    --agent-only) agent_only=true ;;
+    esac
+done
+
+if ! $skip_git_pull; then
     git pull --force
-    exec "./update.sh" --skip-git-pull
-    return
+    exec "./update.sh" --skip-git-pull "$@"
 fi
 
 if ! [ -f "/etc/docker/daemon.json" ] && [ -w "/etc/docker" ]; then
@@ -28,6 +36,9 @@ resolve_agent_settings
 bitcart_update_docker_env
 ./build.sh --pull-only
 install_host_agent
+if $agent_only; then
+    exit 0
+fi
 
 if ! ./build.sh; then
     echo "Failed to generate the docker-compose"
