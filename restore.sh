@@ -10,8 +10,8 @@ This script must be run as root
     --delete-backup: Delete backup file after restoring. Default: false
     --encryption-key KEY: Custom encryption key to decrypt the backup. If not provided, uses the key from .deploy file
 This script will restore the database from SQL script and copy essential volumes to /var/lib/docker/volumes
-extracted from tar.zst (or legacy tar.gz) backup archive
-If the backup file is encrypted (.enc extension), it will be automatically decrypted using the encryption key
+extracted from a .tar.zst (or legacy .tar.gz) backup archive, picked by the file extension
+If the backup file is encrypted (.tar.zst.enc or .tar.gz.enc), it will be automatically decrypted using the encryption key
 from the .deploy file or the custom key provided via --encryption-key
 END
 }
@@ -67,6 +67,7 @@ load_env true
 cd "$BITCART_BASE_DIRECTORY" || exit 1
 
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
+UPLOADED_FILE="$BACKUP_FILE"
 
 if [[ "$BACKUP_FILE" == *.enc ]]; then
     if [ -n "$CUSTOM_ENCRYPTION_KEY" ]; then
@@ -104,6 +105,12 @@ else
     rm "$tar_file"
 fi
 
+if [ ! -f "$TEMP_DIR/database.sql" ]; then
+    echo "Error: the backup does not contain database.sql, nothing was changed"
+    rm -rf "$TEMP_DIR"
+    exit 1
+fi
+
 echo "Stopping Bitcart…"
 bitcart_stop
 
@@ -119,5 +126,5 @@ bitcart_start
 rm -rf "$TEMP_DIR"
 
 if $DELETE_BACKUP; then
-    rm -rf "$BACKUP_FILE"
+    rm -f "$UPLOADED_FILE"
 fi

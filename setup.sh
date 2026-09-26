@@ -4,6 +4,8 @@ set +x
 
 # shellcheck source=helpers.sh
 . helpers.sh
+# shellcheck source=host-agent/helpers.sh
+. host-agent/helpers.sh
 
 function display_help() {
     cat <<-END
@@ -48,8 +50,9 @@ Environment variables:
     REVERSEPROXY_TRUSTED_IPS: Comma-separated list of trusted proxy IP/CIDR ranges to set as set_real_ip_from in nginx.
     REVERSEPROXY_TRUSTED_IPS_PRESET: Preset name to auto-fetch trusted IPs (e.g. cloudflare). Merges with REVERSEPROXY_TRUSTED_IPS.
     REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). If unset, all three are trusted when IP is trusted.
-    BITCART_ENABLE_SSH: Gives Bitcart SSH access to the host by allowing it to edit authorized_keys of the host, it can be used for updating or reconfiguring your instance directly through the website. (Default: true)
-    BITCART_SSH_PORT: Port where ssh server runs on host machine. Default: 22
+    BITCART_AGENT_TRANSPORT: How the admin panel reaches the host agent to update, restart, back up or reconfigure this instance: auto, systemd, launchd, ssh, manual or none. auto picks launchd on macOS and systemd on Linux; without systemd, ssh if SSH access was enabled before, otherwise none. manual only installs the agent, see the README. (Default: auto)
+    BITCART_AGENT_PORT: Loopback port the launchd transport listens on. Default: 47123
+    BITCART_SSH_PORT: Port where ssh server runs on host machine, for the ssh transport. Default: 22
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
     BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
@@ -210,7 +213,8 @@ esac
 : "${REVERSEPROXY_TRUSTED_IPS:=}"
 : "${REVERSEPROXY_TRUSTED_IPS_PRESET:=}"
 : "${REVERSEPROXY_TRUSTED_HEADERS:=}"
-: "${BITCART_ENABLE_SSH:=true}"
+: "${BITCART_AGENT_TRANSPORT:=auto}"
+: "${BITCART_AGENT_PORT:=47123}"
 : "${BITCART_SSH_PORT:=22}"
 : "${CLOUDFLARE_TUNNEL_TOKEN:=}"
 : "${PIHOLE_SERVERIP:=}"
@@ -239,21 +243,8 @@ if ! [ -f "$BITCART_DEPLOYMENT_CONFIG" ]; then
     first_setup=true
 fi
 
-# SSH settings
-BITCART_SSH_KEY_FILE=""
-
-if $BITCART_ENABLE_SSH && ! [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
-    BITCART_HOST_SSH_AUTHORIZED_KEYS=~/.ssh/authorized_keys
-fi
-
-if $BITCART_ENABLE_SSH && [[ "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
-    if ! [[ -f "$BITCART_HOST_SSH_AUTHORIZED_KEYS" ]]; then
-        mkdir -p "$(dirname "$BITCART_HOST_SSH_AUTHORIZED_KEYS")"
-        touch "$BITCART_HOST_SSH_AUTHORIZED_KEYS"
-    fi
-    BITCART_SSH_AUTHORIZED_KEYS="/datadir/host_authorized_keys"
-    BITCART_SSH_KEY_FILE="/datadir/host_id_rsa"
-fi
+export BITCART_AGENT_PORT BITCART_SSH_PORT
+resolve_agent_settings
 
 if [ "$BITCARTGEN_DOCKER_IMAGE" == "bitcartcc/docker-compose-generator:local" ]; then
     export BITCARTGEN_DOCKER_IMAGE="bitcart/docker-compose-generator:local"
@@ -271,7 +262,8 @@ REVERSEPROXY_DEFAULT_HOST=$REVERSEPROXY_DEFAULT_HOST
 REVERSEPROXY_TRUSTED_IPS=$REVERSEPROXY_TRUSTED_IPS
 REVERSEPROXY_TRUSTED_IPS_PRESET=$REVERSEPROXY_TRUSTED_IPS_PRESET
 REVERSEPROXY_TRUSTED_HEADERS=$REVERSEPROXY_TRUSTED_HEADERS
-BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
+BITCART_AGENT_TRANSPORT=$BITCART_AGENT_TRANSPORT
+BITCART_AGENT_PORT=$BITCART_AGENT_PORT
 BITCART_SSH_PORT=$BITCART_SSH_PORT
 BITCART_LETSENCRYPT_EMAIL=$BITCART_LETSENCRYPT_EMAIL
 BITCART_STORE_HOST=$BITCART_STORE_HOST
@@ -301,9 +293,6 @@ Additional exported variables:
 BITCART_BASE_DIRECTORY=$BITCART_BASE_DIRECTORY
 BITCART_ENV_FILE=$BITCART_ENV_FILE
 BITCART_DEPLOYMENT_CONFIG=$BITCART_DEPLOYMENT_CONFIG
-BITCART_SSH_KEY_FILE=$BITCART_SSH_KEY_FILE
-BITCART_SSH_AUTHORIZED_KEYS=$BITCART_SSH_AUTHORIZED_KEYS
-BITCART_HOST_SSH_AUTHORIZED_KEYS=$BITCART_HOST_SSH_AUTHORIZED_KEYS
 ----------------------"
 
 if $PREVIEW_SETTINGS; then
@@ -315,29 +304,39 @@ apply_local_modifications
 
 # Configure deployment config to determine which deployment name to use
 save_deploy_config
+if $first_setup; then
+    mark_upgrades_applied
+fi
+
+profile_export() {
+    local value=$2 c
+    for c in "\\" '$' '`' '"'; do
+        value=${value//"$c"/\\$c}
+    done
+    printf 'export %s="%s"\n' "$1" "$value"
+}
 
 # Init the variables when a user log interactively
-touch "$BASH_PROFILE_SCRIPT"
-cat >"${BASH_PROFILE_SCRIPT}" <<EOF
-#!/bin/bash
-export COMPOSE_HTTP_TIMEOUT="180"
-export BITCART_BASE_DIRECTORY="$BITCART_BASE_DIRECTORY"
-export BITCART_INSTALL="${BITCART_INSTALL:-all}"
-export BITCART_REVERSEPROXY="${BITCART_REVERSEPROXY:-nginx-https}"
-export BITCART_CRYPTOS="${BITCART_CRYPTOS:-btc}"
-export BITCART_ADDITIONAL_COMPONENTS="$BITCART_ADDITIONAL_COMPONENTS"
-export BITCART_EXCLUDE_COMPONENTS="$BITCART_EXCLUDE_COMPONENTS"
-export BITCART_ENV_FILE="$BITCART_ENV_FILE"
-export BITCART_ENABLE_SSH=$BITCART_ENABLE_SSH
-export BITCART_SSH_PORT=$BITCART_SSH_PORT
-export BITCARTGEN_DOCKER_IMAGE="$BITCARTGEN_DOCKER_IMAGE"
-export PIHOLE_SERVERIP="$PIHOLE_SERVERIP"
-if cat "\$BITCART_ENV_FILE" &> /dev/null; then
+{
+    echo "#!/bin/bash"
+    profile_export COMPOSE_HTTP_TIMEOUT 180
+    profile_export BITCART_BASE_DIRECTORY "$BITCART_BASE_DIRECTORY"
+    profile_export BITCART_INSTALL "${BITCART_INSTALL:-all}"
+    profile_export BITCART_REVERSEPROXY "${BITCART_REVERSEPROXY:-nginx-https}"
+    profile_export BITCART_CRYPTOS "${BITCART_CRYPTOS:-btc}"
+    profile_export BITCART_ADDITIONAL_COMPONENTS "$BITCART_ADDITIONAL_COMPONENTS"
+    profile_export BITCART_EXCLUDE_COMPONENTS "$BITCART_EXCLUDE_COMPONENTS"
+    profile_export BITCART_ENV_FILE "$BITCART_ENV_FILE"
+    profile_export BITCARTGEN_DOCKER_IMAGE "$BITCARTGEN_DOCKER_IMAGE"
+    profile_export PIHOLE_SERVERIP "$PIHOLE_SERVERIP"
+    cat <<'EOF'
+if cat "$BITCART_ENV_FILE" &> /dev/null; then
   while IFS= read -r line; do
-    ! [[ "\$line" == "#"* ]] && [[ "\$line" == *"="* ]] && export "\$line" || true
-  done < "\$BITCART_ENV_FILE"
+    ! [[ "$line" == "#"* ]] && [[ "$line" == *"="* ]] && export "$line" || true
+  done < "$BITCART_ENV_FILE"
 fi
 EOF
+} >"$BASH_PROFILE_SCRIPT"
 
 chmod +x "${BASH_PROFILE_SCRIPT}"
 
@@ -419,6 +418,9 @@ if ! [[ $(docker compose version 2>/dev/null) ]]; then
     exit 1
 fi
 
+./build.sh --pull-only
+install_host_agent
+
 # Generate the docker compose
 if ! ./build.sh; then
     echo "Failed to generate the docker-compose"
@@ -499,6 +501,7 @@ fi
 
 if $START; then
     ./start.sh
+    run_upgrades
 fi
 
 echo "Setup done."

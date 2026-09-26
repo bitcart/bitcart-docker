@@ -18,14 +18,22 @@ IFS=', ' read -r -a CRYPTOS <<<"$BITCART_CRYPTOS"
 
 ./dev-setup.sh
 
+build_image() {
+    local revision=$1
+    shift
+    docker build --pull --label org.opencontainers.image.version=master \
+        --label "org.opencontainers.image.revision=$revision" "$@" || true
+}
+
 cd compose
+revision=$(cat bitcart/.revision)
 
 if [[ " ${COMPONENTS[*]} " == *" backend "* ]]; then
-    docker build --pull -t bitcart/bitcart:stable -f backend.Dockerfile . || true
+    build_image "$revision" -t bitcart/bitcart:stable -f backend.Dockerfile .
 fi
 
 for coin in "${CRYPTOS[@]}"; do
-    docker build --pull -t "bitcart/bitcart-$coin:stable" -f "$coin.Dockerfile" . || true
+    build_image "$revision" -t "bitcart/bitcart-$coin:stable" -f "$coin.Dockerfile" .
 done
 
 cd ..
@@ -38,7 +46,7 @@ build_additional_image() {
         cd "$TEMP_DIR"
         git clone "https://github.com/bitcart/bitcart-$1"
         cd "bitcart-$1"
-        docker build --pull -t "bitcart/bitcart-$1:stable" . || true
+        build_image "$(git rev-parse HEAD)" -t "bitcart/bitcart-$1:stable" .
         cd "$OLDDIR"
         rm -rf "$TEMP_DIR"
     fi

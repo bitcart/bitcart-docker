@@ -19,6 +19,7 @@ It may optionally upload the backup to a remote server
 Environment variables:
     BACKUP_PROVIDER: where to upload. Default empty (local). See list of supported providers below
     BACKUP_ENCRYPTION: whether to encrypt backups with OpenSSL (AES-256-CBC). Default: false
+    BACKUP_NAME: archive name without extension. Default: <timestamp>-backup
     SCP_TARGET: where to upload the backup via scp
     S3_BUCKET: where to upload the backup via s3
     S3_PATH: path to the backup on the remote server
@@ -81,7 +82,11 @@ deployment_name=$(volume_name)
 volumes_dir=/var/lib/docker/volumes
 backup_dir="$volumes_dir/backup_datadir"
 timestamp=$(date "+%Y%m%d-%H%M%S")
-filename="$timestamp-backup.tar.zst"
+if [ -n "$BACKUP_NAME" ]; then
+    filename="$BACKUP_NAME.tar.zst"
+else
+    filename="$timestamp-backup.tar.zst"
+fi
 dumpname="$timestamp-database.sql"
 
 backup_path="$backup_dir/_data/${filename}"
@@ -137,6 +142,8 @@ if [ "$BACKUP_ENCRYPTION" = "true" ]; then
     filename="${filename}.enc"
 fi
 
+backup_size=$(wc -c <"$backup_path" | tr -d ' ')
+
 delete_backup() {
     echo "Deleting local backup …"
     rm "$backup_path"
@@ -145,12 +152,11 @@ delete_backup() {
 case $BACKUP_PROVIDER in
 "s3")
     echo "Uploading to S3 …"
-    docker_args=(--rm
-        -e AWS_ACCESS_KEY_ID="$S3_ACCESS_KEY_ID"
-        -e AWS_SECRET_ACCESS_KEY="$S3_SECRET_ACCESS_KEY"
-        -e AWS_DEFAULT_REGION="$S3_DEFAULT_REGION")
+    export AWS_ACCESS_KEY_ID="$S3_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$S3_SECRET_ACCESS_KEY" AWS_DEFAULT_REGION="$S3_DEFAULT_REGION"
+    docker_args=(--rm -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION)
     if [ -n "$S3_ENDPOINT_URL" ]; then
-        docker_args+=(-e AWS_ENDPOINT_URL="$S3_ENDPOINT_URL")
+        export AWS_ENDPOINT_URL="$S3_ENDPOINT_URL"
+        docker_args+=(-e AWS_ENDPOINT_URL)
     fi
     docker_args+=(-v "$backup_path:/aws/$filename" amazon/aws-cli s3 cp "$filename" "s3://$S3_BUCKET/$S3_PATH/$filename")
     docker run "${docker_args[@]}"
@@ -159,7 +165,7 @@ case $BACKUP_PROVIDER in
 
 "scp")
     echo "Uploading via SCP …"
-    scp "$backup_path" "$SCP_TARGET"
+    scp -- "$backup_path" "$SCP_TARGET"
     delete_backup
     ;;
 
@@ -170,6 +176,8 @@ esac
 
 # cleanup
 rm "$dbdump_path"
+
+job_result filename "$filename" size "$backup_size" provider "${BACKUP_PROVIDER:-local}"
 
 echo "Backup done."
 

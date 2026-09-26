@@ -6,7 +6,7 @@ from generator.utils import apply_recursive, env
 BUILD_TIME_ENV_REGEX = re.compile(r"\$<(.*?)>:?(.*?)\?")
 
 
-def apply_build_time_env(line):
+def apply_build_time_env(line, settings):
     if not isinstance(line, str):
         return False, line
 
@@ -17,7 +17,7 @@ def apply_build_time_env(line):
         env_name = match.group(1)
         default = match.group(2)
         if env_name == "DEPLOYENT_NAME":
-            return env("NAME", "compose", prefix="")
+            return settings.NAME or "compose"
         if env_name.startswith(ENV_PREFIX):
             env_name = env_name[len(ENV_PREFIX) :]
         value = env(env_name, default or "")
@@ -30,4 +30,4 @@ def apply_build_time_env(line):
 
 
 def rule(services, settings):
-    services.update(apply_recursive(services, apply_build_time_env)[1])
+    services.update(apply_recursive(services, lambda line: apply_build_time_env(line, settings))[1])

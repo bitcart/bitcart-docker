@@ -207,6 +207,38 @@ def test_tor_rule():
     delete_env("REVERSEPROXY")
 
 
+# Rule 7: build time env
+def test_deployment_name():
+    def proxy_container():
+        services = generate_config()["services"]
+        return next(
+            service["environment"]["NGINX_PROXY_CONTAINER"]
+            for service in services.values()
+            if "NGINX_PROXY_CONTAINER" in service.get("environment", {})
+        )
+
+    assert proxy_container() == "compose-nginx-1"
+    set_env("NAME", "shop", prefix="")
+    assert proxy_container() == "shop-nginx-1"
+    delete_env("NAME", prefix="")
+
+
+def test_build_time_env_in_custom_component(tmp_path):
+    component = tmp_path / "custom.yml"
+    component.write_text(
+        'services:\n  custom:\n    image: custom\n    ports:\n      - "$<BITCART_CUSTOM_PORT>:8080?:80"\n'
+        '      - "$<BITCART_CUSTOM_EXTRA_PORT>?:81"\n'
+    )
+    set_env("ADDITIONAL_COMPONENTS", str(component))
+    assert generate_config()["services"]["custom"]["ports"] == ["8080:80"]
+    set_env("CUSTOM_PORT", "8000")
+    set_env("CUSTOM_EXTRA_PORT", "8001")
+    assert generate_config()["services"]["custom"]["ports"] == ["8000:80", "8001:81"]
+    delete_env("ADDITIONAL_COMPONENTS")
+    delete_env("CUSTOM_PORT")
+    delete_env("CUSTOM_EXTRA_PORT")
+
+
 # Rule 8
 def test_scale():
     services = generate_config()["services"]
@@ -326,3 +358,82 @@ def test_trusted_headers_preset_deduplicates():
 def test_trusted_headers_custom_only_no_preset():
     services = generate_config()["services"]
     assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "${REVERSEPROXY_TRUSTED_HEADERS:-}"
+
+
+# Rule 13: host agent
+def test_host_agent_disabled_by_default():
+    worker = generate_config()["services"]["worker"]
+    assert not any(key.startswith("BITCART_AGENT_") for key in worker["environment"])
+    assert not any(volume.endswith(("/run/bitcart-agent", "/run/bitcart-agent:ro")) for volume in worker.get("volumes", []))
+    assert "extra_hosts" not in worker
+
+
+def test_host_agent_systemd():
+    set_env("AGENT_TRANSPORT", "systemd")
+    services = generate_config()["services"]
+    worker = services["worker"]
+    assert worker["environment"]["BITCART_AGENT_URL"] == "unix:///run/bitcart-agent/agent.sock"
+    assert "BITCART_AGENT_TOKEN" not in worker["environment"]
+    assert "/run/bitcart:/run/bitcart-agent" in worker["volumes"]
+    assert "extra_hosts" not in worker
+    assert "BITCART_AGENT_URL" not in services["backend"]["environment"]
+    delete_env("AGENT_TRANSPORT")
+
+
+def test_host_agent_systemd_named_deployment():
+    set_env("AGENT_TRANSPORT", "systemd")
+    set_env("NAME", "shop", prefix="")
+    assert "/run/bitcart-shop:/run/bitcart-agent" in generate_config()["services"]["worker"]["volumes"]
+    delete_env("AGENT_TRANSPORT")
+    delete_env("NAME", prefix="")
+
+
+def test_host_agent_launchd():
+    set_env("AGENT_TRANSPORT", "launchd")
+    set_env("AGENT_PORT", "47200")
+    worker = generate_config()["services"]["worker"]
+    assert worker["environment"]["BITCART_AGENT_URL"] == "tcp://host.docker.internal:47200"
+    assert worker["environment"]["BITCART_AGENT_TOKEN"] == "${BITCART_AGENT_TOKEN}"
+    assert worker["extra_hosts"] == ["host.docker.internal:host-gateway"]
+    assert not any(volume.endswith(":/run/bitcart-agent") for volume in worker.get("volumes", []))
+    delete_env("AGENT_PORT")
+    worker = generate_config()["services"]["worker"]
+    assert worker["environment"]["BITCART_AGENT_URL"] == "tcp://host.docker.internal:47123"
+    delete_env("AGENT_TRANSPORT")
+
+
+def test_host_agent_ssh():
+    set_env("AGENT_TRANSPORT", "ssh")
+    set_env("BASE_DIRECTORY", "/root/bitcart-docker")
+    worker = generate_config()["services"]["worker"]
+    assert worker["environment"]["BITCART_AGENT_URL"] == "ssh://root@host.docker.internal:22"
+    assert worker["environment"]["BITCART_AGENT_SSH_KEY_FILE"] == "/run/bitcart-agent/id_ed25519"
+    assert "/root/bitcart-docker/.agent/ssh:/run/bitcart-agent:ro" in worker["volumes"]
+    assert worker["extra_hosts"] == ["host.docker.internal:host-gateway"]
+    assert "BITCART_AGENT_TOKEN" not in worker["environment"]
+    set_env("SSH_PORT", "2222")
+    worker = generate_config()["services"]["worker"]
+    assert worker["environment"]["BITCART_AGENT_URL"] == "ssh://root@host.docker.internal:2222"
+    delete_env("SSH_PORT")
+    delete_env("AGENT_TRANSPORT")
+    delete_env("BASE_DIRECTORY")
+
+
+def test_host_agent_none_and_manual():
+    default_worker = generate_config()["services"]["worker"]
+    for transport in ("none", "manual"):
+        set_env("AGENT_TRANSPORT", transport)
+        assert generate_config()["services"]["worker"] == default_worker
+    delete_env("AGENT_TRANSPORT")
+
+
+def test_host_agent_without_worker():
+    set_env("AGENT_TRANSPORT", "systemd")
+    set_env("INSTALL", "frontend")
+    set_env("ADMIN_API_URL", "https://api.example.com")
+    set_env("STORE_API_URL", "https://api.example.com")
+    assert "worker" not in generate_config()["services"]
+    delete_env("AGENT_TRANSPORT")
+    delete_env("INSTALL")
+    delete_env("ADMIN_API_URL")
+    delete_env("STORE_API_URL")
