@@ -223,6 +223,22 @@ def test_deployment_name():
     delete_env("NAME", prefix="")
 
 
+def test_build_time_env_in_custom_component(tmp_path):
+    component = tmp_path / "custom.yml"
+    component.write_text(
+        'services:\n  custom:\n    image: custom\n    ports:\n      - "$<BITCART_CUSTOM_PORT>:8080?:80"\n'
+        '      - "$<BITCART_CUSTOM_EXTRA_PORT>?:81"\n'
+    )
+    set_env("ADDITIONAL_COMPONENTS", str(component))
+    assert generate_config()["services"]["custom"]["ports"] == ["8080:80"]
+    set_env("CUSTOM_PORT", "8000")
+    set_env("CUSTOM_EXTRA_PORT", "8001")
+    assert generate_config()["services"]["custom"]["ports"] == ["8000:80", "8001:81"]
+    delete_env("ADDITIONAL_COMPONENTS")
+    delete_env("CUSTOM_PORT")
+    delete_env("CUSTOM_EXTRA_PORT")
+
+
 # Rule 8
 def test_scale():
     services = generate_config()["services"]
