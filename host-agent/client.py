@@ -1,6 +1,5 @@
 import os
 import socket
-import subprocess
 import sys
 from urllib.parse import urlsplit
 
@@ -11,23 +10,24 @@ if url.scheme == "tcp":
 request = b"".join(field.encode() + b"\0" for field in fields) + b"\0"
 
 if url.scheme == "ssh":
-    command = [
-        "ssh",
-        "-i",
-        os.environ["BITCART_AGENT_SSH_KEY_FILE"],
-        "-o",
-        "BatchMode=yes",
-        "-o",
-        "StrictHostKeyChecking=no",
-        "-o",
-        "UserKnownHostsFile=/dev/null",
-        "-p",
-        str(url.port or 22),
-        f"{url.username}@{url.hostname}",
-    ]
-    reply = subprocess.run(
-        command, input=request, capture_output=True, timeout=60, check=False
-    ).stdout
+    import paramiko  # type: ignore[import]
+
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(
+        url.hostname,
+        port=url.port or 22,
+        username=url.username,
+        key_filename=os.environ["BITCART_AGENT_SSH_KEY_FILE"],
+        allow_agent=False,
+        look_for_keys=False,
+        timeout=30,
+    )
+    stdin, stdout, _ = client.exec_command("bitcart-agent", timeout=60)
+    stdin.write(request)
+    stdin.channel.shutdown_write()
+    reply = stdout.read()
+    client.close()
 else:
     if url.scheme == "unix":
         sock = socket.socket(socket.AF_UNIX)
