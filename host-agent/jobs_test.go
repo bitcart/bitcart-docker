@@ -337,7 +337,20 @@ func TestJobStatusSendsTheRequestedLogTailAsRawBytes(t *testing.T) {
 		t.Errorf("unexpected full log %q", r.raw)
 	}
 	r = a.send("job_status", "id="+id, "log_lines=0")
-	if r.str("log_bytes") != "0" || len(r.tail) != 0 {
+	if r.str("log_bytes") != "0" || len(r.tail) != 0 || r.str("log_complete") != "false" {
+		t.Errorf("unexpected reply %q", r.raw)
+	}
+}
+
+func TestJobStatusWithoutLogLinesDoesNotReadTheLog(t *testing.T) {
+	a := newAgent(t)
+	id := "20250101T000000Z-abcdef"
+	a.writeStatus(id, "done", "cleanup", 1)
+	if err := syscall.Mkfifo(a.path(".agent", "jobs", id, "log"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	r := a.ok(a.send("job_status", "id="+id, "log_lines=0"))
+	if r.str("log_bytes") != "0" || r.str("log_complete") != "true" {
 		t.Errorf("unexpected reply %q", r.raw)
 	}
 }

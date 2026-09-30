@@ -314,10 +314,20 @@ func jobStatusVerb(a args) *apiError {
 	if st == nil {
 		return fail("internal", "unreadable job status")
 	}
-	snapshot := readTail(filepath.Join(dir, "log"), maxLogBytes)
-	logTail := snapshot
-	if a["log_lines"] != "all" {
-		logTail = tailLines(snapshot, n)
+	logPath := filepath.Join(dir, "log")
+	var logTail []byte
+	logComplete := true
+	if n == 0 {
+		if info, err := os.Stat(logPath); err == nil {
+			logComplete = info.Size() == 0
+		}
+	} else {
+		snapshot := readTail(logPath, maxLogBytes)
+		logTail = snapshot
+		if a["log_lines"] != "all" {
+			logTail = tailLines(snapshot, n)
+		}
+		logComplete = len(snapshot) < maxLogBytes && len(logTail) == len(snapshot)
 	}
 	var result json.RawMessage
 	if raw, err := os.ReadFile(filepath.Join(dir, "result.json")); err == nil && json.Valid(raw) {
@@ -329,8 +339,7 @@ func jobStatusVerb(a args) *apiError {
 		Result      json.RawMessage `json:"result"`
 		LogBytes    int             `json:"log_bytes"`
 		LogComplete bool            `json:"log_complete"`
-	}{ID: id, jobStatus: *st, Result: result, LogBytes: len(logTail),
-		LogComplete: len(snapshot) < maxLogBytes && len(logTail) == len(snapshot)}
+	}{ID: id, jobStatus: *st, Result: result, LogBytes: len(logTail), LogComplete: logComplete}
 	if data.Result == nil {
 		data.Result = json.RawMessage("null")
 	}
