@@ -7,7 +7,7 @@ Usage:
 Restore Bitcart files
 This script must be run as root
     -h, --help: Show help
-    --delete-backup: Delete backup file after restoring. Default: false
+    --delete-backup: Delete the backup file when done, even if restoring fails. Default: false
     --encryption-key KEY: Custom encryption key to decrypt the backup. If not provided, uses the key from .deploy file
 This script will restore the database from SQL script and copy essential volumes to /var/lib/docker/volumes
 extracted from a .tar.zst (or legacy .tar.gz) backup archive, picked by the file extension
@@ -61,13 +61,17 @@ if [ -z "$BACKUP_FILE" ]; then
     exit 0
 fi
 
+if $DELETE_BACKUP; then
+    UPLOADED_FILE="$BACKUP_FILE"
+    trap 'rm -f "$UPLOADED_FILE"' EXIT
+fi
+
 # shellcheck source=helpers.sh
 . helpers.sh
 load_env true
 cd "$BITCART_BASE_DIRECTORY" || exit 1
 
 TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
-UPLOADED_FILE="$BACKUP_FILE"
 
 if [[ "$BACKUP_FILE" == *.enc ]]; then
     if [ -n "$CUSTOM_ENCRYPTION_KEY" ]; then
@@ -124,7 +128,3 @@ echo "Restarting Bitcart…"
 bitcart_start
 
 rm -rf "$TEMP_DIR"
-
-if $DELETE_BACKUP; then
-    rm -f "$UPLOADED_FILE"
-fi
