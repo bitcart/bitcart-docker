@@ -40,7 +40,7 @@ func TestCapabilitiesDescribesTheAgentAndTheHost(t *testing.T) {
 		}
 	}
 	for key, want := range map[string]string{
-		"verbs":            "capabilities ping get_config job_status restart reload cleanup update backup restore reconfigure",
+		"commands":         "capabilities ping get_config job_status restart reload cleanup update backup restore reconfigure",
 		"backup_providers": "local s3 scp",
 		"update_channels":  "stable staging",
 	} {
@@ -152,9 +152,9 @@ func TestGetConfigFailsOnAnUnreadableProfile(t *testing.T) {
 	a.fails(a.send("get_config"), "internal")
 }
 
-func TestUnknownVerbsAreRejected(t *testing.T) {
+func TestUnknownCommandsAreRejected(t *testing.T) {
 	a := newAgent(t)
-	r := a.fails(a.send("shutdown"), "unknown_verb")
+	r := a.fails(a.send("shutdown"), "unknown_command")
 	a.singleLine(r)
 }
 
@@ -192,7 +192,7 @@ func TestArgumentsAreARequestThatNeedsNoToken(t *testing.T) {
 	a.singleLine(r)
 	a.fails(a.run("job_status", "id=20260923T140651Z-7f3a9c"), "not_found")
 	a.fails(a.run("backup", "PATH=x"), "invalid_argument")
-	a.fails(a.run("nope"), "unknown_verb")
+	a.fails(a.run("nope"), "unknown_command")
 	a.fails(a.send("ping"), "unauthorized")
 }
 

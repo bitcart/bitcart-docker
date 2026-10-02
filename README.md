@@ -130,7 +130,7 @@ The agent is a static binary with its source in `host-agent/`. `setup.sh` and `u
 - Agent crashes: `.agent/agent.log`.
 - Service: `systemctl status bitcart-agent` on Linux, `launchctl print gui/$(id -u)/org.bitcart.agent` on macOS.
 
-The binary takes a request as arguments, verb first:
+The binary takes a request as arguments, command first:
 
 ```bash
 ./bitcart-agent ping

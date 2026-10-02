@@ -60,10 +60,10 @@ type reply struct {
 }
 
 var (
-	out       sync.Mutex
-	responded bool
-	auditVerb = "invalid"
-	auditJob  string
+	out          sync.Mutex
+	responded    bool
+	auditCommand = "invalid"
+	auditJob     string
 )
 
 func marshal(v any) ([]byte, error) {
@@ -101,7 +101,7 @@ func audit(outcome string) {
 		job = "-"
 	}
 	if w, err := syslog.New(syslog.LOG_INFO|syslog.LOG_USER, "bitcart-agent"); err == nil {
-		w.Info("verb=" + auditVerb + " outcome=" + outcome + " job=" + job)
+		w.Info("command=" + auditCommand + " outcome=" + outcome + " job=" + job)
 		w.Close()
 	}
 }
@@ -239,11 +239,11 @@ func handleRequest(fields []string) *apiError {
 		}
 	}
 	name := fields[0]
-	v, ok := verbs[name]
+	v, ok := commands[name]
 	if !ok {
-		return fail("unknown_verb", "unknown verb")
+		return fail("unknown_command", "unknown command")
 	}
-	auditVerb = name
+	auditCommand = name
 	args, err := parseArgs(v, fields[1:])
 	if err != nil {
 		return err

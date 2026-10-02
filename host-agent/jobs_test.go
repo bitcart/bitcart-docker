@@ -28,7 +28,7 @@ func TestAJobRunsItsScriptOutsideTheAgentAndRecordsTheOutcome(t *testing.T) {
 	}
 	r := a.ok(a.send("job_status", "id="+id))
 	for key, want := range map[string]string{
-		"id": id, "verb": "restart", "state": "done", "exit_code": "0", "result": "null", "reason": "<missing>", "log_complete": "true",
+		"id": id, "command": "restart", "state": "done", "exit_code": "0", "result": "null", "reason": "<missing>", "log_complete": "true",
 	} {
 		if got := r.str(key); got != want {
 			t.Errorf("%s = %s, want %s", key, got, want)
@@ -55,7 +55,7 @@ func TestJobFilesArePrivate(t *testing.T) {
 	}
 }
 
-func TestEachVerbRunsItsOwnScript(t *testing.T) {
+func TestEachCommandRunsItsOwnScript(t *testing.T) {
 	a := newAgent(t)
 	for _, c := range []struct {
 		request []string
@@ -361,7 +361,7 @@ func TestRetentionKeepsThe50NewestJobsAndNeverDeletesRunningOnes(t *testing.T) {
 	for i := 10; i <= 69; i++ {
 		a.write(
 			fmt.Sprintf(".agent/jobs/20250101T0000%dZ-abcdef/status.json", i),
-			`{"state":"done","verb":"restart","created":1}`+"\n",
+			`{"state":"done","command":"restart","created":1}`+"\n",
 		)
 	}
 	a.writeStatus(running, "running", "restart", time.Now().Unix())

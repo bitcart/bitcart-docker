@@ -14,7 +14,7 @@ func (a *testAgent) notPwned() {
 	}
 }
 
-func TestArgumentsMustBeKnownForTheVerb(t *testing.T) {
+func TestArgumentsMustBeKnownForTheCommand(t *testing.T) {
 	a := newAgent(t)
 	if r := a.fails(a.send("restart", "channel=stable"), "invalid_argument"); r.Error.Field != "channel" {
 		t.Errorf("field = %s", r.Error.Field)

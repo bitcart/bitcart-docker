@@ -269,8 +269,8 @@ func (a *testAgent) state(id string) string {
 	return st.State
 }
 
-func (a *testAgent) writeStatus(id, state, verb string, created int64) {
-	a.write(".agent/jobs/"+id+"/status.json", fmt.Sprintf(`{"state":%q,"verb":%q,"created":%d}`+"\n", state, verb, created))
+func (a *testAgent) writeStatus(id, state, command string, created int64) {
+	a.write(".agent/jobs/"+id+"/status.json", fmt.Sprintf(`{"state":%q,"command":%q,"created":%d}`+"\n", state, command, created))
 }
 
 func (a *testAgent) waitJob(id string) {

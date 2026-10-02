@@ -13,16 +13,16 @@ import (
 
 type args map[string]string
 
-type verb struct {
+type command struct {
 	keys    []string
 	envKeys *regexp.Regexp
 	loadEnv bool
 	respond func(args) *apiError
-	command func(args) []string
+	argv    func(args) []string
 }
 
 var (
-	verbOrder = []string{
+	commandOrder = []string{
 		"capabilities",
 		"ping",
 		"get_config",
@@ -48,22 +48,22 @@ func script(
 	return func(args) []string { return []string{path} }
 }
 
-var verbs map[string]*verb
+var commands map[string]*command
 
 func init() {
-	verbs = map[string]*verb{
+	commands = map[string]*command{
 		"capabilities": {respond: capabilities},
 		"ping": {
 			respond: func(args) *apiError { send(reply{OK: true, Data: struct{}{}}, nil); return nil },
 		},
 		"get_config": {respond: getConfig},
-		"job_status": {keys: []string{"id", "log_lines"}, respond: jobStatusVerb},
-		"restart":    {command: script("./restart.sh")},
-		"reload":     {command: script("./start.sh")},
-		"cleanup":    {command: script("./cleanup.sh")},
+		"job_status": {keys: []string{"id", "log_lines"}, respond: jobStatusCommand},
+		"restart":    {argv: script("./restart.sh")},
+		"reload":     {argv: script("./start.sh")},
+		"cleanup":    {argv: script("./cleanup.sh")},
 		"update": {
 			keys: []string{"channel"},
-			command: func(a args) []string {
+			argv: func(a args) []string {
 				if a["channel"] == "staging" {
 					return []string{"./install-master.sh"}
 				}
@@ -72,15 +72,15 @@ func init() {
 		},
 		"backup": {
 			envKeys: regexp.MustCompile(`^(BACKUP|S3|SCP)_[A-Z0-9_]+$`),
-			command: script("./backup.sh"),
+			argv:    script("./backup.sh"),
 		},
-		"restore": {keys: []string{"name"}, command: func(a args) []string {
+		"restore": {keys: []string{"name"}, argv: func(a args) []string {
 			return []string{"./restore.sh", "--delete-backup", filepath.Join(backupsDir, a["name"])}
 		}},
 		"reconfigure": {
 			envKeys: settingKeys,
 			loadEnv: true,
-			command: func(args) []string {
+			argv: func(args) []string {
 				if deployName != "" {
 					return []string{"./setup.sh", "--name", deployName}
 				}
@@ -94,7 +94,7 @@ func hasControl(s string) bool {
 	return strings.IndexFunc(s, func(r rune) bool { return r < 0x20 || r == 0x7f }) >= 0
 }
 
-func parseArgs(v *verb, fields []string) (args, *apiError) {
+func parseArgs(v *command, fields []string) (args, *apiError) {
 	a := args{}
 	for _, f := range fields {
 		key, val, ok := strings.Cut(f, "=")
@@ -185,12 +185,12 @@ func capabilities(args) *apiError {
 		Executor        string               `json:"executor"`
 		Runtime         runtimeInfo          `json:"runtime"`
 		Images          map[string]imageInfo `json:"images"`
-		Verbs           []string             `json:"verbs"`
+		Commands        []string             `json:"commands"`
 		BackupProviders []string             `json:"backup_providers"`
 		UpdateChannels  []string             `json:"update_channels"`
 		RunningJob      any                  `json:"running_job"`
 		Host            *hostInfo            `json:"host,omitempty"`
-	}{Protocol: protocol, Transport: transport, Executor: detectExecutor(), Verbs: verbOrder,
+	}{Protocol: protocol, Transport: transport, Executor: detectExecutor(), Commands: commandOrder,
 		BackupProviders: backupProviders, UpdateChannels: updateChannels}
 	data.ScriptsVersion = nullable(
 		commandOutput(

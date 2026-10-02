@@ -48,7 +48,7 @@ func runJob(id string) {
 	if err != nil {
 		return
 	}
-	v, ok := verbs[fields[0]]
+	v, ok := commands[fields[0]]
 	if !ok {
 		return
 	}
@@ -62,7 +62,7 @@ func runJob(id string) {
 			env = append(env, key+"="+val)
 		}
 	}
-	argv := v.command(a)
+	argv := v.argv(a)
 	if v.loadEnv {
 		argv = append(
 			[]string{

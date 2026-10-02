@@ -20,7 +20,7 @@ import (
 
 type jobStatus struct {
 	State    string `json:"state"`
-	Verb     string `json:"verb,omitempty"`
+	Command  string `json:"command,omitempty"`
 	Created  *int64 `json:"created,omitempty"`
 	Started  *int64 `json:"started,omitempty"`
 	Finished *int64 `json:"finished,omitempty"`
@@ -205,12 +205,12 @@ func encodeRequest(fields []string) []byte {
 	return buf.Bytes()
 }
 
-func startJob(verbName string, fields []string) *apiError {
+func startJob(commandName string, fields []string) *apiError {
 	pruneJobs()
 	id := newJobID()
 	auditJob = id
 	dir := filepath.Join(jobsDir, id)
-	status, _ := json.Marshal(jobStatus{State: "running", Verb: verbName, Created: now()})
+	status, _ := json.Marshal(jobStatus{State: "running", Command: commandName, Created: now()})
 	if os.Mkdir(dir, 0o700) != nil ||
 		os.WriteFile(filepath.Join(dir, "request.bin"), encodeRequest(fields), 0o600) != nil ||
 		os.WriteFile(filepath.Join(dir, "status.json"), append(status, '\n'), 0o600) != nil {
@@ -293,7 +293,7 @@ func readTail(path string, limit int64) []byte {
 	return buf
 }
 
-func jobStatusVerb(a args) *apiError {
+func jobStatusCommand(a args) *apiError {
 	id := a["id"]
 	if !reJobID.MatchString(id) {
 		return invalid("id", "id is not a job id")
