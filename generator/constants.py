@@ -16,6 +16,7 @@ METADATA_PATH = path_join(COMPOSE_DIR, "metadata.json")
 # Crypto constants
 CRYPTOS = {
     "btc": {"component": "bitcoin"},
+    "btclnd": {"component": "bitcoinlnd"},
     "ltc": {"component": "litecoin"},
     "bch": {"component": "bitcoincash"},
     "xrg": {"component": "ergon"},
