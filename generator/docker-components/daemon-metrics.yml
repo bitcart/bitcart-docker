@@ -1,0 +1,16 @@
+services:
+  daemon-metrics:
+    build:
+      context: ./daemon-metrics
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:8000
+      BACKEND_TOKEN: ${BACKEND_TOKEN:-}
+      METRICS_SCRAPE_INTERVAL: ${METRICS_SCRAPE_INTERVAL:-30}
+      METRICS_PORT: 8000
+    expose:
+      - "8000"
+    depends_on:
+      - backend
+    links:
+      - backend
