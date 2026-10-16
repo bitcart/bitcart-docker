@@ -54,6 +54,7 @@ BITCART_API_WORKERS=$BITCART_API_WORKERS
 BITCART_PROMETHEUS_METRICS_ENABLED=$BITCART_PROMETHEUS_METRICS_ENABLED
 BITCART_AGENT_TRANSPORT=$BITCART_AGENT_TRANSPORT
 BITCART_AGENT_TOKEN=$BITCART_AGENT_TOKEN
+BITCART_PLUGINS_AUTO_UPDATE=$BITCART_PLUGINS_AUTO_UPDATE
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_PORT")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_EXPOSE")
 $(env | awk -F "=" '{print "\n"$0}' | grep "BITCART_.*.*_SCALE")
@@ -89,6 +90,34 @@ bitcart_pull() {
 bitcart_restart() {
     bitcart_stop
     bitcart_start
+}
+
+bitcart_update_plugins() {
+    if [[ "$BITCART_PLUGINS_AUTO_UPDATE" == "false" ]]; then
+        echo "Plugins auto-update is disabled"
+        return
+    fi
+    if [[ " $(./build.sh --components-only | tail -1) " != *" backend "* ]]; then
+        return
+    fi
+    echo "Updating plugins to the newest versions compatible with the new Bitcart version"
+    local exit_code=0
+    docker compose -p "$NAME" -f compose/generated.yml run --rm --no-deps -T backend \
+        sh -c 'if [ -f scripts/update_plugins.py ]; then exec python3 scripts/update_plugins.py; fi; exit 3' ||
+        exit_code=$?
+    case $exit_code in
+    0) ;;
+    3) echo "This Bitcart version can't update plugins automatically" ;;
+    *) echo "WARNING: updating plugins failed, keeping the installed versions" ;;
+    esac
+}
+
+bitcart_finish_update() {
+    bitcart_update_plugins
+    bitcart_start
+    set +e
+    run_upgrades
+    docker image prune -f --filter "label=org.bitcart.image" --filter "label!=org.bitcart.image=docker-compose-generator"
 }
 
 get_profile_file() {
@@ -333,6 +362,7 @@ install_plugins() {
     COIN_COMPONENTS=$(./build.sh --cryptos-only | tail -1)
     failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
     error=false
+    failed=false
     rm -f "$failed_file"
     if [[ " ${COMPONENTS[*]} " == *" backend "* ]]; then
         make_backup_image bitcart/bitcart
@@ -347,8 +377,8 @@ install_plugins() {
         make_backup_image "bitcart/bitcart-$coin"
     done
     if [[ "$DOCKER_PLUGINS_HASH" != "$(get_plugins_hash docker)" ]]; then
-        ./build.sh || touch "$failed_file"
-        docker compose -f compose/generated.yml config || touch "$failed_file"
+        ./build.sh || failed=true
+        docker compose -f compose/generated.yml config || failed=true
     fi
     if [[ " ${COMPONENTS[*]} " == *" backend "* ]] && [[ "$BACKEND_PLUGINS_HASH" != "$(get_plugins_hash backend)" ]]; then
         docker build -t bitcart/bitcart:stable -f compose/backend-plugins.Dockerfile compose || error=true
@@ -373,9 +403,15 @@ install_plugins() {
         for coin in $COIN_COMPONENTS; do
             docker tag "bitcart/bitcart-$coin:original" "bitcart/bitcart-$coin:stable"
         done
-        touch "$failed_file"
+        failed=true
     fi
     save_deploy_config
+    if [[ "$failed" == true ]]; then
+        touch "$failed_file"
+        for component in ADMIN STORE BACKEND DOCKER; do
+            set_deploy_value "${component}_PLUGINS_HASH" ""
+        done
+    fi
 }
 
 job_result() {

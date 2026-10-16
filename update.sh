@@ -12,10 +12,12 @@ cd "$BITCART_BASE_DIRECTORY"
 
 skip_git_pull=false
 agent_only=false
+no_start=false
 for arg in "$@"; do
     case $arg in
     --skip-git-pull) skip_git_pull=true ;;
     --agent-only) agent_only=true ;;
+    --no-start) no_start=true ;;
     esac
 done
 
@@ -50,8 +52,7 @@ fi
 check_docker_compose
 install_tooling
 bitcart_pull
-bitcart_start
-
-set +e
-run_upgrades
-docker image prune -f --filter "label=org.bitcart.image" --filter "label!=org.bitcart.image=docker-compose-generator"
+if $no_start; then
+    exit 0
+fi
+bitcart_finish_update

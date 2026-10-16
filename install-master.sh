@@ -11,7 +11,9 @@ cd "$BITCART_BASE_DIRECTORY"
 # Create a backup
 ./backup.sh
 # First, update to latest stable release, then we can apply staging changes
-./update.sh
+./update.sh --no-start
+# shellcheck source=helpers.sh
+. helpers.sh
 
 COMPONENTS=$(./build.sh --components-only | tail -1)
 IFS=', ' read -r -a CRYPTOS <<<"$BITCART_CRYPTOS"
@@ -55,4 +57,4 @@ build_additional_image() {
 build_additional_image admin
 build_additional_image store
 bitcart_reset_plugins
-bitcart_start
+bitcart_finish_update
