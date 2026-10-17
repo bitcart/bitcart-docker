@@ -13,11 +13,13 @@ cd "$BITCART_BASE_DIRECTORY"
 skip_git_pull=false
 agent_only=false
 no_start=false
+keep_master_images=false
 for arg in "$@"; do
     case $arg in
     --skip-git-pull) skip_git_pull=true ;;
     --agent-only) agent_only=true ;;
     --no-start) no_start=true ;;
+    --keep-master-images) keep_master_images=true ;;
     esac
 done
 
@@ -51,7 +53,11 @@ fi
 . helpers.sh
 check_docker_compose
 install_tooling
-bitcart_pull
+if $keep_master_images; then
+    bitcart_pull_keep_master
+else
+    bitcart_pull
+fi
 if $no_start; then
     exit 0
 fi

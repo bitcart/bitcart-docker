@@ -75,16 +75,38 @@ bitcart_stop() {
     docker compose -p "$NAME" -f compose/generated.yml down
 }
 
+bitcart_generator_list() (
+    set -o pipefail
+    ./build.sh "$1" | tail -1
+)
+
 bitcart_reset_plugins() {
-    export ADMIN_PLUGINS_HASH=
-    export STORE_PLUGINS_HASH=
-    export BACKEND_PLUGINS_HASH=
-    export DOCKER_PLUGINS_HASH=
+    [[ $# -gt 0 ]] || set -- ADMIN STORE BACKEND DOCKER
+    local component
+    for component in "$@"; do
+        set_deploy_value "${component}_PLUGINS_HASH" ""
+    done
 }
 
 bitcart_pull() {
-    docker compose -f compose/generated.yml pull
     bitcart_reset_plugins
+    docker compose -f compose/generated.yml pull
+}
+
+bitcart_pull_keep_master() {
+    local image images=()
+    for image in $(docker compose -f compose/generated.yml config --images | sort -u); do
+        if [[ "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$image" 2>/dev/null)" == master ]]; then
+            continue
+        fi
+        case $image in
+        bitcart/bitcart:*) bitcart_reset_plugins BACKEND ;;
+        bitcart/bitcart-admin:*) bitcart_reset_plugins ADMIN ;;
+        bitcart/bitcart-store:*) bitcart_reset_plugins STORE ;;
+        esac
+        images+=("$image")
+    done
+    printf '%s\n' "${images[@]}" | xargs -r -n1 -P0 docker pull
 }
 
 bitcart_restart() {
@@ -97,7 +119,12 @@ bitcart_update_plugins() {
         echo "Plugins auto-update is disabled"
         return
     fi
-    if [[ " $(./build.sh --components-only | tail -1) " != *" backend "* ]]; then
+    local components
+    if ! components=$(bitcart_generator_list --components-only); then
+        echo "WARNING: failed to get the enabled components, skipping plugins update"
+        return
+    fi
+    if [[ " $components " != *" backend "* ]]; then
         return
     fi
     echo "Updating plugins to the newest versions compatible with the new Bitcart version"
@@ -358,8 +385,8 @@ make_backup_image() {
 }
 
 install_plugins() {
-    COMPONENTS=$(./build.sh --components-only | tail -1)
-    COIN_COMPONENTS=$(./build.sh --cryptos-only | tail -1)
+    COMPONENTS=$(bitcart_generator_list --components-only) || return
+    COIN_COMPONENTS=$(bitcart_generator_list --cryptos-only) || return
     failed_file="/var/lib/docker/volumes/$(volume_name "bitcart_datadir")/_data/.plugins-failed"
     error=false
     failed=false
@@ -408,9 +435,7 @@ install_plugins() {
     save_deploy_config
     if [[ "$failed" == true ]]; then
         touch "$failed_file"
-        for component in ADMIN STORE BACKEND DOCKER; do
-            set_deploy_value "${component}_PLUGINS_HASH" ""
-        done
+        bitcart_reset_plugins
     fi
 }
 

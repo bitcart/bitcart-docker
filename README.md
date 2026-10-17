@@ -236,6 +236,16 @@ export BITCART_ADDITIONAL_COMPONENTS=tor
 
 Currently the testing of individual pieces of Bitcart is done via local development installation, see [Manual Deployment](https://docs.bitcart.ai/deployment/manual) about how it is done.
 
+To run the latest unreleased code on a deployment, use `./install-master.sh`. It backs up, updates to the latest stable release, then builds the backend, admin, store and enabled coin daemons from their master branches.
+
+To rebuild only some of them, pass `--only` with a comma-separated list of `backend`, `admin`, `store` and enabled coin symbols:
+
+```bash
+./install-master.sh --only backend,btc
+```
+
+Components you don't list keep their earlier master builds, or are updated to the latest stable release.
+
 When doing some changes in generator, it is usually tested via local python installation, like so:
 
 ```bash
