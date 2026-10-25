@@ -1,0 +1,8 @@
+services:
+  bitcoin:
+    environment:
+      BTC_LIGHTNING_LISTEN: "0.0.0.0:9735"
+    ports:
+      - "9735:9735"
+    expose:
+      - "9735"
