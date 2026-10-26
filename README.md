@@ -102,6 +102,17 @@ Here is a complete list of configuration settings:
 | TOR_RELAY_EMAIL               | If tor relay is activated, the email for Tor to contact you regarding your relay                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | :x:         | Extension |
 | BITCART_PLUGINS_AUTO_UPDATE   | Set to false to stop update.sh and install-master.sh from updating installed marketplace plugins to the newest versions compatible with the new Bitcart version.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | true        | Scripts   |
 
+## Checkout
+
+The new checkout is opt-in: add `checkout` to `BITCART_ADDITIONAL_COMPONENTS`. It replaces the admin panel's invoice and refund pages and its `/modal/bitcart.js` script, and adds the `/embed/v1.js` script. It needs the admin component (or the store in one domain mode) and the `nginx` or `nginx-https` reverse proxy.
+
+nginx serves the checkout's `/i/`, `/refunds/`, `/embed/`, `/modal/bitcart.js` and `/checkout/` paths from the checkout container:
+
+- with separate domains, on `BITCART_ADMIN_HOST`, which is where the Merchants API already sends customers;
+- in one domain mode, on `BITCART_HOST`. `/admin/i/` and `/admin/refunds/` links redirect there, and `/admin/modal/bitcart.js` keeps working.
+
+The checkout uses `BITCART_ADMIN_API_URL` as its API URL, and the generator fills it in one domain mode.
+
 ## Host agent
 
 The admin panel manages its own instance through the **host agent**, `bitcart-agent`. The agent runs the scripts of this repository for a fixed set of operations, one job at a time. Jobs run outside the containers and keep running while the containers restart or update. Among the containers, only the worker has access to the agent.

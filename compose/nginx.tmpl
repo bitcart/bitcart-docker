@@ -53,6 +53,48 @@
             {{ end }}
         {{ end }}
     {{ end }}
+    {{ template "checkout" $ }}
+{{ end }}
+
+{{ define "checkout" }}
+    {{ $checkoutUsed := "false" }}
+    {{ range $container := $.Containers }}
+        {{ if (and (eq $checkoutUsed "false") (eq (index $container.Labels "com.docker.compose.service") "checkout")) }}
+            {{ $checkoutUsed = "true" }}
+            {{ $upstream := trim $container.Env.VIRTUAL_HOST_NAME }}
+            {{ $oneDomainStore := (and (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") (eq $.HostName "bitcart-store")) }}
+            {{ if (or (eq $.HostName "bitcart-admin") $oneDomainStore) }}
+    location /i/ {
+        proxy_pass http://{{ $upstream }};
+    }
+    location /refunds/ {
+        proxy_pass http://{{ $upstream }};
+    }
+    location /checkout/ {
+        proxy_pass http://{{ $upstream }};
+    }
+    location /embed/ {
+        proxy_pass http://{{ $upstream }};
+    }
+    location = /modal/bitcart.js {
+        proxy_pass http://{{ $upstream }};
+    }
+            {{ end }}
+            {{ if $oneDomainStore }}
+    location /admin/i/ {
+        absolute_redirect off;
+        rewrite ^/admin(/.*)$ $1 redirect;
+    }
+    location /admin/refunds/ {
+        absolute_redirect off;
+        rewrite ^/admin(/.*)$ $1 redirect;
+    }
+    location = /admin/modal/bitcart.js {
+        proxy_pass http://{{ $upstream }}/modal/bitcart.js;
+    }
+            {{ end }}
+        {{ end }}
+    {{ end }}
 {{ end }}
 
 {{ define "ssl_policy" }}

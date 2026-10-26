@@ -1,7 +1,10 @@
 import sys
 from unittest.mock import AsyncMock, patch
 
+import pytest
+
 from generator.constants import CRYPTO_COMPONENTS, HOST_COMPONENTS, TOR_CRYPTOS
+from generator.exceptions import ConfigError
 from generator.generator import generate_config
 
 from .utils import delete_env, set_env
@@ -437,3 +440,68 @@ def test_host_agent_without_worker():
     delete_env("INSTALL")
     delete_env("ADMIN_API_URL")
     delete_env("STORE_API_URL")
+
+
+# Rule 14: checkout
+def test_checkout_disabled_by_default():
+    services = generate_config()["services"]
+    assert "checkout" not in services
+    assert "BITCART_CHECKOUT_URL" not in services["backend"]["environment"]
+
+
+def test_checkout_one_domain():
+    set_env("ADDITIONAL_COMPONENTS", "checkout")
+    services = generate_config()["services"]
+    assert services["checkout"]["environment"]["BITCART_API_URL"] == "https://None/api"
+    assert services["checkout"]["environment"]["ONE_DOMAIN_MODE"] == "true"
+    assert "VIRTUAL_HOST" not in services["checkout"]["environment"]
+    assert services["backend"]["environment"]["BITCART_CHECKOUT_URL"] == "https://None"
+    assert services["worker"]["environment"]["BITCART_CHECKOUT_URL"] == "https://None"
+    set_env("REVERSEPROXY", "nginx")
+    set_env("REVERSEPROXY_HTTP_PORT", "8080", prefix="")
+    services = generate_config()["services"]
+    assert services["checkout"]["environment"]["BITCART_API_URL"] == "http://None:8080/api"
+    assert services["backend"]["environment"]["BITCART_CHECKOUT_URL"] == "http://None:8080"
+    delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
+    delete_env("REVERSEPROXY")
+    delete_env("ADDITIONAL_COMPONENTS")
+
+
+def test_checkout_separate_domains():
+    set_env("ADDITIONAL_COMPONENTS", "checkout")
+    set_env("ADMIN_HOST", "admin.example.com")
+    set_env("ADMIN_API_URL", "https://api.example.com")
+    services = generate_config()["services"]
+    assert services["checkout"]["environment"]["BITCART_API_URL"] == "${BITCART_ADMIN_API_URL}"
+    assert "ONE_DOMAIN_MODE" not in services["checkout"]["environment"]
+    assert "BITCART_CHECKOUT_URL" not in services["backend"]["environment"]
+    delete_env("ADMIN_API_URL")
+    delete_env("ADMIN_HOST")
+    delete_env("ADDITIONAL_COMPONENTS")
+
+
+@pytest.mark.parametrize(
+    "env",
+    [
+        {"REVERSEPROXY": "none"},
+        {"INSTALL": "backend"},
+        {"EXCLUDE_COMPONENTS": "admin", "ADMIN_HOST": "admin.example.com"},
+    ],
+)
+def test_checkout_requires_admin_host(env):
+    set_env("ADDITIONAL_COMPONENTS", "checkout")
+    for name, value in env.items():
+        set_env(name, value)
+    with pytest.raises(ConfigError):
+        generate_config()
+    for name in env:
+        delete_env(name)
+    delete_env("ADDITIONAL_COMPONENTS")
+
+
+def test_checkout_one_domain_store_only():
+    set_env("ADDITIONAL_COMPONENTS", "checkout")
+    set_env("EXCLUDE_COMPONENTS", "admin")
+    assert generate_config()["services"]["checkout"]["environment"]["ONE_DOMAIN_MODE"] == "true"
+    delete_env("EXCLUDE_COMPONENTS")
+    delete_env("ADDITIONAL_COMPONENTS")

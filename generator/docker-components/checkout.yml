@@ -1,0 +1,11 @@
+services:
+  checkout:
+    restart: unless-stopped
+    image: bitcart/bitcart-checkout:stable
+    expose:
+      - "80"
+    environment:
+      BITCART_API_URL: ${BITCART_ADMIN_API_URL}
+      VIRTUAL_NETWORK: nginx-proxy
+      VIRTUAL_PORT: 80
+      VIRTUAL_HOST_NAME: "bitcart-checkout"
