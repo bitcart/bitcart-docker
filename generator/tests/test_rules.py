@@ -505,3 +505,21 @@ def test_checkout_one_domain_store_only():
     assert generate_config()["services"]["checkout"]["environment"]["ONE_DOMAIN_MODE"] == "true"
     delete_env("EXCLUDE_COMPONENTS")
     delete_env("ADDITIONAL_COMPONENTS")
+
+
+# Rule 15: nginx template
+def test_nginx_template_hash(monkeypatch, tmp_path):
+    nginx_template_rule = sys.modules["generator.rules.15_nginx_template"]
+    template = tmp_path / "nginx.tmpl"
+    monkeypatch.setattr(nginx_template_rule, "NGINX_TEMPLATE_PATH", str(template))
+    template.write_text("first")
+    first = generate_config()["services"]["nginx-gen"]["labels"]["org.bitcart.nginx-template-sha256"]
+    assert generate_config()["services"]["nginx-gen"]["labels"]["org.bitcart.nginx-template-sha256"] == first
+    template.write_text("second")
+    assert generate_config()["services"]["nginx-gen"]["labels"]["org.bitcart.nginx-template-sha256"] != first
+
+
+def test_nginx_template_hash_without_nginx():
+    set_env("REVERSEPROXY", "none")
+    assert "nginx-gen" not in generate_config()["services"]
+    delete_env("REVERSEPROXY")
