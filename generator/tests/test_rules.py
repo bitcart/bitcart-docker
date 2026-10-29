@@ -1,3 +1,4 @@
+import os
 import sys
 from unittest.mock import AsyncMock, patch
 
@@ -58,6 +59,8 @@ def test_one_domain_rule():
     check_one_domain_setting("ADMIN_HOST")
     check_one_domain_setting("STORE_HOST")
     check_one_domain_setting("ADMIN_API_URL")
+    check_one_domain_setting("API_URL")
+    check_one_domain_setting("CHECKOUT_HOST")
     check_one_domain_setting("STORE_API_URL")
     assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://None/api"
     assert services["admin"]["environment"]["BITCART_ADMIN_SERVER_API_URL"] == "http://backend:8000"
@@ -453,6 +456,7 @@ def test_checkout_one_domain():
     set_env("ADDITIONAL_COMPONENTS", "checkout")
     services = generate_config()["services"]
     assert services["checkout"]["environment"]["BITCART_API_URL"] == "https://None/api"
+    assert services["checkout"]["environment"]["BITCART_CHECKOUT_URL"] == "https://None"
     assert services["checkout"]["environment"]["ONE_DOMAIN_MODE"] == "true"
     assert "VIRTUAL_HOST" not in services["checkout"]["environment"]
     assert services["backend"]["environment"]["BITCART_CHECKOUT_URL"] == "https://None"
@@ -467,36 +471,95 @@ def test_checkout_one_domain():
     delete_env("ADDITIONAL_COMPONENTS")
 
 
-def test_checkout_separate_domains():
-    set_env("ADDITIONAL_COMPONENTS", "checkout")
+def set_separate_domains(checkout_host="checkout.example.com"):
+    set_env("HOST", "api.example.com")
     set_env("ADMIN_HOST", "admin.example.com")
-    set_env("ADMIN_API_URL", "https://api.example.com")
+    set_env("STORE_HOST", "store.example.com")
+    if checkout_host:
+        set_env("ADDITIONAL_COMPONENTS", "checkout")
+        set_env("CHECKOUT_HOST", checkout_host)
+
+
+def unset_separate_domains():
+    for name in ("HOST", "ADMIN_HOST", "STORE_HOST", "ADDITIONAL_COMPONENTS", "CHECKOUT_HOST"):
+        os.environ.pop(f"BITCART_{name}", None)
+
+
+@pytest.mark.parametrize(
+    ("env", "checkout_url"),
+    [
+        ({}, "https://checkout.example.com"),
+        ({"REVERSEPROXY": "nginx"}, "http://checkout.example.com"),
+        ({"REVERSEPROXY": "nginx", "HTTPS_ENABLED": "true"}, "https://checkout.example.com"),
+    ],
+)
+def test_checkout_separate_domains(env, checkout_url):
+    set_separate_domains()
+    for name, value in env.items():
+        set_env(name, value)
     services = generate_config()["services"]
-    assert services["checkout"]["environment"]["BITCART_API_URL"] == "${BITCART_ADMIN_API_URL}"
-    assert "ONE_DOMAIN_MODE" not in services["checkout"]["environment"]
-    assert "BITCART_CHECKOUT_URL" not in services["backend"]["environment"]
+    checkout = services["checkout"]["environment"]
+    assert checkout["VIRTUAL_HOST"] == "checkout.example.com"
+    assert checkout["LETSENCRYPT_HOST"] == "checkout.example.com"
+    assert checkout["BITCART_CHECKOUT_URL"] == checkout_url
+    assert checkout["BITCART_API_URL"] == checkout_url.replace("checkout", "api")
+    assert "ONE_DOMAIN_MODE" not in checkout
+    assert services["backend"]["environment"]["BITCART_CHECKOUT_URL"] == checkout_url
+    assert services["worker"]["environment"]["BITCART_CHECKOUT_URL"] == checkout_url
+    for name in env:
+        delete_env(name)
+    unset_separate_domains()
+
+
+def test_checkout_uses_api_url_not_admin_override():
+    set_separate_domains()
+    set_env("API_URL", "https://pay-api.example.com")
+    set_env("ADMIN_API_URL", "https://admin-api.example.com")
+    services = generate_config()["services"]
+    assert services["checkout"]["environment"]["BITCART_API_URL"] == "https://pay-api.example.com"
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "${BITCART_ADMIN_API_URL}"
+    assert services["store"]["environment"]["BITCART_STORE_API_URL"] == "https://pay-api.example.com"
     delete_env("ADMIN_API_URL")
-    delete_env("ADMIN_HOST")
-    delete_env("ADDITIONAL_COMPONENTS")
+    delete_env("API_URL")
+    unset_separate_domains()
 
 
 @pytest.mark.parametrize(
     "env",
     [
-        {"REVERSEPROXY": "none"},
-        {"INSTALL": "backend"},
-        {"EXCLUDE_COMPONENTS": "admin", "ADMIN_HOST": "admin.example.com"},
+        {"ADDITIONAL_COMPONENTS": "checkout", "REVERSEPROXY": "none"},
+        {"ADDITIONAL_COMPONENTS": "checkout", "ADMIN_HOST": "admin.example.com"},
+        {"ADDITIONAL_COMPONENTS": "checkout", "CHECKOUT_HOST": "checkout.example.com", "REVERSEPROXY": "none"},
     ],
 )
-def test_checkout_requires_admin_host(env):
-    set_env("ADDITIONAL_COMPONENTS", "checkout")
+def test_checkout_without_nginx_or_host(env):
     for name, value in env.items():
         set_env(name, value)
     with pytest.raises(ConfigError):
         generate_config()
     for name in env:
         delete_env(name)
+
+
+def test_checkout_host_alone_does_not_enable_checkout():
+    set_separate_domains()
     delete_env("ADDITIONAL_COMPONENTS")
+    services = generate_config()["services"]
+    assert "checkout" not in services
+    assert "BITCART_CHECKOUT_URL" not in services["backend"]["environment"]
+    unset_separate_domains()
+
+
+def test_checkout_frontend_pack_with_api_url():
+    set_separate_domains()
+    set_env("INSTALL", "frontend")
+    set_env("API_URL", "https://api.example.com")
+    services = generate_config()["services"]
+    assert services["checkout"]["environment"]["BITCART_API_URL"] == "https://api.example.com"
+    assert "backend" not in services
+    delete_env("API_URL")
+    delete_env("INSTALL")
+    unset_separate_domains()
 
 
 def test_checkout_one_domain_store_only():
@@ -523,3 +586,22 @@ def test_nginx_template_hash_without_nginx():
     set_env("REVERSEPROXY", "none")
     assert "nginx-gen" not in generate_config()["services"]
     delete_env("REVERSEPROXY")
+
+
+# Rule 16: public API URL
+def test_public_api_url_defaults_to_backend_host():
+    set_separate_domains(checkout_host=None)
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://api.example.com"
+    assert services["store"]["environment"]["BITCART_STORE_API_URL"] == "https://api.example.com"
+    unset_separate_domains()
+
+
+def test_public_api_url_keeps_per_app_overrides():
+    set_separate_domains(checkout_host=None)
+    set_env("STORE_API_URL", "https://store-api.example.com")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "https://api.example.com"
+    assert services["store"]["environment"]["BITCART_STORE_API_URL"] == "${BITCART_STORE_API_URL}"
+    delete_env("STORE_API_URL")
+    unset_separate_domains()

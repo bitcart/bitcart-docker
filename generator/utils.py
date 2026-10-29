@@ -1,4 +1,5 @@
 import os
+from os.path import join as urljoin
 
 from generator.constants import CRYPTO_COMPONENTS, ENV_PREFIX, HOST_COMPONENTS
 from generator.exceptions import ConfigError
@@ -20,6 +21,16 @@ def preferred_service(components):
     for variant in HOST_COMPONENTS:
         if components.get(variant):
             return variant
+
+
+def public_api_url(services, settings):
+    if settings.API_URL:
+        return settings.API_URL
+    if settings.ONE_DOMAIN_MODE:
+        return urljoin(settings.HOST_URL, "api")
+    if services.get("backend") and settings.HOST:
+        return settings.HOST_URL
+    return ""
 
 
 def config_error(message):

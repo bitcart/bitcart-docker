@@ -20,7 +20,7 @@ def rule(services, settings):
     if not settings.ONE_DOMAIN_MODE:
         return
     BACKEND_AVAILABLE = services.get("backend") and services.get("worker")
-    API_URL = urljoin(settings.API_URL, "api")
+    API_URL = urljoin(settings.HOST_URL, "api")
     INTERNAL_API_URL = "http://backend:8000" if BACKEND_AVAILABLE else None
     STORE_AVAILABLE = services.get("store")
     ADMIN_AVAILABLE = services.get("admin")

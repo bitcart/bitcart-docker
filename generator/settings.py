@@ -31,6 +31,8 @@ class Settings:
             self.REVERSE_PROXY in ALL_REVERSE_PROXIES
             and not self.ADMIN_HOST
             and not self.STORE_HOST
+            and not self.CHECKOUT_HOST
+            and not self.API_URL
             and not self.ADMIN_API_URL
             and not self.STORE_API_URL
         )
@@ -39,14 +41,12 @@ class Settings:
         self.API_PORT = env(f"REVERSEPROXY_{self.PROTOCOL.upper()}_PORT", self.DEFAULT_API_PORT, prefix="")
         self.API_PORT = self.API_PORT.rsplit(":", 1)[-1]
         port_suffix = f":{self.API_PORT}" if not self.BEHIND_REVERSE_PROXY and self.API_PORT != self.DEFAULT_API_PORT else ""
-        self.API_URL = f"{self.PROTOCOL}://{self.HOST}{port_suffix}"
+        self.HOST_URL = f"{self.PROTOCOL}://{self.HOST}{port_suffix}"
+        self.CHECKOUT_URL = f"{self.PROTOCOL}://{self.CHECKOUT_HOST}{port_suffix}" if self.CHECKOUT_HOST else None
 
     def apply_checks(self):
         if self.ONE_DOMAIN_MODE and self.INSTALLATION_PACK == "frontend":
-            config_error(
-                "Frontend installation pack is enabled and no API URL set. "
-                "Please set BITCART_ADMIN_API_URL and BITCART_STORE_API_URL."
-            )
+            config_error("Frontend installation pack is enabled and no API URL set. Please set BITCART_API_URL.")
 
     @staticmethod
     def load_comma_separated(name, default=""):

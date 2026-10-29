@@ -46,7 +46,7 @@ read -r -a components <<<"$components"
 read -r -a cryptos <<<"$cryptos"
 
 buildable=()
-for component in backend admin store; do
+for component in backend admin store checkout; do
     if [[ " ${components[*]} " == *" $component "* ]]; then
         buildable+=("$component")
     fi
@@ -125,6 +125,11 @@ for component in admin store; do
         build_image "$(git -C "$temp_dir/$component" rev-parse HEAD)" "bitcart/bitcart-$component" "$temp_dir/$component"
     fi
 done
+if selected checkout; then
+    git clone --depth 1 https://github.com/bitcart/bitcart-frontend "$temp_dir/frontend"
+    build_image "$(git -C "$temp_dir/frontend" rev-parse HEAD)" bitcart/bitcart-checkout \
+        -f "$temp_dir/frontend/apps/checkout/Dockerfile" "$temp_dir/frontend"
+fi
 
 for image in "${built[@]}"; do
     docker tag "$image:install-master" "$image:stable"

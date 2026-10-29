@@ -56,9 +56,11 @@ Environment variables:
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
     BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
     BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
-    BITCART_STORE_API_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
+    BITCART_STORE_API_URL: Optional, overrides BITCART_API_URL for the store
     BITCART_ADMIN_HOST: The hostname of your website admin panel (eg. admin.example.com)
-    BITCART_ADMIN_API_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com)
+    BITCART_ADMIN_API_URL: Optional, overrides BITCART_API_URL for the admin panel
+    BITCART_CHECKOUT_HOST: The hostname of your checkout (eg. checkout.example.com), required by the checkout component with separate domains
+    BITCART_API_URL: The URL to your website API (hosted locally or remotely, eg. https://api.example.com). Default: the bundled API on BITCART_HOST
     BTC_NETWORK: The network to run bitcoin daemon on (eg. mainnet, testnet)
     BTC_LIGHTNING: Whether to enable bitcoin lightning network or not (eg. true, false)
     BCH_NETWORK: The network to run bitcoin cash daemon on (eg. mainnet, testnet)
@@ -270,6 +272,8 @@ BITCART_STORE_HOST=$BITCART_STORE_HOST
 BITCART_STORE_API_URL=$BITCART_STORE_API_URL
 BITCART_ADMIN_HOST=$BITCART_ADMIN_HOST
 BITCART_ADMIN_API_URL=$BITCART_ADMIN_API_URL
+BITCART_CHECKOUT_HOST=$BITCART_CHECKOUT_HOST
+BITCART_API_URL=$BITCART_API_URL
 BITCART_INSTALL=$BITCART_INSTALL
 BITCART_REVERSEPROXY=$BITCART_REVERSEPROXY
 BITCART_CRYPTOS=$BITCART_CRYPTOS

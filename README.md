@@ -34,7 +34,7 @@ export BITCART_HOST=yourdomain.tld
 
 This setup utilizes the [one domain mode](https://docs.bitcart.ai/guides/one-domain-mode). We recommend you to read about that.
 
-**Important: for everything to work, you will need to first set up DNS A records for** `BITCART_HOST`**,** `BITCART_ADMIN_HOST` **(if set) and** `BITCART_STORE_HOST` **(if set) to point to the server where you are deploying Bitcart.**
+**Important: for everything to work, you will need to first set up DNS A records for** `BITCART_HOST`**,** `BITCART_ADMIN_HOST` **(if set),** `BITCART_STORE_HOST` **(if set) and** `BITCART_CHECKOUT_HOST` **(if set) to point to the server where you are deploying Bitcart.**
 
 ![DNS A records for bitcart demo](https://raw.githubusercontent.com/bitcart/bitcart-docs/master/.gitbook/assets/namecheap_dns_records.png)
 
@@ -53,22 +53,13 @@ cd bitcart-docker
 export BITCART_HOST=api.yourdomain.tld
 export BITCART_ADMIN_HOST=admin.yourdomain.tld
 export BITCART_STORE_HOST=store.yourdomain.tld
-export BITCART_ADMIN_API_URL=https://api.yourdomain.tld
-export BITCART_STORE_API_URL=https://api.yourdomain.tld
 ./setup.sh
 ```
 
-Why was it done like so? It's because it is possible to run Merchants API on one server, and everything else on different servers.
-
-But in most cases, you can basically do:
+The admin panel, store and checkout use the Merchants API on `BITCART_HOST`. If you run the Merchants API on another server (for example with `BITCART_INSTALL=frontend`), set its URL:
 
 ```bash
-# if https (BITCART_REVERSEPROXY=nginx-https, default)
-export BITCART_ADMIN_API_URL=https://$BITCART_HOST
-export BITCART_STORE_API_URL=https://$BITCART_HOST
-# if http (BITCART_REVERSEPROXY=nginx, local deployments, other)
-export BITCART_ADMIN_API_URL=http://$BITCART_HOST
-export BITCART_STORE_API_URL=http://$BITCART_HOST
+export BITCART_API_URL=https://api.yourdomain.tld
 ```
 
 ## Configuration
@@ -86,8 +77,10 @@ Here is a complete list of configuration settings:
 | BITCART_HOST                  | Host where to run Bitcart Merchants API. Is used when merchants API (backend component) is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | :x:         | App       |
 | BITCART_STORE_HOST            | Host where to run Bitcart Ready Store. Is used when store component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | :x:         | App       |
 | BITCART_ADMIN_HOST            | Host where to run Bitcart Admin Panel. Is used when admin component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | :x:         | App       |
-| BITCART_STORE_API_URL         | URL of Bitcart Merchants API instance. It can be your instance hosted together with store or a completely separate instance. In case of default setup (store+admin+API at once), you need to set it to https://$BITCART_HOST or (http if nginx-https component is not enabled).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | :x:         | App       |
-| BITCART_ADMIN_API_URL         | Same as BITCART_STORE_API_URL, but for configuring your admin panel.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | :x:         | App       |
+| BITCART_CHECKOUT_HOST         | Host where to run Bitcart Checkout: invoice, receipt and refund pages, and the /embed/v1.js and /modal/bitcart.js scripts. The checkout component needs it unless one domain mode is used. Old checkout links on BITCART_ADMIN_HOST redirect to it. Setting it turns off one domain mode.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | :x:         | App       |
+| BITCART_API_URL               | URL of Bitcart Merchants API instance used by the admin panel, store and checkout. It can be your instance hosted together with them or a completely separate instance. Defaults to the bundled Merchants API on BITCART_HOST (or BITCART_HOST/api in one domain mode). Setting it turns off one domain mode.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | :x:         | App       |
+| BITCART_STORE_API_URL         | Overrides BITCART_API_URL for the store.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | :x:         | App       |
+| BITCART_ADMIN_API_URL         | Overrides BITCART_API_URL for the admin panel. The checkout never uses it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | :x:         | App       |
 | BITCART_LETSENCRYPT_EMAIL     | Email used for notifying you about your https certificates. Usually no action is needed to renew your certificates, but otherwise you'll get an email. Is used when nginx-https component is enabled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | :x:         | App       |
 | COINNAME_NETWORK              | Used for configuring network of COINNAME daemon. Daemon can be run in only one network at once. Possible values are mainnet, testnet, and sometimes regtest and simnet. This setting affects only daemon of COINNAME, you need to set this value for each coin daemon you want to customize.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | mainnet     | App       |
 | COINNAME_LIGHTNING            | Used for enabling/disabling lightning support of COINNAME daemon. Some coins might not support lightning, in this case this setting does nothing. Possible values are true, false or not set. This setting affects only daemon of COINNAME, you need to set this value for each coin daemon you want to customize.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | false       | App       |
@@ -104,14 +97,14 @@ Here is a complete list of configuration settings:
 
 ## Checkout
 
-The new checkout is opt-in: add `checkout` to `BITCART_ADDITIONAL_COMPONENTS`. It replaces the admin panel's invoice and refund pages and its `/modal/bitcart.js` script, and adds the `/embed/v1.js` script. It needs the admin component (or the store in one domain mode) and the `nginx` or `nginx-https` reverse proxy.
+The new checkout is opt-in: add `checkout` to `BITCART_ADDITIONAL_COMPONENTS`. With separate domains, also set `BITCART_CHECKOUT_HOST`. It replaces the admin panel's invoice and refund pages and its `/modal/bitcart.js` script, and adds the `/embed/v1.js` script. It needs the `nginx` or `nginx-https` reverse proxy.
 
-nginx serves the checkout's `/i/`, `/refunds/`, `/embed/`, `/modal/bitcart.js` and `/checkout/` paths from the checkout container:
+nginx serves the checkout's `/i/`, `/refunds/`, `/embed/`, `/modal/bitcart.js` and `/checkout/` paths:
 
-- with separate domains, on `BITCART_ADMIN_HOST`, which is where the Merchants API already sends customers;
+- with separate domains, on `BITCART_CHECKOUT_HOST`. Old links to `/i/`, `/refunds/` and `/modal/bitcart.js` on `BITCART_ADMIN_HOST` redirect there with a 302, except on its onion address, which keeps serving all of these paths;
 - in one domain mode, on `BITCART_HOST`. `/admin/i/` and `/admin/refunds/` links redirect there, and `/admin/modal/bitcart.js` keeps working.
 
-The checkout uses `BITCART_ADMIN_API_URL` as its API URL, and the generator fills it in one domain mode.
+The checkout uses `BITCART_API_URL`, not `BITCART_ADMIN_API_URL`.
 
 ## Host agent
 
@@ -247,7 +240,7 @@ export BITCART_ADDITIONAL_COMPONENTS=tor
 
 Currently the testing of individual pieces of Bitcart is done via local development installation, see [Manual Deployment](https://docs.bitcart.ai/deployment/manual) about how it is done.
 
-To run the latest unreleased code on a deployment, use `./install-master.sh`. It backs up, updates to the latest stable release, then builds the backend, admin, store and enabled coin daemons from their master branches.
+To run the latest unreleased code on a deployment, use `./install-master.sh`. It backs up, updates to the latest stable release, then builds the backend, admin, store, checkout (when enabled) and enabled coin daemons from their master branches.
 
 To rebuild only some of them, pass `--only` with a comma-separated list of `backend`, `admin`, `store` and enabled coin symbols:
 

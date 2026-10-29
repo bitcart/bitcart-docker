@@ -46,6 +46,8 @@ AVAILABLE_SETTINGS = [
     ("HOST",),
     ("ADMIN_HOST",),
     ("STORE_HOST",),
+    ("CHECKOUT_HOST",),
+    ("API_URL",),
     ("ADMIN_API_URL",),
     ("STORE_API_URL",),
     ("HTTPS_ENABLED",),

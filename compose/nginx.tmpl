@@ -62,8 +62,21 @@
         {{ if (and (eq $checkoutUsed "false") (eq (index $container.Labels "com.docker.compose.service") "checkout")) }}
             {{ $checkoutUsed = "true" }}
             {{ $upstream := trim $container.Env.VIRTUAL_HOST_NAME }}
-            {{ $oneDomainStore := (and (eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true") (eq $.HostName "bitcart-store")) }}
-            {{ if (or (eq $.HostName "bitcart-admin") $oneDomainStore) }}
+            {{ $oneDomain := eq (or ($container.Env.ONE_DOMAIN_MODE) "") "true" }}
+            {{ $oneDomainStore := (and $oneDomain (eq $.HostName "bitcart-store")) }}
+            {{ $checkoutUrl := trim (or ($container.Env.BITCART_CHECKOUT_URL) "") }}
+            {{ $redirectAdmin := (and (eq $.HostName "bitcart-admin") (not $oneDomain) (not $.Onion) (ne $checkoutUrl "")) }}
+            {{ if $redirectAdmin }}
+    location /i/ {
+        return 302 {{ $checkoutUrl }}$request_uri;
+    }
+    location /refunds/ {
+        return 302 {{ $checkoutUrl }}$request_uri;
+    }
+    location = /modal/bitcart.js {
+        return 302 {{ $checkoutUrl }}$request_uri;
+    }
+            {{ else if (or (eq $.HostName "bitcart-admin") $oneDomainStore) }}
     location /i/ {
         proxy_pass http://{{ $upstream }};
     }
@@ -426,7 +439,7 @@ server {
     location / {
         proxy_pass http://{{ trim $upstream_name }};
     }
-    {{ template "redirects" (dict "HostName" $host_name "Containers" $) }}
+    {{ template "redirects" (dict "HostName" $host_name "Containers" $ "Onion" true) }}
 }
     {{ end }}
 {{ end }}
