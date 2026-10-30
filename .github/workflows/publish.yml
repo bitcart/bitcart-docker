@@ -78,5 +78,6 @@ jobs:
       image-name: bitcart/docker-compose-generator
       tags: |
         type=raw,value=latest
+        type=sha,format=long
       dockerhub-user: ${{ vars.DOCKERHUB_USER }}
       dockerhub-oidc-connection-id: ${{ vars.DOCKERHUB_OIDC_CONNECTIONID }}

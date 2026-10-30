@@ -1,7 +1,8 @@
 # shellcheck shell=bash
 
 install_agent_binary() {
-    local image=${BITCARTGEN_DOCKER_IMAGE:-bitcart/docker-compose-generator} os dir container binary
+    local image os dir container binary
+    image=$("$BITCART_BASE_DIRECTORY/build.sh" --image)
     os=$(uname -s | tr '[:upper:]' '[:lower:]')
     mkdir -p "$BITCART_BASE_DIRECTORY/.agent"
     chmod 700 "$BITCART_BASE_DIRECTORY/.agent"

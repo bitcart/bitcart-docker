@@ -265,6 +265,8 @@ export BITCARTGEN_DOCKER_IMAGE=bitcart/docker-compose-generator:local
 ./build.sh # now uses local image
 ```
 
+Without it, `build.sh` uses the generator image published for the checked out commit (`bitcart/docker-compose-generator:sha-<commit>`), and builds it locally when that commit has none.
+
 ## Architecture
 
 To provide a variety of deployment methods, to fit in every possible use case, we use a custom generator system.
