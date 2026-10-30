@@ -2,4 +2,4 @@ rules:
   unpinned-uses:
     config:
       policies:
-        "*": ref-pin
+        "bitcart/*": ref-pin
