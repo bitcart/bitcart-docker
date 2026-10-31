@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -294,12 +295,7 @@ func (a *testAgent) outLines(script string) []string {
 }
 
 func (a *testAgent) hasLine(script, line string) bool {
-	for _, l := range a.outLines(script) {
-		if l == line {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(a.outLines(script), line)
 }
 
 func (a *testAgent) mustHaveLines(script string, lines ...string) {

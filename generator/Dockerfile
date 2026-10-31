@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS agent-build
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS agent-build
 ARG TARGETARCH
 ARG AGENT_OS="linux darwin"
 WORKDIR /src
