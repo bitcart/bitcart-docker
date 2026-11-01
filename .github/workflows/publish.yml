@@ -16,14 +16,15 @@ jobs:
   ci:
     name: CI
     uses: $/.github/workflows/test.yml
+
     permissions:
       contents: read
       security-events: write # needed for github advanced security
       id-token: write # OIDC token for codecov uploads
 
   demo:
-    needs: ci
     name: demo
+    needs: ci
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -64,14 +65,8 @@ jobs:
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 
   publish:
-    needs: ci
     uses: bitcart/bitcart-actions/.github/workflows/build-docker-image.yml@master
-    permissions:
-      contents: read
-      packages: write # publishing to GHCR
-      id-token: write # OIDC for provenance
-      attestations: write # github attestations
-      artifact-metadata: write # artifact storage metadata (recommended by actions/attest)
+    needs: ci
     with:
       dockerfile: generator/Dockerfile
       image-name: bitcart/docker-compose-generator
@@ -80,3 +75,10 @@ jobs:
         type=sha,format=long
       dockerhub-user: ${{ vars.DOCKERHUB_USER }}
       dockerhub-oidc-connection-id: ${{ vars.DOCKERHUB_OIDC_CONNECTIONID }}
+
+    permissions:
+      contents: read
+      packages: write # publishing to GHCR
+      id-token: write # OIDC for provenance
+      attestations: write # github attestations
+      artifact-metadata: write # artifact storage metadata (recommended by actions/attest)
