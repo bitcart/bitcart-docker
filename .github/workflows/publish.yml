@@ -19,8 +19,7 @@ jobs:
     permissions:
       contents: read
       security-events: write # needed for github advanced security
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      id-token: write # OIDC token for codecov uploads
 
   demo:
     needs: ci

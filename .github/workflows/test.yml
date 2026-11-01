@@ -2,9 +2,6 @@ name: Tests
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
-        required: true
 
 permissions:
   contents: read
@@ -25,6 +22,10 @@ jobs:
     name: test
     needs: [lint, zizmor]
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write # OIDC token for codecov uploads
 
     env:
       TEST_ARGS: "-o junit_family=legacy --junitxml test-results/junit.xml --cov-report html:coverage"
@@ -49,7 +50,6 @@ jobs:
         uses: bitcart/bitcart-actions/actions/codecov@master
         if: ${{ !cancelled() }}
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           name: Tests - Python ${{ env.PYTHON }}
           flags: tests
           env_vars: PYTHON
