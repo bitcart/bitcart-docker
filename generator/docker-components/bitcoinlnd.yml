@@ -1,0 +1,29 @@
+services:
+  bitcoinlnd:
+    restart: unless-stopped
+    image: bitcart/bitcart-btclnd:stable
+    environment:
+      BTCLND_NETWORK: ${BTCLND_NETWORK:-mainnet}
+      BTCLND_NEUTRINO_PEERS: ${BTCLND_NEUTRINO_PEERS:-}
+      BTCLND_DEBUG: ${BTCLND_DEBUG:-false}
+      BTCLND_LND_EXTRA_ARGS: ${BTCLND_LND_EXTRA_ARGS:-}
+    expose:
+      - "5012"
+    ports:
+      # Lightning P2P port range. One port per non-Tor LND wallet; must
+      # be reachable from the outside so peers can open inbound channels.
+      # Tor-enabled wallets do not need a published port (the hidden
+      # service handles inbound). Default range = 10 wallets; override
+      # BTCLND_P2P_PORT_RANGE in the env to widen it (e.g. 9735-9834).
+      - "${BTCLND_P2P_PORT_RANGE:-9735-9744}:${BTCLND_P2P_PORT_RANGE:-9735-9744}"
+    volumes:
+      - "bitcoinlnd_datadir:/data"
+
+  backend:
+    depends_on:
+      - bitcoinlnd
+    links:
+      - bitcoinlnd
+
+volumes:
+  bitcoinlnd_datadir:
