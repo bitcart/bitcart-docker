@@ -8,7 +8,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ARG TARGETPLATFORM
 ENV IN_DOCKER=1
 # renovate: datasource=github-releases depName=tianon/gosu
-ENV GOSU_VERSION=1.19
+ENV GOSU_VERSION=1.20
 LABEL org.bitcart.image=backend
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_NO_CACHE=1

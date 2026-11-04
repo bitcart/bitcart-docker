@@ -5,7 +5,7 @@ services:
 
   nginx-https:
     restart: unless-stopped
-    image: nginxproxy/acme-companion:2.6
+    image: nginxproxy/acme-companion:2.8
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "nginx_conf:/etc/nginx/conf.d"
