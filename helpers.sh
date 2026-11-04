@@ -357,10 +357,10 @@ save_deploy_config() {
 #!/bin/bash
 NAME=$NAME
 SCRIPTS_POSTFIX=$SCRIPTS_POSTFIX
-ADMIN_PLUGINS_HASH=$(get_plugins_hash admin)
-STORE_PLUGINS_HASH=$(get_plugins_hash store)
-BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
-DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
+ADMIN_PLUGINS_HASH=$ADMIN_PLUGINS_HASH
+STORE_PLUGINS_HASH=$STORE_PLUGINS_HASH
+BACKEND_PLUGINS_HASH=$BACKEND_PLUGINS_HASH
+DOCKER_PLUGINS_HASH=$DOCKER_PLUGINS_HASH
 BACKUP_ENCRYPTION_KEY=$BACKUP_ENCRYPTION_KEY
 BITCART_UPGRADES=$BITCART_UPGRADES
 EOF
@@ -435,6 +435,10 @@ install_plugins() {
         done
         failed=true
     fi
+    ADMIN_PLUGINS_HASH=$(get_plugins_hash admin)
+    STORE_PLUGINS_HASH=$(get_plugins_hash store)
+    BACKEND_PLUGINS_HASH=$(get_plugins_hash backend)
+    DOCKER_PLUGINS_HASH=$(get_plugins_hash docker)
     save_deploy_config
     if [[ "$failed" == true ]]; then
         touch "$failed_file"

@@ -1,0 +1,14 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["local>bitcart/renovate-config:audit"],
+    "docker-compose": {
+        "managerFilePatterns": ["/(^|/)generator/docker-components/[^/]+\\.yml$/"]
+    },
+    "packageRules": [
+        {
+            "description": "Compose components deploy floating tags like stable, which a digest would freeze",
+            "matchManagers": ["docker-compose"],
+            "pinDigests": false
+        }
+    ]
+}

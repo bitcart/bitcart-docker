@@ -41,10 +41,11 @@ repos:
         types: [text]
         language: node
         require_serial: true
-        entry: npx oxfmt --no-error-on-unmatched-pattern
+        entry: oxfmt --no-error-on-unmatched-pattern
+        additional_dependencies: [oxfmt@0.75.0]
       - id: docker-shell-shfmt
         name: Run shfmt with docker
-        entry: mvdan/shfmt:latest -d -i 4
+        entry: mvdan/shfmt:v3.14.1@sha256:8c06884a35683d8763fba6c0d9484d11a61a96da65f8d497d6f625825a6043f2 -d -i 4
         language: docker_image
         types: [shell]
         exclude: compose/scripts/cli-zsh-autocomplete.sh

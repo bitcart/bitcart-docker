@@ -4,7 +4,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow_ref }}-${{ github.event.pull_request.number || github.run_id }}
+  group: ${{ github.workflow_ref }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   run:
-    name: CI
+    name: run
     uses: $/.github/workflows/test.yml
 
     permissions:

@@ -6,6 +6,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   lint:
     name: lint
@@ -50,10 +54,13 @@ jobs:
 
       - name: Run host agent tests
         working-directory: host-agent
+        env:
+          # renovate: datasource=go depName=golang.org/x/vuln
+          GOVULNCHECK_VERSION: "v1.9.0"
         run: |
           go vet ./...
           go test -race ./...
-          go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+          go run "golang.org/x/vuln/cmd/govulncheck@$GOVULNCHECK_VERSION" ./...
 
   cansetup:
     name: cansetup
