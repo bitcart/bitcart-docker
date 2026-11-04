@@ -54,7 +54,7 @@ Environment variables:
     BITCART_AGENT_PORT: Loopback port the launchd transport listens on. Default: 47123
     BITCART_SSH_PORT: Port where ssh server runs on host machine, for the ssh transport. Default: 22
     BITCART_HOST: The hostname of your website API (eg. api.example.com)
-    BITCART_LETSENCRYPT_EMAIL: A mail will be sent to this address if certificate expires and fail to renew automatically (eg. me@example.com)
+    BITCART_LETSENCRYPT_EMAIL: Email sent to the certificate authority when registering the ACME account. Let's Encrypt no longer sends expiry emails (eg. me@example.com)
     BITCART_STORE_HOST: The hostname of your website store (eg. example.com)
     BITCART_STORE_API_URL: Optional, overrides BITCART_API_URL for the store
     BITCART_ADMIN_HOST: The hostname of your website admin panel (eg. admin.example.com)
