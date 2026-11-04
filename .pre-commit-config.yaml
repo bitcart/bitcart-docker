@@ -14,12 +14,12 @@ repos:
       - id: fix-byte-order-marker
       - id: detect-private-key
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.1
+    rev: v0.17.3
     hooks:
       - id: ruff-check
       - id: ruff-format
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: "0.13.1"
+    rev: "0.13.6"
     hooks:
       - id: uv-lock
       - id: uv-audit
@@ -42,7 +42,7 @@ repos:
         language: node
         require_serial: true
         entry: oxfmt --no-error-on-unmatched-pattern
-        additional_dependencies: [oxfmt@0.75.0]
+        additional_dependencies: [oxfmt@0.76.0]
       - id: docker-shell-shfmt
         name: Run shfmt with docker
         entry: mvdan/shfmt:v3.14.1@sha256:8c06884a35683d8763fba6c0d9484d11a61a96da65f8d497d6f625825a6043f2 -d -i 4

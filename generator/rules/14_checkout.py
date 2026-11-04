@@ -17,7 +17,7 @@ def rule(services, settings):
             environment["ONE_DOMAIN_MODE"] = "true"
         else:
             environment["VIRTUAL_HOST"] = settings.CHECKOUT_HOST
-            environment["LETSENCRYPT_HOST"] = settings.CHECKOUT_HOST
+            environment["ACME_HOST"] = settings.CHECKOUT_HOST
     for service in ("backend", "worker"):
         with modify_key(services, service, "environment") as environment:
             environment["BITCART_CHECKOUT_URL"] = checkout_url

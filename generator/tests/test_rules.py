@@ -500,7 +500,7 @@ def test_checkout_separate_domains(env, checkout_url):
     services = generate_config()["services"]
     checkout = services["checkout"]["environment"]
     assert checkout["VIRTUAL_HOST"] == "checkout.example.com"
-    assert checkout["LETSENCRYPT_HOST"] == "checkout.example.com"
+    assert checkout["ACME_HOST"] == "checkout.example.com"
     assert checkout["BITCART_CHECKOUT_URL"] == checkout_url
     assert checkout["BITCART_API_URL"] == checkout_url.replace("checkout", "api")
     assert "ONE_DOMAIN_MODE" not in checkout
