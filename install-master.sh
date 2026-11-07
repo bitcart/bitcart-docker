@@ -109,6 +109,7 @@ if selected backend || [[ ${#selected_cryptos[@]} -gt 0 ]]; then
     revision=$(cat bitcart/.revision)
     if selected backend; then
         build_image "$revision" bitcart/bitcart -f backend.Dockerfile .
+        build_image "$revision" bitcart/bitcart-renderer -f renderer.Dockerfile .
     fi
     for coin in "${selected_cryptos[@]}"; do
         build_image "$revision" "bitcart/bitcart-$coin" -f "$coin.Dockerfile" .

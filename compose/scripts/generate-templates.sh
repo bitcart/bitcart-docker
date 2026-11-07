@@ -24,7 +24,7 @@ coins="$(jq -r '.[].dockerfile | sub(".Dockerfile"; "")' "$images")"
 eval "coins=( $coins )"
 
 for coin in "${coins[@]}"; do
-    if [ "$coin" == "backend" ]; then
+    if [ "$coin" == "backend" ] || [ "$coin" == "renderer" ]; then
         continue
     fi
     bases=$(jq -r ".[\"bitcart-$coin\"].bases // \"btc\"" "$images")

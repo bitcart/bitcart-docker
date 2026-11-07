@@ -1,0 +1,33 @@
+services:
+  renderer:
+    restart: unless-stopped
+    image: bitcart/bitcart-renderer:stable
+    network_mode: none
+    read_only: true
+    pids_limit: 64
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpu_shares: 128
+    environment:
+      RENDERER_WORKERS: ${RENDERER_WORKERS:-}
+    volumes:
+      - "renderer_socket:/run/renderer"
+
+  backend:
+    depends_on:
+      - renderer
+    environment:
+      RENDERER_SOCKET: /run/renderer/renderer.sock
+    volumes:
+      - "renderer_socket:/run/renderer:ro"
+
+  worker:
+    depends_on:
+      - renderer
+    environment:
+      RENDERER_SOCKET: /run/renderer/renderer.sock
+    volumes:
+      - "renderer_socket:/run/renderer:ro"
+
+volumes:
+  renderer_socket:

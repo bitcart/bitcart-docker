@@ -30,7 +30,7 @@ TOR_CRYPTOS = {"btc": CRYPTOS["btc"]}  # cryptos to enable tor proxy for
 CRYPTO_COMPONENTS = [CRYPTOS[i]["component"] for i in CRYPTOS]
 
 # Installation packs
-BACKEND_COMPONENTS = ["backend", "worker", "postgres", "redis"]
+BACKEND_COMPONENTS = ["backend", "worker", "renderer", "postgres", "redis"]
 FRONTEND_COMPONENTS = ["store", "admin"]
 
 # One domain mode constants

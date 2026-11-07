@@ -26,9 +26,21 @@ DEFAULT_SERVICES = [
     "nginx",
     "nginx-gen",
     "redis",
+    "renderer",
     "store",
     "worker",
 ]
+
+
+def test_renderer_is_isolated_and_shares_only_its_socket(config):
+    services = config["services"]
+    renderer = services["renderer"]
+    assert renderer["network_mode"] == "none"
+    assert renderer["read_only"] is True
+    assert renderer["volumes"] == ["renderer_socket:/run/renderer"]
+    for name in ("backend", "worker"):
+        assert "renderer_socket:/run/renderer:ro" in services[name]["volumes"]
+        assert services[name]["environment"]["RENDERER_SOCKET"] == "/run/renderer/renderer.sock"
 
 
 def test_basic_structure(config):
