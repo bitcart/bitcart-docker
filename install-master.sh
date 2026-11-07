@@ -54,10 +54,8 @@ done
 buildable+=("${cryptos[@]}")
 
 if [[ ${#only[@]} -eq 0 ]]; then
-    partial=false
     selection=("${buildable[@]}")
 else
-    partial=true
     for component in "${only[@]}"; do
         if [[ " ${buildable[*]} " != *" $component "* ]]; then
             echo "Error: Unknown or disabled component: $component. Available: ${buildable[*]}" >&2
@@ -85,15 +83,6 @@ for component in backend admin store; do
         bitcart_reset_plugins "$(echo "$component" | tr '[:lower:]' '[:upper:]')"
     fi
 done
-# First, update to latest stable release, then we can apply staging changes
-if $partial; then
-    ./update.sh --skip-git-pull --no-start --keep-master-images
-else
-    ./update.sh --skip-git-pull --no-start
-fi
-# shellcheck source=helpers.sh
-. helpers.sh
-
 built=()
 build_image() {
     local revision=$1 image=$2
@@ -136,6 +125,11 @@ for image in "${built[@]}"; do
     docker tag "$image:install-master" "$image:stable"
     docker rmi "$image:install-master" >/dev/null
 done
+
+# Images built above are kept, so ones that aren't released yet don't fail the pull of the latest stable release
+./update.sh --skip-git-pull --no-start --keep-master-images
+# shellcheck source=helpers.sh
+. helpers.sh
 
 for component in backend admin store; do
     if [[ " ${buildable[*]} " == *" $component "* ]] && ! selected "$component"; then
