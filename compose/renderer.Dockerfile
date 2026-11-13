@@ -1,4 +1,4 @@
-FROM rust:1.99.1-alpine AS build
+FROM rust:1.100.0-alpine AS build
 
 RUN apk add --no-cache musl-dev
 WORKDIR /src
