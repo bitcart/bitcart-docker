@@ -63,7 +63,7 @@ agent_launchd_label() {
 
 # update_authorized_keys FILE LINE COMMENT...: drops the keys with any of the given comments, then appends LINE
 update_authorized_keys() {
-    local file=$1 line=$2 tmp
+    local file=$1 line=$2 kept desired tmp
     shift 2
     if [ ! -f "$file" ]; then
         if [ -z "$line" ]; then
@@ -74,17 +74,18 @@ update_authorized_keys() {
         touch "$file"
         chmod 600 "$file"
     fi
+    kept=$(awk -v drop=" $* " 'index(drop, " " $NF " ") == 0' "$file")
+    desired=$kept
+    if [ -n "$line" ]; then
+        desired=${kept:+$kept$'\n'}$line
+    fi
+    if [ "$desired" = "$(cat "$file")" ]; then
+        return 0
+    fi
     tmp=$(mktemp "$file.XXXXXX")
     cp -p "$file" "$tmp"
-    awk -v drop=" $* " 'index(drop, " " $NF " ") == 0' "$file" >"$tmp"
-    if [ -n "$line" ]; then
-        printf '%s\n' "$line" >>"$tmp"
-    fi
-    if cmp -s "$file" "$tmp"; then
-        rm -f "$tmp"
-    else
-        mv -f "$tmp" "$file"
-    fi
+    printf '%s' "${desired:+$desired$'\n'}" >"$tmp"
+    mv -f "$tmp" "$file"
 }
 
 install_agent_systemd() {
