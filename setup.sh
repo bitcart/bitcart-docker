@@ -25,8 +25,10 @@ This script must be run as root, except on Mac OS
     Available presets:
       cloudflare          Bitcart runs behind cloudflare directly
       cloudflare-proxied  Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
-      proxied             Bitcart is behind a reverse proxy that is not cloudflare (requires PROXY protocol)
-      proxied-legacy      Bitcart is behind a reverse proxy that is not cloudflare (requires X-Forwarded-For HTTP header)
+      proxied             Bitcart is behind a reverse proxy that is not cloudflare and passes TLS through (requires PROXY protocol)
+      proxied-tls-termination
+                          Bitcart is behind a reverse proxy that terminates TLS, e.g. to run a WAF (requires X-Forwarded-For
+                          and X-Forwarded-Proto)
 This script will:
 * Install Docker
 * Install Docker-Compose
@@ -49,7 +51,7 @@ Environment variables:
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
     REVERSEPROXY_TRUSTED_IPS: Comma-separated list of trusted proxy IP/CIDR ranges to set as set_real_ip_from in nginx.
     REVERSEPROXY_TRUSTED_IPS_PRESET: Preset name to auto-fetch trusted IPs (e.g. cloudflare). Merges with REVERSEPROXY_TRUSTED_IPS.
-    REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). If unset, all three are trusted when IP is trusted.
+    REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). Headers not listed are replaced by nginx's own values. List only headers your proxy sets itself.
     BITCART_AGENT_TRANSPORT: How the admin panel reaches the host agent to update, restart, back up or reconfigure this instance: auto, systemd, launchd, ssh, manual or none. auto picks launchd on macOS and systemd on Linux; without systemd, ssh if SSH access was enabled before, otherwise none. manual only installs the agent, see the README. (Default: auto)
     BITCART_AGENT_PORT: Loopback port the launchd transport listens on. Default: 47123
     BITCART_SSH_PORT: Port where ssh server runs on host machine, for the ssh transport. Default: 22
@@ -180,14 +182,18 @@ proxied)
     REVERSEPROXY_PROXYPROTOCOL=true
     BITCART_BEHIND_REVERSEPROXY=true
     unset REVERSEPROXY_TRUSTED_IPS_PRESET
+    unset REVERSEPROXY_TRUSTED_IPS
+    unset REVERSEPROXY_TRUSTED_HEADERS
     unset BITCART_HTTPS_ENABLED
     ;;
-proxied-legacy)
+proxied-tls-termination)
     BITCART_REVERSEPROXY=nginx
     REVERSEPROXY_HTTP_PORT=10080
     REVERSEPROXY_HTTPS_PORT=10081
     BITCART_BEHIND_REVERSEPROXY=true
     BITCART_HTTPS_ENABLED=true
+    REVERSEPROXY_TRUSTED_IPS=172.16.0.0/12
+    REVERSEPROXY_TRUSTED_HEADERS=X-Forwarded-Proto
     unset REVERSEPROXY_TRUSTED_IPS_PRESET
     unset REVERSEPROXY_PROXYPROTOCOL
     ;;

@@ -148,6 +148,9 @@ def test_no_reverseproxy_rule():
     set_env("BITCOIN_EXPOSE", "true")
     services = generate_config()["services"]
     assert "ports" in services["bitcoin"]
+    set_env("BITCOIN_EXPOSE", "false")
+    services = generate_config()["services"]
+    assert "ports" not in services["bitcoin"]
     # Cleanup
     delete_env("BITCOIN_EXPOSE")
 
@@ -285,6 +288,10 @@ def test_local_deploy():
 def test_proxyprotocol_rule():
     services = generate_config()["services"]
     nginx_ports = services["nginx"]["ports"]
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
+    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
+    set_env("REVERSEPROXY_PROXYPROTOCOL", "false", prefix="")
+    nginx_ports = generate_config()["services"]["nginx"]["ports"]
     assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
     assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
     set_env("REVERSEPROXY_PROXYPROTOCOL", "true", prefix="")

@@ -130,12 +130,22 @@
     {{ end }}
 {{ end }}
 
-{{ define "real_ip_policy" }}
-{{ if eq .Env.PROXY_PROTOCOL "true" }}
+{{ define "proxy_protocol_listen" }}
     listen {{ if .ssl }}10083{{ else }}10082{{ end }}{{- .ssl }} proxy_protocol{{- .default_server }};
 {{ if .enable_ipv6 }}
     listen [::]:{{ if .ssl }}10083{{ else }}10082{{ end }}{{- .ssl }} proxy_protocol{{- .default_server }};
 {{ end }}
+{{ end }}
+
+{{ define "real_ip_policy" }}
+{{ if eq .Env.PROXY_PROTOCOL "true" }}
+{{ template "proxy_protocol_listen" . }}
+{{ end }}
+{{ template "real_ip_headers" . }}
+{{ end }}
+
+{{ define "real_ip_headers" }}
+{{ if eq .Env.PROXY_PROTOCOL "true" }}
     set_real_ip_from 172.16.0.0/12;
 {{ end }}
 
@@ -315,6 +325,11 @@ server {
     {{ if $enable_ipv6 }}
     listen [::]:443 ssl;
     {{ end }}
+    {{ if eq $.Env.PROXY_PROTOCOL "true" }}
+    {{ template "proxy_protocol_listen" (dict "ssl" "" "default_server" "" "enable_ipv6" $enable_ipv6) }}
+    {{ template "proxy_protocol_listen" (dict "ssl" " ssl" "default_server" "" "enable_ipv6" $enable_ipv6) }}
+    {{ end }}
+    {{ template "real_ip_headers" (dict "Env" $.Env) }}
     ssl_reject_handshake on;
     {{ template "access_log" $ }}
     {{ if eq (len $allVirtualHosts) 1 }}

@@ -3,6 +3,7 @@ import pytest
 from generator.exceptions import ConfigError
 from generator.generator import generate_config
 from generator.settings import Settings
+from generator.utils import env_bool
 
 from .utils import check_service_list, delete_env, set_env
 
@@ -134,4 +135,43 @@ def test_https_hint():
     delete_env("EXCLUDE_COMPONENTS")
     # Cleanup
     delete_env("HTTPS_ENABLED")
+    delete_env("REVERSEPROXY")
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("true", True),
+        ("True", True),
+        ("1", True),
+        ("yes", True),
+        ("on", True),
+        ("false", False),
+        ("0", False),
+        ("no", False),
+        ("off", False),
+        ("", False),
+        ("enabled", False),
+    ],
+)
+def test_env_bool(value, expected):
+    set_env("TEST_FLAG", value)
+    assert env_bool("TEST_FLAG") is expected
+    delete_env("TEST_FLAG")
+
+
+def test_false_boolean_settings():
+    set_env("REVERSEPROXY", "nginx")
+    set_env("REVERSEPROXY_HTTP_PORT", "10080", prefix="")
+    set_env("HTTPS_ENABLED", "false")
+    set_env("BEHIND_REVERSEPROXY", "false")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None:10080/api"
+    set_env("BEHIND_REVERSEPROXY", "true")
+    services = generate_config()["services"]
+    assert services["admin"]["environment"]["BITCART_ADMIN_API_URL"] == "http://None/api"
+    # Cleanup
+    delete_env("BEHIND_REVERSEPROXY")
+    delete_env("HTTPS_ENABLED")
+    delete_env("REVERSEPROXY_HTTP_PORT", prefix="")
     delete_env("REVERSEPROXY")

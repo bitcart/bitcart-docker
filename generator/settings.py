@@ -1,7 +1,7 @@
 from shlex import shlex
 
 from generator.constants import ALL_REVERSE_PROXIES, AVAILABLE_SETTINGS, HTTPS_REVERSE_PROXIES
-from generator.utils import config_error, env
+from generator.utils import config_error, env, env_bool
 
 
 class Settings:
@@ -14,8 +14,6 @@ class Settings:
             default = None
             if len(setting) == 3:
                 name, env_name, default = setting
-            elif len(setting) == 2:  # pragma: no cover
-                name, env_name = setting
             else:
                 name = env_name = setting[0]
             self.settings[name] = env(env_name, default)
@@ -27,6 +25,8 @@ class Settings:
         self.CRYPTOS = self.load_comma_separated("CRYPTOS", "btc")
         self.ADDITIONAL_COMPONENTS = self.load_comma_separated("ADDITIONAL_COMPONENTS")
         self.EXCLUDE_COMPONENTS = self.load_comma_separated("EXCLUDE_COMPONENTS")
+        self.HTTPS_ENABLED = env_bool("HTTPS_ENABLED")
+        self.BEHIND_REVERSE_PROXY = env_bool("BEHIND_REVERSEPROXY")
         self.ONE_DOMAIN_MODE = (
             self.REVERSE_PROXY in ALL_REVERSE_PROXIES
             and not self.ADMIN_HOST
