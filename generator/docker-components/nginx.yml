@@ -16,7 +16,6 @@ services:
     image: bitcart/docker-gen:0.9.2
     environment:
       DEFAULT_HOST: ${REVERSEPROXY_DEFAULT_HOST:-none}
-      PROXY_PROTOCOL: ${REVERSEPROXY_PROXYPROTOCOL:-false}
       TRUSTED_IPS: ${REVERSEPROXY_TRUSTED_IPS:-}
       TRUSTED_HEADERS: ${REVERSEPROXY_TRUSTED_HEADERS:-}
     volumes:

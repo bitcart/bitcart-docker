@@ -285,19 +285,22 @@ def test_local_deploy():
 
 
 # Rule 11: proxy protocol port
-def test_proxyprotocol_rule():
+PROXYPROTOCOL_PORTS = [
+    "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082",
+    "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083",
+]
+
+
+@pytest.mark.parametrize(
+    ("value", "enabled"),
+    [("", False), ("false", False), ("0", False), ("true", True), ("1", True), ("yes", True)],
+)
+def test_proxyprotocol_rule(value, enabled):
+    set_env("REVERSEPROXY_PROXYPROTOCOL", value, prefix="")
     services = generate_config()["services"]
-    nginx_ports = services["nginx"]["ports"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
-    set_env("REVERSEPROXY_PROXYPROTOCOL", "false", prefix="")
-    nginx_ports = generate_config()["services"]["nginx"]["ports"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
-    set_env("REVERSEPROXY_PROXYPROTOCOL", "true", prefix="")
-    services = generate_config()["services"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" in services["nginx"]["ports"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" in services["nginx"]["ports"]
+    assert services["nginx-gen"]["environment"]["PROXY_PROTOCOL"] == ("true" if enabled else "false")
+    for port in PROXYPROTOCOL_PORTS:
+        assert (port in services["nginx"]["ports"]) is enabled
     # Cleanup
     delete_env("REVERSEPROXY_PROXYPROTOCOL", prefix="")
 
