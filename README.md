@@ -203,6 +203,7 @@ We have live demo available at:
 - [https://admin.bitcart.ai](https://admin.bitcart.ai/) Bitcart Admin Panel
 - [https://store.bitcart.ai](https://store.bitcart.ai/) Bitcart Ready Store POS
 - [https://api.bitcart.ai](https://api.bitcart.ai/) Bitcart Merchants API
+- [https://checkout.bitcart.ai](https://checkout.bitcart.ai/) Bitcart Checkout
 
 Note that it isn't designed for your production use, it is for testing and learning.
 
@@ -210,7 +211,7 @@ Note that it isn't designed for your production use, it is for testing and learn
 
 Basically via deployment steps above (:
 
-Here are the commands used on our demo, as of October 2024, Bitcart Version 0.8.0.0:
+Here are the commands used on our demo, as of November 2026, Bitcart Version 0.11.1.0:
 
 ```bash
 sudo su -
@@ -220,21 +221,21 @@ cd bitcart-docker
 export BITCART_HOST=api.bitcart.ai
 export BITCART_ADMIN_HOST=admin.bitcart.ai
 export BITCART_STORE_HOST=store.bitcart.ai
+export BITCART_CHECKOUT_HOST=checkout.bitcart.ai
 export BITCART_ADMIN_API_URL=https://api.bitcart.ai
 export BITCART_STORE_API_URL=https://api.bitcart.ai
-# reverse proxy settings, we use none because we configure nginx manually
-export BITCART_REVERSEPROXY=none
 # cryptocurrency settings
-# we enable all currencies we support on the demo to test that they work
-export BITCART_CRYPTOS=btc,bch,ltc,xrg,eth,bnb,matic,trx,grs,xmr
+export BITCART_CRYPTOS=btc,bch,ltc,xrg,eth,bnb,matic,trx,xmr
 # lightning network for supported coins
 export BTC_LIGHTNING=true
 export LTC_LIGHTNING=true
-export GRS_LIGHTNING=true
-# tor support
-export BITCART_ADDITIONAL_COMPONENTS=tor
-./setup.sh
+# new checkout
+export BITCART_ADDITIONAL_COMPONENTS=checkout
+# reverse proxy settings, Caddy in front terminates TLS
+./setup.sh --preset proxied-tls-termination
 ```
+
+The Caddy side follows the [TLS termination guide](https://docs.bitcart.ai/proxying-bitcart/custom-reverse-proxy#tls-termination), with Coraza WAF rules added to each Bitcart site block.
 
 ## Development builds
 
