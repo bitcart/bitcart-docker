@@ -11,8 +11,13 @@ PRESET_URLS = {
     ],
 }
 
+PRESET_IPS = {
+    "docker": ["172.16.0.0/12"],
+}
+
 PRESET_HEADERS = {
     "cloudflare": ["X-Forwarded-Proto"],
+    "docker": ["X-Forwarded-Proto"],
 }
 
 
@@ -21,21 +26,29 @@ async def fetch(url):  # pragma: no cover
         return await response.text()
 
 
+def load_preset_ips(preset):
+    if preset in PRESET_IPS:
+        return PRESET_IPS[preset]
+    urls = PRESET_URLS.get(preset)
+    if not urls:
+        return None
+
+    async def fetch_all():
+        return await asyncio.gather(*[fetch(url) for url in urls])
+
+    results = asyncio.run(fetch_all())
+    return [line.strip() for text in results for line in text.splitlines() if line.strip()]
+
+
 def rule(services, settings):
     preset = env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
     if not preset:
         return
     if not services.get("nginx-gen"):  # pragma: no cover
         return
-    urls = PRESET_URLS.get(preset)
-    if not urls:
+    all_ips = load_preset_ips(preset)
+    if all_ips is None:
         return
-
-    async def fetch_all():
-        return await asyncio.gather(*[fetch(url) for url in urls])
-
-    results = asyncio.run(fetch_all())
-    all_ips = [line.strip() for text in results for line in text.splitlines() if line.strip()]
     preset_ips = ",".join(all_ips)
     trusted_ips = env("REVERSEPROXY_TRUSTED_IPS", prefix="")
     combined = f"{preset_ips},{trusted_ips}" if trusted_ips else preset_ips

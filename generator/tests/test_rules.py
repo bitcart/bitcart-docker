@@ -344,6 +344,29 @@ def test_trusted_ips_preset_with_custom():
     delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")
 
 
+def test_trusted_ips_docker_preset():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "docker", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock()) as fetch:
+        services = generate_config()["services"]
+    fetch.assert_not_called()
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "172.16.0.0/12"
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+
+
+def test_trusted_ips_docker_preset_with_custom():
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "docker", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_IPS", "10.0.0.5/32", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_HEADERS", "X-Forwarded-Host", prefix="")
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "172.16.0.0/12,10.0.0.5/32"
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto,X-Forwarded-Host"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_HEADERS", prefix="")
+
+
 def test_trusted_headers_no_preset():
     services = generate_config()["services"]
     assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "${REVERSEPROXY_TRUSTED_HEADERS:-}"
