@@ -148,6 +148,9 @@ def test_no_reverseproxy_rule():
     set_env("BITCOIN_EXPOSE", "true")
     services = generate_config()["services"]
     assert "ports" in services["bitcoin"]
+    set_env("BITCOIN_EXPOSE", "false")
+    services = generate_config()["services"]
+    assert "ports" not in services["bitcoin"]
     # Cleanup
     delete_env("BITCOIN_EXPOSE")
 
@@ -282,15 +285,22 @@ def test_local_deploy():
 
 
 # Rule 11: proxy protocol port
-def test_proxyprotocol_rule():
+PROXYPROTOCOL_PORTS = [
+    "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082",
+    "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083",
+]
+
+
+@pytest.mark.parametrize(
+    ("value", "enabled"),
+    [("", False), ("false", False), ("0", False), ("true", True), ("1", True), ("yes", True)],
+)
+def test_proxyprotocol_rule(value, enabled):
+    set_env("REVERSEPROXY_PROXYPROTOCOL", value, prefix="")
     services = generate_config()["services"]
-    nginx_ports = services["nginx"]["ports"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" not in nginx_ports
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" not in nginx_ports
-    set_env("REVERSEPROXY_PROXYPROTOCOL", "true", prefix="")
-    services = generate_config()["services"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTP_PORT:-10082}:10082" in services["nginx"]["ports"]
-    assert "${REVERSEPROXY_PROXYPROTOCOL_HTTPS_PORT:-10083}:10083" in services["nginx"]["ports"]
+    assert services["nginx-gen"]["environment"]["PROXY_PROTOCOL"] == ("true" if enabled else "false")
+    for port in PROXYPROTOCOL_PORTS:
+        assert (port in services["nginx"]["ports"]) is enabled
     # Cleanup
     delete_env("REVERSEPROXY_PROXYPROTOCOL", prefix="")
 
@@ -332,6 +342,29 @@ def test_trusted_ips_preset_with_custom():
     assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
     delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
     delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")
+
+
+def test_trusted_ips_docker_preset():
+    module = get_trusted_ips_module()
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "docker", prefix="")
+    with patch.object(module, "fetch", new=AsyncMock()) as fetch:
+        services = generate_config()["services"]
+    fetch.assert_not_called()
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "172.16.0.0/12"
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+
+
+def test_trusted_ips_docker_preset_with_custom():
+    set_env("REVERSEPROXY_TRUSTED_IPS_PRESET", "docker", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_IPS", "10.0.0.5/32", prefix="")
+    set_env("REVERSEPROXY_TRUSTED_HEADERS", "X-Forwarded-Host", prefix="")
+    services = generate_config()["services"]
+    assert services["nginx-gen"]["environment"]["TRUSTED_IPS"] == "172.16.0.0/12,10.0.0.5/32"
+    assert services["nginx-gen"]["environment"]["TRUSTED_HEADERS"] == "X-Forwarded-Proto,X-Forwarded-Host"
+    delete_env("REVERSEPROXY_TRUSTED_IPS_PRESET", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_IPS", prefix="")
+    delete_env("REVERSEPROXY_TRUSTED_HEADERS", prefix="")
 
 
 def test_trusted_headers_no_preset():

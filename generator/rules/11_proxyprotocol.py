@@ -1,8 +1,11 @@
-from generator.utils import env, modify_key
+from generator.utils import env_bool, modify_key
 
 
 def rule(services, settings):
-    if not env("REVERSEPROXY_PROXYPROTOCOL", prefix=""):
+    enabled = env_bool("REVERSEPROXY_PROXYPROTOCOL", prefix="")
+    with modify_key(services, "nginx-gen", "environment") as environment:
+        environment["PROXY_PROTOCOL"] = "true" if enabled else "false"
+    if not enabled:
         return
     if not services.get("nginx"):  # pragma: no cover
         return

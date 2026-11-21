@@ -21,12 +21,14 @@ This script must be run as root, except on Mac OS
     --install-only: Run install only
     --no-startup-register: Do not register Bitcart to start via systemctl or upstart
     --no-systemd-reload: Do not reload systemd configuration
-    --preset name: Apply a configuration preset for this setup run.
+    --preset name: Apply a configuration preset for this setup run. Presets keep REVERSEPROXY_TRUSTED_IPS and REVERSEPROXY_TRUSTED_HEADERS.
     Available presets:
       cloudflare          Bitcart runs behind cloudflare directly
       cloudflare-proxied  Your server runs another reverse proxy, and Bitcart is behind that reverse proxy
-      proxied             Bitcart is behind a reverse proxy that is not cloudflare (requires PROXY protocol)
-      proxied-legacy      Bitcart is behind a reverse proxy that is not cloudflare (requires X-Forwarded-For HTTP header)
+      proxied             Bitcart is behind a reverse proxy that is not cloudflare and passes TLS through (requires PROXY protocol)
+      proxied-tls-termination
+                          Bitcart is behind a reverse proxy that terminates TLS, e.g. to run a WAF (requires X-Forwarded-For
+                          and X-Forwarded-Proto)
 This script will:
 * Install Docker
 * Install Docker-Compose
@@ -48,8 +50,8 @@ Environment variables:
     REVERSEPROXY_PROXYPROTOCOL: Whether to enable proxyprotocol support. Used in advanced deployments, e.g. behind sslh. Default: false.
     REVERSEPROXY_DEFAULT_HOST: Optional, if using a reverse proxy nginx, specify which website should be presented if the server is accessed by its IP.
     REVERSEPROXY_TRUSTED_IPS: Comma-separated list of trusted proxy IP/CIDR ranges to set as set_real_ip_from in nginx.
-    REVERSEPROXY_TRUSTED_IPS_PRESET: Preset name to auto-fetch trusted IPs (e.g. cloudflare). Merges with REVERSEPROXY_TRUSTED_IPS.
-    REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). If unset, all three are trusted when IP is trusted.
+    REVERSEPROXY_TRUSTED_IPS_PRESET: Built-in list of trusted IPs and headers: cloudflare (fetched from Cloudflare) or docker (172.16.0.0/12). Merges with REVERSEPROXY_TRUSTED_IPS and REVERSEPROXY_TRUSTED_HEADERS.
+    REVERSEPROXY_TRUSTED_HEADERS: Comma-separated list of headers to trust from trusted IPs (e.g. X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Port). Headers not listed are replaced by nginx's own values. List only headers your proxy sets itself.
     BITCART_AGENT_TRANSPORT: How the admin panel reaches the host agent to update, restart, back up or reconfigure this instance: auto, systemd, launchd, ssh, manual or none. auto picks launchd on macOS and systemd on Linux; without systemd, ssh if SSH access was enabled before, otherwise none. manual only installs the agent, see the README. (Default: auto)
     BITCART_AGENT_PORT: Loopback port the launchd transport listens on. Default: 47123
     BITCART_SSH_PORT: Port where ssh server runs on host machine, for the ssh transport. Default: 22
@@ -182,13 +184,13 @@ proxied)
     unset REVERSEPROXY_TRUSTED_IPS_PRESET
     unset BITCART_HTTPS_ENABLED
     ;;
-proxied-legacy)
+proxied-tls-termination)
     BITCART_REVERSEPROXY=nginx
+    REVERSEPROXY_TRUSTED_IPS_PRESET=docker
     REVERSEPROXY_HTTP_PORT=10080
     REVERSEPROXY_HTTPS_PORT=10081
     BITCART_BEHIND_REVERSEPROXY=true
     BITCART_HTTPS_ENABLED=true
-    unset REVERSEPROXY_TRUSTED_IPS_PRESET
     unset REVERSEPROXY_PROXYPROTOCOL
     ;;
 "") ;;

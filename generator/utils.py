@@ -13,8 +13,15 @@ def env(name, default=None, prefix=None):
     return value
 
 
+TRUE_VALUES = frozenset({"1", "on", "t", "true", "y", "yes"})
+
+
+def env_bool(name, prefix=None):
+    return env(name, "", prefix).lower() in TRUE_VALUES
+
+
 def custom_port_allowed(service, no_nginx):
-    return (service not in CRYPTO_COMPONENTS and no_nginx) or env(f"{service.upper()}_EXPOSE", False)
+    return (service not in CRYPTO_COMPONENTS and no_nginx) or env_bool(f"{service.upper()}_EXPOSE")
 
 
 def preferred_service(components):
