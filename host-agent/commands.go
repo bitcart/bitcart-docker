@@ -75,7 +75,7 @@ func init() {
 			argv:    script("./backup.sh"),
 		},
 		"restore": {keys: []string{"name"}, argv: func(a args) []string {
-			return []string{"./restore.sh", "--delete-backup", filepath.Join(backupsDir, a["name"])}
+			return []string{"./restore.sh", "--delete-backup", filepath.Join(backupsDir, filepath.Base(filepath.Join("/", a["name"])))}
 		}},
 		"reconfigure": {
 			envKeys: settingKeys,

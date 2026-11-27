@@ -281,6 +281,27 @@ func TestRestorePassesTheArchivePath(t *testing.T) {
 	}
 }
 
+func TestRestoreStaysInTheBackupsDirectory(t *testing.T) {
+	for name, want := range map[string]string{
+		"../../etc/shadow":       "shadow",
+		"/etc/shadow":            "shadow",
+		"sub/../../shop.tar.zst": "shop.tar.zst",
+		"..":                     "",
+		"../":                    "",
+		"":                       "",
+		"--encryption-key=x":     "--encryption-key=x",
+	} {
+		t.Run(name, func(t *testing.T) {
+			a := newAgent(t)
+			a.waitJob(a.startJob("restore", "name="+name))
+			path := filepath.Join(backupsDir, want)
+			if got := a.args("restore.sh"); !slices.Equal(got, []string{"--delete-backup", path}) {
+				t.Errorf("args = %q", got)
+			}
+		})
+	}
+}
+
 func TestReconfigureKeepsExistingSettingsAndAppliesTheRequestedOnes(t *testing.T) {
 	a := newAgent(t)
 	a.write(".deploy", "NAME=shop\n")
